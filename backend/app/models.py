@@ -65,3 +65,37 @@ class TaskOut(TaskIn):
 
 class DeleteRequest(BaseModel):
     ids: List[str]
+
+
+# ── 혁신 사례 ──
+class InnovationCase(BaseModel):
+    id: int
+    title: str
+    category: str = ""
+    background: str = ""
+    effect: str = ""
+    kpi: Kpi = Field(default_factory=Kpi)
+    sourceOrg: str = ""
+    sourceType: str = "manual"   # manual / ai / auto
+    sourceRef: str = ""
+    status: str = "approved"     # approved / pending / rejected
+    affiliates: List[str] = []
+    createdAt: Optional[str] = None
+
+
+class CaseCreate(BaseModel):
+    title: str
+    category: str = ""
+    background: str = ""
+    effect: str = ""
+    kpiName: str = "-"
+    kpiFormula: str = "-"
+    sourceOrg: str = ""
+    sourceType: str = "manual"
+    sourceRef: str = ""
+    status: str = "approved"
+    affiliates: List[str] = []
+
+
+class CaseStatusUpdate(BaseModel):
+    status: str  # approved / pending / rejected

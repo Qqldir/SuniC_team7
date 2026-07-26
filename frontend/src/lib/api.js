@@ -67,3 +67,29 @@ export async function deleteTasks(ids) {
     localStore.save(localStore.load().filter((t) => !ids.includes(t.id)));
   }
 }
+
+/* ── 혁신 사례 (지식 기반, 백엔드 필요 — localStorage 폴백 없음) ── */
+export async function fetchCases(params = {}) {
+  const qs = new URLSearchParams(
+    Object.entries(params).filter(([, v]) => v)
+  ).toString();
+  try {
+    const data = await req(`/cases${qs ? "?" + qs : ""}`);
+    return data.cases || [];
+  } catch {
+    return [];
+  }
+}
+
+export async function createCase(payload) {
+  const data = await req("/cases", { method: "POST", body: JSON.stringify(payload) });
+  return data.case;
+}
+
+export async function updateCaseStatus(id, status) {
+  await req(`/cases/${id}/status`, { method: "PATCH", body: JSON.stringify({ status }) });
+}
+
+export async function deleteCase(id) {
+  await req(`/cases/${id}`, { method: "DELETE" });
+}

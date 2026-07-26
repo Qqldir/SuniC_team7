@@ -110,10 +110,19 @@ export default function StyleBlock() {
       /* 폼 */
       .field { margin-bottom:12px; }
       .field-label { display:block; font-size:12px; font-weight:600; color:var(--steel); margin-bottom:5px; }
-      .select, .textarea { width:100%; font-family:inherit; font-size:13.5px; color:var(--ink);
+      .input, .select, .textarea { width:100%; font-family:inherit; font-size:13.5px; color:var(--ink);
         background:#FAFBFD; border:1px solid var(--line); padding:9px 11px; }
       .textarea { resize:vertical; line-height:1.55; }
-      .select:focus, .textarea:focus { outline:none; border-color:var(--steel); }
+      .input:focus, .select:focus, .textarea:focus { outline:none; border-color:var(--steel); }
+      .field-2 { display:grid; grid-template-columns:1fr 1fr; gap:10px; }
+      .aff-pick { display:flex; flex-wrap:wrap; gap:5px; }
+      .case-badges { display:flex; gap:6px; align-items:center; flex-wrap:wrap; }
+      .badge-pending { background:#FDF3E3; color:#9A6413; }
+      .badge-approved { background:#E7F1EC; color:#2E6B57; }
+      .badge-rejected { background:#F0F3F7; color:var(--steel); }
+      .badge-src { background:#EFEAF7; color:#5E4A9E; }
+      .case-actions { display:flex; gap:6px; margin-top:8px; align-items:center; }
+      .case-actions .spacer { flex:1; }
       .ctx-note { font-size:11.5px; color:var(--steel); background:#F7F8FA; border:1px dashed var(--line);
         padding:7px 10px; margin-bottom:10px; }
       .errbox { display:flex; align-items:center; gap:7px; margin-top:10px; padding:9px 11px;

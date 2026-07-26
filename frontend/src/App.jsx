@@ -1,5 +1,5 @@
 import { useState, useEffect, useMemo } from "react";
-import { LayoutDashboard, Wand2, FolderCheck, MessageSquare } from "lucide-react";
+import { LayoutDashboard, Wand2, FolderCheck, MessageSquare, Lightbulb } from "lucide-react";
 
 import { TODAY, AFFILIATES, AFF } from "./data/affiliates.js";
 import { FEED } from "./data/feed.js";
@@ -14,6 +14,7 @@ import DashView from "./views/DashView.jsx";
 import GenView from "./views/GenView.jsx";
 import SavedView from "./views/SavedView.jsx";
 import BotView from "./views/BotView.jsx";
+import CasesView from "./views/CasesView.jsx";
 import ExportModal from "./views/ExportModal.jsx";
 
 export default function App() {
@@ -143,6 +144,7 @@ export default function App() {
         <div className="rail">
           <NavBtn on={view === "dash"} onClick={() => setView("dash")} icon={<LayoutDashboard size={16} />} label="대시보드" />
           <NavBtn on={view === "gen"} onClick={() => setView("gen")} icon={<Wand2 size={16} />} label="과제 생성" />
+          <NavBtn on={view === "cases"} onClick={() => setView("cases")} icon={<Lightbulb size={16} />} label="혁신 사례" />
           <NavBtn on={view === "saved"} onClick={() => setView("saved")} icon={<FolderCheck size={16} />} label="저장된 과제" count={tasks.length} />
           <NavBtn on={view === "bot"} onClick={() => setView("bot")} icon={<MessageSquare size={16} />} label="메신저 봇" />
         </div>
@@ -179,6 +181,7 @@ export default function App() {
               goGen={() => setView("gen")} goBot={() => setView("bot")}
             />
           )}
+          {view === "cases" && <CasesView />}
           {view === "bot" && (
             <BotView
               botAdded={botAdded}

@@ -55,12 +55,29 @@ CREATE TABLE IF NOT EXISTS kb_process (
     description TEXT
 );
 
+-- 혁신 사례 모음 (큐레이션 대상). 3층 구조:
+--   source_type = manual(사람이 직접) / ai(AI 추출·사람 검토대기) / auto(자동 후보)
+--   status      = approved(승인·사용) / pending(검토대기) / rejected(반려)
+-- 적용 계열사는 다대다이므로 kb_case_affiliate 로 연결.
 CREATE TABLE IF NOT EXISTS kb_innovation_case (
-    id          INTEGER PRIMARY KEY AUTOINCREMENT,
-    aff_code    TEXT REFERENCES affiliate(code),
-    title       TEXT NOT NULL,
-    description TEXT,
-    source      TEXT
+    id           INTEGER PRIMARY KEY AUTOINCREMENT,
+    title        TEXT NOT NULL,               -- 사례명
+    category     TEXT,                        -- 레버 분류 (에너지비/정비·TA/물류비/수율/구매/간접비/운전자본 ...)
+    background   TEXT,                        -- 배경·사례 내용
+    effect       TEXT,                        -- 기대효과 (정량 방향성)
+    kpi_name     TEXT,                        -- KPI 지표명
+    kpi_formula  TEXT,                        -- KPI 산출식
+    source_org   TEXT,                        -- 사례 주체 (미쓰이화학, CATL, McKinsey ...)
+    source_type  TEXT NOT NULL DEFAULT 'manual',    -- manual / ai / auto
+    source_ref   TEXT,                        -- 근거 링크 또는 feed_item.id
+    status       TEXT NOT NULL DEFAULT 'approved',  -- approved / pending / rejected
+    created_at   TEXT
+);
+
+CREATE TABLE IF NOT EXISTS kb_case_affiliate (
+    case_id  INTEGER NOT NULL REFERENCES kb_innovation_case(id) ON DELETE CASCADE,
+    aff_code TEXT NOT NULL REFERENCES affiliate(code),
+    PRIMARY KEY (case_id, aff_code)
 );
 
 CREATE TABLE IF NOT EXISTS kb_technology (
@@ -104,3 +121,5 @@ CREATE TABLE IF NOT EXISTS task_evidence (
 CREATE INDEX IF NOT EXISTS idx_feed_published ON feed_item(published_on);
 CREATE INDEX IF NOT EXISTS idx_feed_tag_aff   ON feed_item_tag(aff_code);
 CREATE INDEX IF NOT EXISTS idx_task_aff       ON task(aff_code);
+CREATE INDEX IF NOT EXISTS idx_case_status    ON kb_innovation_case(status);
+CREATE INDEX IF NOT EXISTS idx_case_aff       ON kb_case_affiliate(aff_code);
