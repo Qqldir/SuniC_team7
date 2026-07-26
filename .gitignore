@@ -1,0 +1,29 @@
+# Node
+node_modules/
+frontend/dist/
+frontend/.env
+
+# Python
+backend/.venv/
+backend/__pycache__/
+**/__pycache__/
+*.pyc
+backend/.env
+
+# SQLite
+*.db
+*.sqlite
+*.sqlite3
+
+# 크롤러 캐시 (자동 재생성)
+backend/data/
+
+# OS / editor
+.DS_Store
+Thumbs.db
+*:Zone.Identifier
+.vscode/
+.idea/
+
+# Claude Code 로컬 개인 설정 (공유 제외)
+.claude/settings.local.json
