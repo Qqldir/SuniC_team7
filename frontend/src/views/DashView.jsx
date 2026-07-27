@@ -32,7 +32,7 @@ export default function DashView({
               style={affSel.includes(a.code) ? { borderColor: BIZ[a.biz].color, color: BIZ[a.biz].color } : {}}
               onClick={() => toggleAff(a.code)}
             >
-              {a.code}
+              {a.label || a.code}
             </button>
           ))}
         </div>
@@ -51,7 +51,7 @@ export default function DashView({
 
       {/* 이벤트 / 뉴스 */}
       <div className="grid-2">
-        <FeedSection title="주요 이벤트" note="경쟁사 수시·정기 공시" items={events} highlight={highlight} onTagClick={onTagClick} />
+        <FeedSection title="주요 이벤트" note="경쟁사 수시·정기 공시" items={events} highlight={highlight} onTagClick={onTagClick} clamp />
         <FeedSection title="주요 뉴스" note="산업·정책·시황" items={news} highlight={highlight} onTagClick={onTagClick} />
       </div>
 
@@ -60,7 +60,7 @@ export default function DashView({
   );
 }
 
-function FeedSection({ title, note, items, highlight, onTagClick }) {
+function FeedSection({ title, note, items, highlight, onTagClick, clamp }) {
   return (
     <div className="card">
       <div className="card-head">
@@ -76,7 +76,7 @@ function FeedSection({ title, note, items, highlight, onTagClick }) {
             <span className="feed-src">{f.src}</span>
           </div>
           <div className="feed-title">{f.title}</div>
-          <div className="feed-sum">{f.sum}</div>
+          <div className={`feed-sum ${clamp ? "feed-clamp" : ""}`}>{f.sum}</div>
           <div className="feed-tags">
             {f.tags.map((t) => <AffTag key={t} code={t} onClick={() => onTagClick(t)} />)}
           </div>

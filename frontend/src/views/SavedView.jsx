@@ -46,7 +46,7 @@ export default function SavedView({
                 <tr key={t.id}>
                   <td className="th-chk"><input type="checkbox" checked={checked.includes(t.id)} onChange={() => toggle(t.id)} aria-label={t.title + " 선택"} /></td>
                   <td className="mono dim">{md(t.createdAt)}</td>
-                  <td><span className="tagchip tagchip-static" style={{ borderLeftColor: BIZ[AFF[t.aff]?.biz || "energy"].color }}>{t.aff}</span></td>
+                  <td><span className="tagchip tagchip-static" style={{ borderLeftColor: BIZ[AFF[t.aff]?.biz || "energy"].color }}>{AFF[t.aff]?.label || t.aff}</span></td>
                   <td className="td-title">{t.title}</td>
                   <td className="dim">{t.category}</td>
                   <td className="mono td-kpi" title={t.kpiFormula}>{t.kpiName}</td>

@@ -17,7 +17,7 @@ export const AFFILIATES = [
   { code: "SKEO",  name: "SK어스온",             biz: "energy"  },
   { code: "SKO",   name: "SK온",                 biz: "battery" },
   { code: "SKIET", name: "SK아이이테크놀로지",   biz: "battery" },
-  { code: "SKES",  name: "SK E&S",               biz: "lng"     },
+  { code: "SKES",  name: "SK E&S",               biz: "lng",     label: "SK E&S" },
 ];
 
 export const AFF = Object.fromEntries(AFFILIATES.map((a) => [a.code, a]));

@@ -130,7 +130,7 @@ export default function App() {
       <div className="topbar">
         <div className="brand">
           <span className="brand-mark">O/I</span>
-          <span className="brand-name">Scout</span>
+          <span className="brand-name">변경 검토</span>
           <span className="brand-sub">신규 과제 발굴 · 데모</span>
         </div>
         <div className="topbar-right">
@@ -142,11 +142,11 @@ export default function App() {
       <div className="frame">
         {/* 좌측 내비 */}
         <div className="rail">
-          <NavBtn on={view === "dash"} onClick={() => setView("dash")} icon={<LayoutDashboard size={16} />} label="대시보드" />
+          <NavBtn on={view === "dash"} onClick={() => setView("dash")} icon={<LayoutDashboard size={16} />} label="외부자료 대시보드" />
           <NavBtn on={view === "gen"} onClick={() => setView("gen")} icon={<Wand2 size={16} />} label="과제 생성" />
           <NavBtn on={view === "cases"} onClick={() => setView("cases")} icon={<Lightbulb size={16} />} label="혁신 사례" />
           <NavBtn on={view === "saved"} onClick={() => setView("saved")} icon={<FolderCheck size={16} />} label="저장된 과제" count={tasks.length} />
-          <NavBtn on={view === "bot"} onClick={() => setView("bot")} icon={<MessageSquare size={16} />} label="메신저 봇" />
+          <NavBtn on={view === "bot"} onClick={() => setView("bot")} icon={<MessageSquare size={16} />} label="AI Reporting" />
         </div>
 
         {/* 본문 */}

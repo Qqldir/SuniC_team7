@@ -10,7 +10,7 @@ export default function BotView({ botAdded, onAdd, openEvidence }) {
     <div>
       <div className="page-head">
         <div>
-          <h1>메신저 봇</h1>
+          <h1>AI Reporting</h1>
           <p className="lede">매일 아침 과제 제안 Top N을 발송합니다. 아래는 오늘 발송분 시뮬레이션입니다.</p>
         </div>
       </div>
@@ -18,7 +18,7 @@ export default function BotView({ botAdded, onAdd, openEvidence }) {
       <div className="chatwrap">
         <div className="chat-head">
           <Bell size={14} />
-          <span>O/I Scout 봇 · #oi-과제발굴</span>
+          <span>O/I 변경 검토 · #oi-과제발굴</span>
           <span className="dim-xs chat-note">매일 09:00 자동 발송 · 데모</span>
         </div>
         <div className="chat-body">

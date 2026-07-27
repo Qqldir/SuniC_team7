@@ -13,7 +13,7 @@ export function buildPrompt(affCodes, periodDays) {
   const affNames = affs.map((c) => AFF[c].name).join(", ");
   return [
     `# 외부 환경 브리핑 — ${affNames} (최근 ${periodDays}일)`,
-    `기준일: ${TODAY} · 출처: DART/SEC/뉴스 (O/I Scout)`,
+    `기준일: ${TODAY} · 출처: DART/SEC/뉴스 (O/I 변경 검토)`,
     ``,
     `## 공시 이벤트`,
     events.length ? events.map(line).join("\n") : "- (해당 기간 없음)",

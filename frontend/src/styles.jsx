@@ -67,6 +67,7 @@ export default function StyleBlock() {
       .feed-src { font-size:12px; font-weight:600; }
       .feed-title { font-weight:600; font-size:13.5px; margin-bottom:2px; }
       .feed-sum { color:var(--steel); font-size:12.5px; margin-bottom:6px; }
+      .feed-sum.feed-clamp { display:-webkit-box; -webkit-line-clamp:3; line-clamp:3; -webkit-box-orient:vertical; overflow:hidden; }
       .feed-tags { display:flex; gap:5px; flex-wrap:wrap; }
 
       .badge { font-size:10.5px; font-weight:600; padding:1px 6px; border-radius:2px; letter-spacing:0.02em; }

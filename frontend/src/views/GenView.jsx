@@ -23,7 +23,7 @@ export default function GenView({
           <div className="field">
             <span className="field-label">대상 계열사</span>
             <select className="select" value={genAff} onChange={(e) => setGenAff(e.target.value)}>
-              {AFFILIATES.map((a) => <option key={a.code} value={a.code}>{a.name} ({a.code})</option>)}
+              {AFFILIATES.map((a) => <option key={a.code} value={a.code}>{a.name}</option>)}
             </select>
           </div>
           <div className="field">

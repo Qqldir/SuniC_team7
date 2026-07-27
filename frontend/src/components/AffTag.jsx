@@ -10,7 +10,7 @@ export default function AffTag({ code, onClick }) {
       onClick={onClick}
       title={BIZ[a.biz].label}
     >
-      {a.code}
+      {a.label || a.code}
     </button>
   );
 }

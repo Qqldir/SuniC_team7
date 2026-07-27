@@ -147,7 +147,7 @@ export default function CasesView() {
                 <button key={a.code} type="button"
                   className={`chip ${form.affiliates.includes(a.code) ? "chip-on" : ""}`}
                   onClick={() => toggleAff(a.code)}>
-                  {a.code}
+                  {a.label || a.code}
                 </button>
               ))}
             </div>
