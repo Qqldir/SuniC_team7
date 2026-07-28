@@ -99,3 +99,87 @@ class CaseCreate(BaseModel):
 
 class CaseStatusUpdate(BaseModel):
     status: str  # approved / pending / rejected
+
+
+# ── 과제 평가 ──
+class ValidationIssue(BaseModel):
+    code: str                      # MISSING_FIELD, NO_EVIDENCE, DUPLICATE ...
+    severity: str                  # block / warn
+    field: str = ""
+    message: str
+
+
+class ValidationResult(BaseModel):
+    ok: bool                       # block 이슈 없음 = 사용자 노출 가능
+    verdict: str                   # pass / review / blocked
+    issues: List[ValidationIssue] = []
+
+
+class AxisScore(BaseModel):
+    score: float = 0.0             # 1.0 ~ 5.0
+    reason: str = ""
+
+
+class Evaluation(BaseModel):
+    verdict: str                   # pass / review / blocked
+    validation: ValidationResult
+    impact: AxisScore = Field(default_factory=AxisScore)
+    feasibility: AxisScore = Field(default_factory=AxisScore)
+    roi: AxisScore = Field(default_factory=AxisScore)
+    grounding: str = "unknown"     # supported / weak / unsupported / unknown
+    groundingReason: str = ""
+    priority: float = 0.0          # 0 ~ 100
+    grade: str = "C"               # A / B / C
+    rank: Optional[int] = None     # 통과 과제 내 순위 (1부터)
+    scoredBy: str = "heuristic"    # llm / heuristic
+
+
+class EvaluatedTask(BaseModel):
+    task: TaskDraft
+    evaluation: Evaluation
+
+
+class EvaluateRequest(BaseModel):
+    aff: str
+    tasks: List[TaskDraft]
+    topN: Optional[int] = None
+    useLlm: bool = True
+    checkSaved: bool = True
+
+
+class EvaluateResponse(BaseModel):
+    results: List[EvaluatedTask]   # priority 내림차순, blocked 는 뒤로
+    criteria: str                  # 선정 기준 설명 (사용자·봇 노출용)
+    weights: dict = {}
+    passed: int = 0
+    review: int = 0
+    blocked: int = 0
+
+
+# ── 제안서 ──
+class ProposalPhase(BaseModel):
+    name: str
+    duration: str = ""
+    activities: List[str] = []
+    deliverable: str = ""
+
+
+class Proposal(BaseModel):
+    taskId: str = ""
+    title: str
+    definition: str = ""           # 혁신 과제 정의
+    expectedEffect: str = ""       # 기대효과
+    kpiBaseline: str = ""
+    kpiTarget: str = ""
+    phases: List[ProposalPhase] = []       # 추진 logic
+    prerequisites: List[str] = []          # 필요 사전 단계
+    investmentItems: List[str] = []        # 예상 투자 비용
+    investmentSummary: str = ""
+    risks: List[str] = []
+    evidence: List[str] = []
+    generatedBy: str = "heuristic"         # llm / heuristic
+
+
+class ProposalRequest(BaseModel):
+    task: TaskIn
+    useLlm: bool = True
