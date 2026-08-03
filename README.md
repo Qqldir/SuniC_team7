@@ -37,7 +37,18 @@ copy .env.example .env            # ANTHROPIC_API_KEY 입력
 python -m app.db.seed             # SQLite 초기화 + 데모 데이터 주입
 uvicorn app.main:app --reload     # http://localhost:8000
 ```
+For Linux:
 
+```bash
+cd ~/sunic/SuniC_team7/backend
+python3 -m venv .venv
+source .venv/bin/activate
+pip install -r requirements.txt
+cp .env.example .env
+nano .env                          # ANTHROPIC_API_KEY 입력, Ctrl+O → Enter → Ctrl+X
+python -m app.db.seed
+uvicorn app.main:app --reload      # http://localhost:8000
+```
 ### 2) 프론트엔드 (Node 18+)
 
 ```bash
@@ -45,6 +56,14 @@ cd frontend
 npm install
 copy .env.example .env            # VITE_API_BASE 확인 (기본 http://localhost:8000)
 npm run dev                       # http://localhost:5173
+```
+For Linux:
+
+```bash
+cd ~/sunic/SuniC_team7/frontend
+npm install
+cp .env.example .env
+npm run dev                        # http://localhost:5173
 ```
 
 프론트엔드는 백엔드가 떠 있으면 SQLite에 과제를 저장하고, 없으면 브라우저
