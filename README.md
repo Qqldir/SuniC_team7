@@ -40,7 +40,7 @@ uvicorn app.main:app --reload     # http://localhost:8000
 For Linux:
 
 ```bash
-cd ~/sunic/SuniC_team7/backend
+cd /backend
 python3 -m venv .venv
 source .venv/bin/activate
 pip install -r requirements.txt
@@ -60,7 +60,7 @@ npm run dev                       # http://localhost:5173
 For Linux:
 
 ```bash
-cd ~/sunic/SuniC_team7/frontend
+cd /frontend
 npm install
 cp .env.example .env
 npm run dev                        # http://localhost:5173
