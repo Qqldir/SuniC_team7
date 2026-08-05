@@ -40,7 +40,7 @@ export default function Login() {
       <header className="lp-header">
         <div className="lp-wrap lp-header-in">
           <a href="#top" className="lp-logo">
-            <span className="lp-mark">O/I</span>
+            <span className="ski-logo" style={{ fontSize: 18 }}><b>SK</b><i>innovation</i></span>
             <span>
               <span className="lp-logo-t">O/I Spark Agent AI</span>
               <span className="lp-logo-s">@ski.com</span>
@@ -138,7 +138,7 @@ export default function Login() {
       <footer className="lp-footer">
         <div className="lp-wrap lp-footer-in">
           <a href="#top" className="lp-logo">
-            <span className="lp-mark sm">O/I</span>
+            <span className="ski-logo" style={{ fontSize: 14 }}><b>SK</b><i>innovation</i></span>
             <span><span className="lp-logo-t sm">O/I Spark</span><span className="lp-logo-s">@ski.com</span></span>
           </a>
           <div className="lp-foot-links">
@@ -247,6 +247,9 @@ const LP_CSS = `
 .lp-mark{background:linear-gradient(135deg,var(--acc),var(--acc2));color:#fff;font-weight:700;
   font-size:13px;padding:5px 8px;border-radius:8px;letter-spacing:.02em}
 .lp-mark.sm{font-size:11px;padding:4px 7px}
+.ski-logo{font-family:Arial,'Helvetica Neue',sans-serif;font-weight:800;white-space:nowrap;letter-spacing:-.3px;line-height:1;display:inline-flex;align-items:baseline;gap:5px}
+.ski-logo b{color:#EA002C}
+.ski-logo i{color:#FF7A00;font-weight:700;font-style:normal}
 .lp-logo-t{display:block;font-size:19px;letter-spacing:-.02em;
   background:linear-gradient(100deg,#f5f3ff,#a855f7 45%,#38bdf8);-webkit-background-clip:text;
   background-clip:text;color:transparent}
