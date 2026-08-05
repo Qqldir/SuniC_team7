@@ -9,6 +9,17 @@ class Kpi(BaseModel):
     formula: str = "-"
 
 
+# ── 인증 ──
+class LoginIn(BaseModel):
+    email: str
+    password: str
+
+
+class ChangePwIn(BaseModel):
+    current_password: str
+    new_password: str
+
+
 class FeedItem(BaseModel):
     id: str
     d: str            # published_on (프론트 데이터 형태와 일치)

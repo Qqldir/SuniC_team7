@@ -16,8 +16,35 @@ function makeStars(n) {
 
 export default function Login() {
   const [open, setOpen] = useState(false);
-  const enter = () => { window.location.href = "/trendroom.html"; };
-  const openModal = (e) => { e?.preventDefault?.(); setOpen(true); };
+  const [email, setEmail] = useState("");
+  const [pw, setPw] = useState("");
+  const [err, setErr] = useState("");
+  const [loading, setLoading] = useState(false);
+  const openModal = (e) => { e?.preventDefault?.(); setErr(""); setOpen(true); };
+
+  const doLogin = async (e) => {
+    e.preventDefault();
+    setErr("");
+    setLoading(true);
+    try {
+      const res = await fetch("/api/auth/login", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email: email.trim(), password: pw }),
+      });
+      if (!res.ok) {
+        const d = await res.json().catch(() => ({}));
+        throw new Error(d.detail || "로그인에 실패했습니다.");
+      }
+      const data = await res.json();
+      localStorage.setItem("oi-token", data.token);
+      localStorage.setItem("oi-user", data.email);
+      window.location.href = "/trendroom.html";
+    } catch (e2) {
+      setErr(e2.message || "로그인에 실패했습니다. 서버 연결을 확인하세요.");
+      setLoading(false);
+    }
+  };
 
   const stars = useMemo(() => ({
     s1: makeStars(700),
@@ -58,7 +85,7 @@ export default function Login() {
           <h1 className="lp-h1">흩어진 외부 자료를<br />계열사 맞춤 혁신 과제로</h1>
           <p className="lp-hero-sub">O/I Spark 에이전트가 여러분의 모든 리서치를 도와드립니다.</p>
           <div className="lp-cta-row">
-            <button className="btn-grad" onClick={openModal}>Outlook으로 연결</button>
+            <button className="btn-grad" onClick={openModal}>로그인</button>
             <a className="btn-ghost" href="#work">서비스 개요 보기</a>
           </div>
           <div className="lp-demo" role="img" aria-label="O/I Spark 미리보기">
@@ -118,7 +145,7 @@ export default function Login() {
             <div className="price-card">
               <div className="price-num">999<small>/ 1일</small></div>
               <div className="price-note">!</div>
-              <button className="btn-grad btn-block" onClick={enter}>메인으로 이동</button>
+              <button className="btn-grad btn-block" onClick={openModal}>로그인</button>
             </div>
           </div>
         </section>
@@ -128,7 +155,7 @@ export default function Login() {
           <div className="cta-box">
             <h2 className="cta-h2">새로운 과제 아이디어를<br />생성할 준비가 됐나요?</h2>
             <p className="cta-p">Chill Guys 팀에 점수 많이 주시고 이 서비스 많이많이 활용해주세염~</p>
-            <button className="btn-grad" onClick={openModal}>Outlook으로 연결</button>
+            <button className="btn-grad" onClick={openModal}>로그인</button>
           </div>
         </section>
       </main>
@@ -153,32 +180,26 @@ export default function Login() {
         <div className="lp-overlay" onClick={() => setOpen(false)}>
           <div className="lp-modal" onClick={(e) => e.stopPropagation()}>
             <button className="lp-modal-x" onClick={() => setOpen(false)} aria-label="닫기">×</button>
-            <h2 className="lp-modal-t">회원가입</h2>
-            <p className="lp-modal-d">Outlook 메일을 O/I Spark에 연결하세요.</p>
+            <h2 className="lp-modal-t">로그인</h2>
+            <p className="lp-modal-d">관리자에게 발급받은 Outlook 이메일로 로그인하세요.</p>
 
-            <form onSubmit={(e) => { e.preventDefault(); enter(); }}>
+            <form onSubmit={doLogin}>
               <label className="lp-lbl">이메일</label>
               <div className="lp-inp"><span className="lp-inp-i">✉</span>
-                <input type="text" placeholder="이메일을 입력하세요" /></div>
+                <input type="text" placeholder="이메일을 입력하세요" value={email}
+                  onChange={(e) => setEmail(e.target.value)} autoFocus /></div>
 
               <label className="lp-lbl">비밀번호</label>
               <div className="lp-inp"><span className="lp-inp-i">🔒</span>
-                <input type="password" placeholder="비밀번호를 입력하세요" /></div>
+                <input type="password" placeholder="비밀번호를 입력하세요" value={pw}
+                  onChange={(e) => setPw(e.target.value)} /></div>
 
-              <div className="lp-row-between">
-                <label className="lp-remember"><input type="checkbox" /> 로그인 유지</label>
-                <span className="lp-link">비밀번호를 잊으셨나요?</span>
-              </div>
+              {err && <p className="lp-err">{err}</p>}
 
-              <button className="lp-signup" type="submit">회원가입</button>
+              <button className="lp-signup" type="submit" disabled={loading}>
+                {loading ? "로그인 중…" : "로그인"}
+              </button>
             </form>
-
-            <p className="lp-modal-foot">이미 계정이 있으신가요? <span className="lp-link" onClick={enter}>로그인</span></p>
-            <p className="lp-or">또는</p>
-            <div className="lp-social">
-              <button type="button" onClick={enter}>Outlook</button>
-              <button type="button" onClick={enter}>Google</button>
-            </div>
           </div>
         </div>
       )}
@@ -368,6 +389,8 @@ const LP_CSS = `
   background:linear-gradient(135deg,var(--acc),var(--acc2));color:#fff;font-size:15px;font-weight:600;
   cursor:pointer;box-shadow:0 12px 30px -12px var(--acc-glow);transition:transform .15s ease}
 .lp-signup:hover{transform:translateY(-1px)}
+.lp-signup:disabled{opacity:.6;cursor:default;transform:none}
+.lp-err{color:#ff8a8a;font-size:12.5px;margin:8px 0 0;line-height:1.5}
 .lp-modal-foot{text-align:center;font-size:14px;color:#8b87a8;margin:4px 0}
 .lp-or{text-align:center;font-size:13px;color:#6e6a88;margin:10px 0}
 .lp-social{display:flex;gap:10px}
