@@ -43,7 +43,6 @@ export default function Login() {
             <span className="ski-logo" style={{ fontSize: 18 }}><b>SK</b><i>innovation</i></span>
             <span>
               <span className="lp-logo-t">O/I Spark Agent AI</span>
-              <span className="lp-logo-s">@ski.com</span>
             </span>
           </a>
           <nav className="lp-nav">
@@ -139,7 +138,7 @@ export default function Login() {
         <div className="lp-wrap lp-footer-in">
           <a href="#top" className="lp-logo">
             <span className="ski-logo" style={{ fontSize: 14 }}><b>SK</b><i>innovation</i></span>
-            <span><span className="lp-logo-t sm">O/I Spark</span><span className="lp-logo-s">@ski.com</span></span>
+            <span><span className="lp-logo-t sm">O/I Spark</span></span>
           </a>
           <div className="lp-foot-links">
             <a href="#top">Privacy Policy</a>
