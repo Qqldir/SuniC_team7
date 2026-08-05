@@ -1,6 +1,5 @@
 import { useState, useEffect, useMemo } from "react";
 import { NavLink, Routes, Route, useNavigate } from "react-router-dom";
-import { LayoutDashboard, Wand2, FolderCheck, MessageSquare, Lightbulb, TrendingUp } from "lucide-react";
 
 import { TODAY, AFFILIATES, AFF } from "./data/affiliates.js";
 import { FEED } from "./data/feed.js";
@@ -16,19 +15,16 @@ import SavedView from "./views/SavedView.jsx";
 import BotView from "./views/BotView.jsx";
 import CasesView from "./views/CasesView.jsx";
 import TrendView from "./views/TrendView.jsx";
+import Placeholder from "./views/Placeholder.jsx";
 import ExportModal from "./views/ExportModal.jsx";
 
-/* 사이드바 네비 링크 */
-function Nav({ to, icon, label, count, end }) {
+/* 사이드바 네비 링크 (trendroom.html NAV 구조: 글리프 아이콘 + 카운트) */
+function Nav({ to, glyph, label, count, end }) {
   return (
-    <NavLink
-      to={to}
-      end={end}
-      className={({ isActive }) => "navbtn" + (isActive ? " navbtn-on" : "")}
-    >
-      {icon}
+    <NavLink to={to} end={end} className={({ isActive }) => "nav-b" + (isActive ? " on" : "")}>
+      <span className="nav-i">{glyph}</span>
       <span>{label}</span>
-      {count != null && <span className="navcount">{count}</span>}
+      {count != null && <span className="nav-c num">{count}</span>}
     </NavLink>
   );
 }
@@ -138,7 +134,7 @@ export default function App() {
     setChecked([]);
   };
 
-  /* 대시보드 엘리먼트 (index + fallback 공용) */
+  /* 라우트 공용 엘리먼트 */
   const dashEl = (
     <DashView
       affSel={affSel} toggleAff={toggleAff} clearAff={() => setAffSel([])}
@@ -149,33 +145,73 @@ export default function App() {
       onTagClick={(c) => setAffSel([c])}
     />
   );
+  const genEl = (
+    <GenView
+      genAff={genAff} setGenAff={setGenAff}
+      genNote={genNote} setGenNote={setGenNote}
+      loading={genLoading} error={genError} results={genResults}
+      ctxCount={ctxCount} run={runGenerate}
+      savedKeys={savedKeys}
+      onSave={(t) => { saveTask(t, "생성"); setSavedKeys((k) => [...k, t.key]); }}
+      openEvidence={openEvidence}
+    />
+  );
+  const savedEl = (
+    <SavedView
+      tasks={tasks} checked={checked} setChecked={setChecked}
+      allChecked={allChecked} toggleAll={toggleAll}
+      downloadCsv={downloadCsv}
+      removeChecked={removeChecked}
+      goGen={() => navigate("/custom")} goBot={() => navigate("/reporting")}
+    />
+  );
+  const botEl = (
+    <BotView
+      botAdded={botAdded}
+      onAdd={(p) => { saveTask(p, "봇"); setBotAdded((a) => [...a, p.id]); }}
+      openEvidence={openEvidence}
+    />
+  );
 
   /* ───────── 렌더 ───────── */
   return (
     <div className="app">
-      {/* 좌측 사이드바 */}
+      {/* 좌측 사이드바 (trendroom.html 구조) */}
       <aside className="side">
         <div className="brand">
           <span className="brand-mark">O/I</span>
           <div>
             <div className="brand-name">O/I Spark</div>
-            <div className="brand-sub">신규 과제 발굴 · 데모</div>
+            <div className="brand-sub">SK이노베이션 O/I추진단</div>
           </div>
           <ThemeToggle />
         </div>
 
         <nav className="nav">
-          <div className="nav-group">
-            <div className="nav-title">발굴</div>
-            <Nav to="/" end icon={<LayoutDashboard size={16} />} label="외부자료 대시보드" />
-            <Nav to="/gen" icon={<Wand2 size={16} />} label="과제 생성" />
-            <Nav to="/cases" icon={<Lightbulb size={16} />} label="혁신 사례" />
+          <div className="nav-g">
+            <div className="nav-t">발굴</div>
+            <Nav to="/" end glyph="≡" label="과제 제안" count={tasks.length} />
+            <Nav to="/custom" glyph="+" label="커스텀 생성" />
           </div>
-          <div className="nav-group">
-            <div className="nav-title">활용</div>
-            <Nav to="/trend" icon={<TrendingUp size={16} />} label="트렌드룸" />
-            <Nav to="/saved" icon={<FolderCheck size={16} />} label="저장된 과제" count={tasks.length} />
-            <Nav to="/reporting" icon={<MessageSquare size={16} />} label="AI Reporting" />
+          <div className="nav-g">
+            <div className="nav-t">활용</div>
+            <Nav to="/trend" glyph="T" label="트렌드룸" />
+            <Nav to="/export" glyph="›" label="프롬프트 내보내기" />
+            <Nav to="/reporting" glyph="↗" label="AI Reporting" />
+          </div>
+          <div className="nav-g">
+            <div className="nav-t">관리</div>
+            <Nav to="/admin" glyph="⚙" label="관리자" />
+          </div>
+
+          <div className="pipe">
+            <div className="pipe-h">
+              <span className="pipe-t">수집 파이프라인</span>
+              <span className="pipe-ok">정상</span>
+            </div>
+            <div className="pipe-r"><span className="dot" style={{ background: "var(--ok)" }} />크롤링 · 오늘 08:00 완료</div>
+            <div className="pipe-r"><span className="dot" style={{ background: "var(--warn)" }} />유료 매체 4건 · 계정 필요</div>
+            <div className="pipe-r"><span className="dot" style={{ background: "var(--steel)" }} />수집 주기 · 4시간</div>
           </div>
         </nav>
       </aside>
@@ -185,44 +221,15 @@ export default function App() {
         <main className="main">
           <Routes>
             <Route index element={dashEl} />
-            <Route
-              path="gen"
-              element={
-                <GenView
-                  genAff={genAff} setGenAff={setGenAff}
-                  genNote={genNote} setGenNote={setGenNote}
-                  loading={genLoading} error={genError} results={genResults}
-                  ctxCount={ctxCount} run={runGenerate}
-                  savedKeys={savedKeys}
-                  onSave={(t) => { saveTask(t, "생성"); setSavedKeys((k) => [...k, t.key]); }}
-                  openEvidence={openEvidence}
-                />
-              }
-            />
-            <Route path="cases" element={<CasesView />} />
+            <Route path="custom" element={genEl} />
             <Route path="trend" element={<TrendView />} />
-            <Route
-              path="saved"
-              element={
-                <SavedView
-                  tasks={tasks} checked={checked} setChecked={setChecked}
-                  allChecked={allChecked} toggleAll={toggleAll}
-                  downloadCsv={downloadCsv}
-                  removeChecked={removeChecked}
-                  goGen={() => navigate("/gen")} goBot={() => navigate("/reporting")}
-                />
-              }
-            />
-            <Route
-              path="reporting"
-              element={
-                <BotView
-                  botAdded={botAdded}
-                  onAdd={(p) => { saveTask(p, "봇"); setBotAdded((a) => [...a, p.id]); }}
-                  openEvidence={openEvidence}
-                />
-              }
-            />
+            <Route path="export" element={<Placeholder title="프롬프트 내보내기" />} />
+            <Route path="reporting" element={botEl} />
+            <Route path="admin" element={<Placeholder title="관리자" />} />
+            {/* 레거시/보조 라우트 (사이드바 외) */}
+            <Route path="gen" element={genEl} />
+            <Route path="cases" element={<CasesView />} />
+            <Route path="saved" element={savedEl} />
             <Route path="*" element={dashEl} />
           </Routes>
         </main>
