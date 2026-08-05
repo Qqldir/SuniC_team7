@@ -1,5 +1,6 @@
 import { useState, useEffect, useMemo } from "react";
-import { LayoutDashboard, Wand2, FolderCheck, MessageSquare, Lightbulb } from "lucide-react";
+import { NavLink, Routes, Route, useNavigate } from "react-router-dom";
+import { LayoutDashboard, Wand2, FolderCheck, MessageSquare, Lightbulb, TrendingUp } from "lucide-react";
 
 import { TODAY, AFFILIATES, AFF } from "./data/affiliates.js";
 import { FEED } from "./data/feed.js";
@@ -8,17 +9,33 @@ import { tasksToCsv } from "./lib/csv.js";
 import { downloadText } from "./lib/utils.js";
 import { generateTasks, fetchTasks, createTask, deleteTasks } from "./lib/api.js";
 
-import StyleBlock from "./styles.jsx";
-import NavBtn from "./components/NavBtn.jsx";
+import ThemeToggle from "./components/ThemeToggle.jsx";
 import DashView from "./views/DashView.jsx";
 import GenView from "./views/GenView.jsx";
 import SavedView from "./views/SavedView.jsx";
 import BotView from "./views/BotView.jsx";
 import CasesView from "./views/CasesView.jsx";
+import TrendView from "./views/TrendView.jsx";
 import ExportModal from "./views/ExportModal.jsx";
 
+/* 사이드바 네비 링크 */
+function Nav({ to, icon, label, count, end }) {
+  return (
+    <NavLink
+      to={to}
+      end={end}
+      className={({ isActive }) => "navbtn" + (isActive ? " navbtn-on" : "")}
+    >
+      {icon}
+      <span>{label}</span>
+      {count != null && <span className="navcount">{count}</span>}
+    </NavLink>
+  );
+}
+
 export default function App() {
-  const [view, setView] = useState("dash");
+  const navigate = useNavigate();
+
   const [tasks, setTasks] = useState([]);
   const [highlight, setHighlight] = useState(null);
 
@@ -66,11 +83,11 @@ export default function App() {
 
   /* 액션 */
   const openEvidence = (id) => {
-    setView("dash");
+    navigate("/");
     setHighlight(id);
     setTimeout(() => {
       document.getElementById("feed-" + id)?.scrollIntoView({ behavior: "smooth", block: "center" });
-    }, 60);
+    }, 80);
     setTimeout(() => setHighlight((h) => (h === id ? null : h)), 3500);
   };
 
@@ -121,75 +138,94 @@ export default function App() {
     setChecked([]);
   };
 
+  /* 대시보드 엘리먼트 (index + fallback 공용) */
+  const dashEl = (
+    <DashView
+      affSel={affSel} toggleAff={toggleAff} clearAff={() => setAffSel([])}
+      kindSel={kindSel} setKindSel={setKindSel}
+      period={period} setPeriod={setPeriod}
+      events={events} news={news} highlight={highlight}
+      onOpenExport={() => setExportOpen(true)}
+      onTagClick={(c) => setAffSel([c])}
+    />
+  );
+
   /* ───────── 렌더 ───────── */
   return (
     <div className="app">
-      <StyleBlock />
-
-      {/* 상단 바 */}
-      <div className="topbar">
+      {/* 좌측 사이드바 */}
+      <aside className="side">
         <div className="brand">
           <span className="brand-mark">O/I</span>
-          <span className="brand-name">변경 검토</span>
-          <span className="brand-sub">신규 과제 발굴 · 데모</span>
-        </div>
-        <div className="topbar-right">
-          <span className="mono dim">기준일 {TODAY}</span>
-          <span className="sample-pill">샘플 데이터</span>
-        </div>
-      </div>
-
-      <div className="frame">
-        {/* 좌측 내비 */}
-        <div className="rail">
-          <NavBtn on={view === "dash"} onClick={() => setView("dash")} icon={<LayoutDashboard size={16} />} label="외부자료 대시보드" />
-          <NavBtn on={view === "gen"} onClick={() => setView("gen")} icon={<Wand2 size={16} />} label="과제 생성" />
-          <NavBtn on={view === "cases"} onClick={() => setView("cases")} icon={<Lightbulb size={16} />} label="혁신 사례" />
-          <NavBtn on={view === "saved"} onClick={() => setView("saved")} icon={<FolderCheck size={16} />} label="저장된 과제" count={tasks.length} />
-          <NavBtn on={view === "bot"} onClick={() => setView("bot")} icon={<MessageSquare size={16} />} label="AI Reporting" />
+          <div>
+            <div className="brand-name">O/I Spark</div>
+            <div className="brand-sub">신규 과제 발굴 · 데모</div>
+          </div>
+          <ThemeToggle />
         </div>
 
-        {/* 본문 */}
-        <div className="main">
-          {view === "dash" && (
-            <DashView
-              affSel={affSel} toggleAff={toggleAff} clearAff={() => setAffSel([])}
-              kindSel={kindSel} setKindSel={setKindSel}
-              period={period} setPeriod={setPeriod}
-              events={events} news={news} highlight={highlight}
-              onOpenExport={() => setExportOpen(true)}
-              onTagClick={(c) => setAffSel([c])}
+        <nav className="nav">
+          <div className="nav-group">
+            <div className="nav-title">발굴</div>
+            <Nav to="/" end icon={<LayoutDashboard size={16} />} label="외부자료 대시보드" />
+            <Nav to="/gen" icon={<Wand2 size={16} />} label="과제 생성" />
+            <Nav to="/cases" icon={<Lightbulb size={16} />} label="혁신 사례" />
+          </div>
+          <div className="nav-group">
+            <div className="nav-title">활용</div>
+            <Nav to="/trend" icon={<TrendingUp size={16} />} label="트렌드룸" />
+            <Nav to="/saved" icon={<FolderCheck size={16} />} label="저장된 과제" count={tasks.length} />
+            <Nav to="/reporting" icon={<MessageSquare size={16} />} label="AI Reporting" />
+          </div>
+        </nav>
+      </aside>
+
+      {/* 본문 */}
+      <div className="body">
+        <main className="main">
+          <Routes>
+            <Route index element={dashEl} />
+            <Route
+              path="gen"
+              element={
+                <GenView
+                  genAff={genAff} setGenAff={setGenAff}
+                  genNote={genNote} setGenNote={setGenNote}
+                  loading={genLoading} error={genError} results={genResults}
+                  ctxCount={ctxCount} run={runGenerate}
+                  savedKeys={savedKeys}
+                  onSave={(t) => { saveTask(t, "생성"); setSavedKeys((k) => [...k, t.key]); }}
+                  openEvidence={openEvidence}
+                />
+              }
             />
-          )}
-          {view === "gen" && (
-            <GenView
-              genAff={genAff} setGenAff={setGenAff}
-              genNote={genNote} setGenNote={setGenNote}
-              loading={genLoading} error={genError} results={genResults}
-              ctxCount={ctxCount} run={runGenerate}
-              savedKeys={savedKeys}
-              onSave={(t) => { saveTask(t, "생성"); setSavedKeys((k) => [...k, t.key]); }}
-              openEvidence={openEvidence}
+            <Route path="cases" element={<CasesView />} />
+            <Route path="trend" element={<TrendView />} />
+            <Route
+              path="saved"
+              element={
+                <SavedView
+                  tasks={tasks} checked={checked} setChecked={setChecked}
+                  allChecked={allChecked} toggleAll={toggleAll}
+                  downloadCsv={downloadCsv}
+                  removeChecked={removeChecked}
+                  goGen={() => navigate("/gen")} goBot={() => navigate("/reporting")}
+                />
+              }
             />
-          )}
-          {view === "saved" && (
-            <SavedView
-              tasks={tasks} checked={checked} setChecked={setChecked}
-              allChecked={allChecked} toggleAll={toggleAll}
-              downloadCsv={downloadCsv}
-              removeChecked={removeChecked}
-              goGen={() => setView("gen")} goBot={() => setView("bot")}
+            <Route
+              path="reporting"
+              element={
+                <BotView
+                  botAdded={botAdded}
+                  onAdd={(p) => { saveTask(p, "봇"); setBotAdded((a) => [...a, p.id]); }}
+                  openEvidence={openEvidence}
+                />
+              }
             />
-          )}
-          {view === "cases" && <CasesView />}
-          {view === "bot" && (
-            <BotView
-              botAdded={botAdded}
-              onAdd={(p) => { saveTask(p, "봇"); setBotAdded((a) => [...a, p.id]); }}
-              openEvidence={openEvidence}
-            />
-          )}
-        </div>
+            <Route path="*" element={dashEl} />
+          </Routes>
+        </main>
       </div>
 
       {exportOpen && <ExportModal affSel={affSel} period={period} onClose={() => setExportOpen(false)} />}

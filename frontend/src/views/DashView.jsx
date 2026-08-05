@@ -52,7 +52,7 @@ export default function DashView({
       {/* 이벤트 / 뉴스 */}
       <div className="grid-2">
         <FeedSection title="주요 이벤트" note="경쟁사 수시·정기 공시" items={events} highlight={highlight} onTagClick={onTagClick} clamp />
-        <FeedSection title="주요 뉴스" note="산업·정책·시황" items={news} highlight={highlight} onTagClick={onTagClick} />
+        <FeedSection title="주요 뉴스" note="산업·정책·시황" items={news} highlight={highlight} onTagClick={onTagClick} clamp />
       </div>
 
       <p className="foot-note">피드는 데모용 샘플입니다. 실서비스는 DART OpenAPI · SEC EDGAR · 뉴스 API 수집으로 대체 — 기획안 6장.</p>
