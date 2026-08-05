@@ -56,20 +56,20 @@ export default function Login() {
         {/* 히어로 */}
         <section className="lp-hero lp-wrap">
           <h1 className="lp-h1">흩어진 외부 자료를<br />계열사 맞춤 혁신 과제로</h1>
-          <p className="lp-hero-sub">O/I Spark agent is here to help all your research needs.</p>
+          <p className="lp-hero-sub">O/I Spark 에이전트가 여러분의 모든 리서치를 도와드립니다.</p>
           <div className="lp-cta-row">
             <button className="btn-grad" onClick={openModal}>Outlook으로 연결</button>
-            <a className="btn-ghost" href="#work">See service overview</a>
+            <a className="btn-ghost" href="#work">서비스 개요 보기</a>
           </div>
           <div className="lp-demo" role="img" aria-label="O/I Spark 미리보기">
-            <span className="lp-demo-tag">3D · Retroactive glass material</span>
+            <span className="lp-demo-tag">3D · 인터랙티브 미리보기</span>
           </div>
         </section>
 
         {/* 서비스 개요 */}
         <section id="work" className="lp-section lp-wrap">
           <div className="lp-sec-head">
-            <div className="lp-eyebrow">Service Overview</div>
+            <div className="lp-eyebrow">서비스 개요</div>
             <h2 className="lp-h2">주요 기능과 외부자료 DB</h2>
           </div>
           <div className="ov-grid">
@@ -84,7 +84,7 @@ export default function Login() {
         {/* 서비스 상세 */}
         <section id="services" className="lp-section lp-wrap">
           <div className="lp-sec-head">
-            <div className="lp-eyebrow">Service Detail</div>
+            <div className="lp-eyebrow">서비스 상세</div>
             <h2 className="lp-h2">주요 기능 상세</h2>
           </div>
           <div className="sd-grid">
@@ -116,9 +116,9 @@ export default function Login() {
               </ul>
             </div>
             <div className="price-card">
-              <div className="price-num">999<small>per 1 day</small></div>
+              <div className="price-num">999<small>/ 1일</small></div>
               <div className="price-note">!</div>
-              <button className="btn-grad btn-block" onClick={enter}>Go to main page</button>
+              <button className="btn-grad btn-block" onClick={enter}>메인으로 이동</button>
             </div>
           </div>
         </section>
@@ -141,8 +141,8 @@ export default function Login() {
             <span><span className="lp-logo-t sm">O/I Spark</span></span>
           </a>
           <div className="lp-foot-links">
-            <a href="#top">Privacy Policy</a>
-            <a href="#top">Terms and Conditions</a>
+            <a href="#top">개인정보 처리방침</a>
+            <a href="#top">이용약관</a>
           </div>
           <div className="lp-copy">© 2026 SUNIC 5기 Chill Guys</div>
         </div>
@@ -153,28 +153,28 @@ export default function Login() {
         <div className="lp-overlay" onClick={() => setOpen(false)}>
           <div className="lp-modal" onClick={(e) => e.stopPropagation()}>
             <button className="lp-modal-x" onClick={() => setOpen(false)} aria-label="닫기">×</button>
-            <h2 className="lp-modal-t">Sign Up</h2>
-            <p className="lp-modal-d">Connect your Outlook mail to O/I Spark.</p>
+            <h2 className="lp-modal-t">회원가입</h2>
+            <p className="lp-modal-d">Outlook 메일을 O/I Spark에 연결하세요.</p>
 
             <form onSubmit={(e) => { e.preventDefault(); enter(); }}>
-              <label className="lp-lbl">Email</label>
+              <label className="lp-lbl">이메일</label>
               <div className="lp-inp"><span className="lp-inp-i">✉</span>
-                <input type="text" placeholder="Enter your Email" /></div>
+                <input type="text" placeholder="이메일을 입력하세요" /></div>
 
-              <label className="lp-lbl">Password</label>
+              <label className="lp-lbl">비밀번호</label>
               <div className="lp-inp"><span className="lp-inp-i">🔒</span>
-                <input type="password" placeholder="Enter your Password" /></div>
+                <input type="password" placeholder="비밀번호를 입력하세요" /></div>
 
               <div className="lp-row-between">
-                <label className="lp-remember"><input type="checkbox" /> Remember me</label>
-                <span className="lp-link">Forgot password?</span>
+                <label className="lp-remember"><input type="checkbox" /> 로그인 유지</label>
+                <span className="lp-link">비밀번호를 잊으셨나요?</span>
               </div>
 
-              <button className="lp-signup" type="submit">Sign Up</button>
+              <button className="lp-signup" type="submit">회원가입</button>
             </form>
 
-            <p className="lp-modal-foot">Already have an account? <span className="lp-link" onClick={enter}>Sign In</span></p>
-            <p className="lp-or">Or With</p>
+            <p className="lp-modal-foot">이미 계정이 있으신가요? <span className="lp-link" onClick={enter}>로그인</span></p>
+            <p className="lp-or">또는</p>
             <div className="lp-social">
               <button type="button" onClick={enter}>Outlook</button>
               <button type="button" onClick={enter}>Google</button>
