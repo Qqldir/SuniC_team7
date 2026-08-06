@@ -550,6 +550,19 @@ textarea{width:100%;border:1px solid var(--line-mid);border-radius:10px;padding:
 .empty2{padding:44px 17px;display:flex;flex-direction:column;gap:6px;align-items:center}
 @media (max-width:1560px){ .tr2{grid-template-columns:1fr} .tr2-r{position:static;order:-1} }
 
+.fxq{border:1px solid #cfdefb;background:var(--brand-tint);border-radius:10px;padding:11px 12px;
+  margin-bottom:9px;display:flex;flex-direction:column;gap:8px}
+html[data-theme="dark"] .fxq{border-color:var(--line-mid)}
+.fxq-h{display:flex;align-items:center;gap:7px}
+.fxq-t{font-size:11.5px;font-weight:700;color:var(--ink)}
+.fxq-r{display:flex;align-items:center;gap:7px}
+.fxq-i{flex:1;min-width:0;height:32px}
+.fxq-p{display:flex;flex-wrap:wrap;gap:5px}
+.fxq-c{font-size:10.5px;padding:4px 9px;border:1px solid var(--line-mid);border-radius:99px;
+  background:var(--panel);color:var(--t2);cursor:pointer;white-space:nowrap}
+.fxq-c:hover{border-color:var(--brand);color:var(--brand)}
+.fxq-c:disabled{opacity:.5;cursor:default}
+
 /* ===== 트렌드룸 신규 (트리맵·키워드·브리핑) ===== */
 .lg-i{display:flex;align-items:center;gap:5px;font-size:10.5px;color:var(--t3)}
 .lg-d{width:8px;height:8px;border-radius:2px;flex:none}
@@ -864,6 +877,41 @@ const stampNow = () => {
   const d=new Date();
   return `2026. 07. 30 ${String(d.getHours()).padStart(2,'0')}:${String(d.getMinutes()).padStart(2,'0')}`;
 };
+/* 자연어 지시로 산출식 재구성 — 데모는 규칙 기반, 실서비스는 LLM 호출 */
+const FX_PRESETS = [
+  {label:'투자비 빼고 총 효과만', run:b=>b.replace(/\s*[−-]\s*[^−-]*(?:투자비|비용)\s*$/,'')},
+  {label:'투자 회수기간으로', run:b=>b.replace(/\s*[−-]\s*([^−-]*(?:투자비|비용))\s*$/,'') + ' ÷ 투자비 × 12 (개월)'},
+  {label:'인건비 절감분 추가', run:b=>b + ' + 인건비 절감분'},
+  {label:'3년 누적 기준', run:b=>'(' + b + ') × 3년'},
+];
+function fxFromPrompt(base, s){
+  const q = (s||'').trim();
+  const hit = FX_PRESETS.find(p=>p.label===q);
+  if (hit) return hit.run(base);
+  if (/회수\s*기간|회수기간/.test(q))            return FX_PRESETS[1].run(base);
+  if (/(투자비|비용).*(빼|제외|없이)/.test(q))     return FX_PRESETS[0].run(base);
+  if (/(3\s*년|삼\s*년|누적)/.test(q))           return FX_PRESETS[3].run(base);
+  if (/월\s*단위|월별/.test(q))                  return '(' + base + ') ÷ 12';
+  const add = q.match(/([가-힣A-Za-z][가-힣A-Za-z\s]{0,10}?)\s*(?:도|를|을|만)?\s*(?:추가|반영|더해|포함)/);
+  if (add) return base + ' + ' + add[1].trim();
+  const sub = q.match(/([가-힣A-Za-z][가-힣A-Za-z\s]{0,10}?)\s*(?:도|를|을|만)?\s*(?:빼|제외|차감)/);
+  if (sub) return base + ' − ' + sub[1].trim();
+  return base + ' × 조정 계수';
+}
+function runFxPrompt(instr){
+  const q = (instr||'').trim();
+  if(!q) return;
+  const t = curTask();
+  S.fxAskText = q; S.fxBusy = true; render();
+  setTimeout(()=>{
+    const base = fxText(t);
+    S.fx[t.id] = {text: fxFromPrompt(base, q), at: stampNow(), by: q};
+    S.sysOff[t.id] = true;
+    S.fxBusy = false; S.fxAsk = null; S.fxAskText = '';
+    render();
+  }, 700);
+}
+
 /* 산출식 상태 — 시스템 제안(ON, 기본) / 사용자 수식(OFF) */
 const sysOn  = t => S.sysOff[t.id] !== true;
 const userFx = t => S.fx[t.id];                       // {text, at}
@@ -1246,6 +1294,7 @@ let S = {
   fx:{},            // 사용자 수식 {taskId:{text,at}}
   sysOff:{},        // 시스템 제안 토글 OFF 여부
   fxDraft:null,     // 수식 편집 중인 과제 id
+  fxAsk:null, fxAskText:'', fxBusy:false,
   fxCopied:false,
   regenerating:false,
   cg:{step:0, oc:null, ev:null, lever:null, plan:null, name:'', sum:'', err:'', saving:false, done:false},
@@ -1660,7 +1709,7 @@ function viewList(){
 /* ---------- 2. 과제 상세 ---------- */
 function viewDetail(){
   const t = curTask(), v = fOf(t), L = LOGIC[t.lever], ver = verOf(t.ver);
-  const on = sysOn(t), uf = userFx(t), drafting = S.fxDraft === t.id;
+  const on = sysOn(t), uf = userFx(t), drafting = S.fxDraft === t.id, asking = S.fxAsk === t.id;
   return `
   <div class="row-f" style="font-size:12px;color:var(--t4)">
     <a href="#" data-nav="list">과제 제안</a><span>/</span>
@@ -1691,12 +1740,26 @@ function viewDetail(){
       <div class="card-b stack" style="gap:14px">
         <div>
           <div class="fx-head">
-            <span class="fld-l">산출식${on?'':` <span class="fx-mark">· ${esc(uf?.at||'')} 사용자 수정</span>`}</span>
+            <span class="fld-l">산출식${on?'':` <span class="fx-mark">· ${esc(uf?.at||'')} ${uf?.by?'프롬프트 수정':'사용자 수정'}</span>`}</span>
             <div style="margin-left:auto" class="row-f" style="gap:4px">
               <button class="icb" id="fxCopy" title="산출식 복사">${S.fxCopied?'✓':'⧉'}</button>
-              <button class="icb ${drafting?'act':''}" id="fxEditBtn" title="산출식 수정">✎</button>
+              <button class="icb ${asking?'act':''}" id="fxAskBtn" title="프롬프트로 수정">
+                <svg width="13" height="13" viewBox="0 0 16 16" fill="currentColor"><path d="M8 1.6l1.25 3.15L12.4 6l-3.15 1.25L8 10.4 6.75 7.25 3.6 6l3.15-1.25L8 1.6zM12.6 9.6l.65 1.65 1.65.65-1.65.65-.65 1.65-.65-1.65-1.65-.65 1.65-.65.65-1.65z"/></svg>
+              </button>
+              <button class="icb ${drafting?'act':''}" id="fxEditBtn" title="직접 수정">✎</button>
             </div>
           </div>
+          ${asking?`<div class="fxq">
+            <div class="fxq-h"><span class="ai-mk">AI</span><span class="fxq-t">자연어로 산출식을 바꿔보세요</span></div>
+            <div class="fxq-r">
+              <input class="inp fxq-i" id="fxAskI" value="${esc(S.fxAskText)}" ${S.fxBusy?'disabled':''}
+                placeholder="예) 투자비는 빼고 총 효과만 보여줘">
+              <button class="btn sm pri" id="fxAskGo" ${S.fxBusy?'disabled':''}>${S.fxBusy?'생성 중…':'적용'}</button>
+              <button class="mclose" id="fxAskX" title="닫기">✕</button>
+            </div>
+            <div class="fxq-p">${FX_PRESETS.map(p=>
+              `<button class="fxq-c" data-fxp="${esc(p.label)}" ${S.fxBusy?'disabled':''}>${esc(p.label)}</button>`).join('')}</div>
+          </div>`:''}
           ${drafting
             ? `<div class="stack" style="gap:8px">
                  <textarea id="fxInput" class="fx-input" spellcheck="false">${esc(fxText(t))}</textarea>
@@ -2567,6 +2630,7 @@ document.addEventListener('click', e=>{
 });
 document.addEventListener('change', e=>{
   const el=e.target;
+  if(el.id==='fxAskI'){ S.fxAskText=el.value; return; }
   if(el.id==='trBizSel'){ S.trBiz = el.value==='전 분야'?'전체':el.value; render(); return trBump(); }
   if(el.id==='trPdSel'){ S.trPeriod = el.value; render(); return trBump(); }
   if(el.id==='trSrc'){ S.trSrc = el.value==='출처 전체'?'전체':el.value; return render(); }
@@ -2796,12 +2860,13 @@ function regenerate(){
 }
 
 document.addEventListener('click', e=>{
-  const el=e.target.closest('[data-nav],[data-open],[data-lv],[data-ver],[data-pg],[data-atab],[data-tn],[data-ch],[data-ex-d],[data-dl],[data-rm-rc],[data-rm-adm],[data-cg-oc],[data-cg-ev],[data-cg-lv],[data-cg-plan],[data-cal-d],[data-cal-m],[data-cnav],[data-sendtog],[data-freq],[data-monav],[data-slice],[data-memo],[data-star],[data-msave],[data-ck],[data-ckall],[data-goto],[data-tr],[data-cite],button');
+  const el=e.target.closest('[data-nav],[data-open],[data-lv],[data-ver],[data-pg],[data-atab],[data-tn],[data-ch],[data-ex-d],[data-dl],[data-rm-rc],[data-rm-adm],[data-cg-oc],[data-cg-ev],[data-cg-lv],[data-cg-plan],[data-cal-d],[data-cal-m],[data-cnav],[data-fxp],[data-sendtog],[data-freq],[data-monav],[data-slice],[data-memo],[data-star],[data-msave],[data-ck],[data-ckall],[data-goto],[data-tr],[data-cite],button');
   // 캘린더 외부 클릭 시 닫기
   if(S.calOpen && !e.target.closest('#cal') && el && el.id!=='calBtn'){ S.calOpen=false; }
   if(S.calOpen && !el){ S.calOpen=false; return render(); }
   if(!el) return;
   const d=el.dataset;
+  if(d.fxp){ return runFxPrompt(d.fxp); }
   if(d.nav){e.preventDefault(); S.screen=d.nav; return render();}
   if(d.open){S.curId=Number(d.open); S.screen='detail'; return render();}
   if(d.ver){S.ver=(S.ver===d.ver?'전체':d.ver); S.page=1; S.calOpen=false; return render();}
@@ -2863,6 +2928,11 @@ document.addEventListener('click', e=>{
       try{ const r=navigator.clipboard.writeText(fxText(t)); if(r&&r.catch) r.catch(()=>{}); }catch(err){}
       S.fxCopied=true; render(); setTimeout(()=>{S.fxCopied=false; render();},1400); return;
     }
+    case 'fxAskBtn':
+      S.fxAsk = (S.fxAsk===curTask().id) ? null : curTask().id;
+      S.fxDraft = null; S.fxAskText=''; return render();
+    case 'fxAskX': S.fxAsk=null; S.fxAskText=''; return render();
+    case 'fxAskGo': return runFxPrompt((document.getElementById('fxAskI')||{}).value);
     case 'fxEditBtn':
       S.fxDraft = (S.fxDraft===curTask().id) ? null : curTask().id;
       return render();
