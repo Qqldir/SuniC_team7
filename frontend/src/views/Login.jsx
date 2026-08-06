@@ -270,7 +270,8 @@ const LP_CSS = `
 .ski-logo{font-family:Arial,'Helvetica Neue',sans-serif;font-weight:800;white-space:nowrap;letter-spacing:-.3px;line-height:1;display:inline-flex;align-items:baseline;gap:5px}
 .ski-logo b{color:#EA002C}
 .ski-logo i{color:#FF7A00;font-weight:700;font-style:normal}
-.lp-logo-t{display:block;font-size:19px;letter-spacing:-.02em;
+@font-face{font-family:'Chillax';src:url('/fonts/Chillax-Semibold.woff2') format('woff2'),url('/fonts/Chillax-Semibold.woff') format('woff');font-weight:600;font-style:normal;font-display:swap}
+.lp-logo-t{display:block;font-family:'Chillax',Arial,sans-serif;font-weight:600;font-size:19px;letter-spacing:-.02em;
   background:linear-gradient(100deg,#f5f3ff,#a855f7 45%,#38bdf8);-webkit-background-clip:text;
   background-clip:text;color:transparent}
 .lp-logo-t.sm{font-size:15px}
