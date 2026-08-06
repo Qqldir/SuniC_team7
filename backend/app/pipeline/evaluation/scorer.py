@@ -10,7 +10,8 @@ import json
 import re
 from typing import List, Optional, Sequence, Tuple
 
-from app.config import ANTHROPIC_API_KEY, OI_MODEL
+from app import llm_client
+from app.config import OI_LLM_PROVIDER, OI_MODEL
 from app.db.database import get_connection
 from app.models import AxisScore, TaskDraft
 
@@ -220,18 +221,11 @@ def _parse(text: str, n: int) -> List[dict]:
 
 
 def score_batch_llm(tasks: Sequence[TaskDraft], aff_name: str) -> List[dict]:
-    if not ANTHROPIC_API_KEY:
-        raise RuntimeError("ANTHROPIC_API_KEY 가 설정되지 않았습니다.")
-    from anthropic import Anthropic
-
+    ready, why = llm_client.ready(OI_LLM_PROVIDER)
+    if not ready:
+        raise RuntimeError(why)
     system, user = _build_messages(tasks, aff_name)
-    resp = Anthropic(api_key=ANTHROPIC_API_KEY).messages.create(
-        model=OI_MODEL,
-        max_tokens=2000,
-        system=system,
-        messages=[{"role": "user", "content": user}],
-    )
-    text = "".join(b.text for b in resp.content if b.type == "text")
+    text = llm_client.call(user, system, OI_MODEL, OI_LLM_PROVIDER)
     return _parse(text, len(tasks))
 
 

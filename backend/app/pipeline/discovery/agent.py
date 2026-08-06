@@ -2,19 +2,12 @@
 import json
 from typing import List
 
-from anthropic import Anthropic
-
-from app.config import ANTHROPIC_API_KEY, OI_MODEL, TODAY
+from app import llm_client
+from app.config import OI_LLM_PROVIDER, OI_MODEL, TODAY
 from app.models import TaskDraft, Kpi
 from app.pipeline.knowledge import repository as kb
 
 KIND_LABEL = {"adhoc": "DART 수시", "periodic": "DART 정기", "sec": "SEC", "news": "뉴스"}
-
-
-def _client() -> Anthropic:
-    if not ANTHROPIC_API_KEY:
-        raise RuntimeError("ANTHROPIC_API_KEY 가 설정되지 않았습니다. backend/.env 를 확인하세요.")
-    return Anthropic(api_key=ANTHROPIC_API_KEY)
 
 
 def _build_messages(aff_code: str, note: str):
@@ -73,12 +66,9 @@ def _parse(text: str, valid_ids: set) -> List[TaskDraft]:
 
 
 def generate_tasks(aff_code: str, note: str = "") -> List[TaskDraft]:
+    ready, why = llm_client.ready(OI_LLM_PROVIDER)
+    if not ready:
+        raise RuntimeError(why)
     system, user, valid_ids = _build_messages(aff_code, note)
-    resp = _client().messages.create(
-        model=OI_MODEL,
-        max_tokens=1000,
-        system=system,
-        messages=[{"role": "user", "content": user}],
-    )
-    text = "".join(b.text for b in resp.content if b.type == "text")
+    text = llm_client.call(user, system, OI_MODEL, OI_LLM_PROVIDER)
     return _parse(text, valid_ids)
