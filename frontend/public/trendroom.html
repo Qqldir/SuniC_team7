@@ -1167,7 +1167,7 @@ let S = {
   fxDraft:null,     // 수식 편집 중인 과제 id
   fxCopied:false,
   regenerating:false,
-  cg:{step:0, oc:null, ev:null, lever:null, plan:null, done:false},
+  cg:{step:0, oc:null, ev:null, lever:null, plan:null, name:null, done:false},
   ex:{oc:'SKGC', days:30, research:'', editing:false, text:null, copied:false},
   admTab:'prompt',
   instruction:DEFAULT_INSTRUCTION,
@@ -1177,6 +1177,21 @@ let S = {
   recipients:['O/I추진단 (jin.k@sk.com)','SKGC 혁신팀 (gc-innov@sk.com)'],
   channels:{outlook:true, teams:true},
 };
+
+// 검색창·프롬프트 편집 등은 브라우저 메모리(S)에만 두어, 같은 세션 안에서 화면을
+// 옮겨 다녀도(=새로고침 없이) 입력이 유지된다. 새로고침하면 저장하지 않은 내용은
+// 버리고 마지막으로 "저장"한 값으로 돌아간다 — 생성 인스트럭션만 저장 버튼이 있으므로
+// 그 값만 localStorage 에 실제로 저장해 새로고침에도 남긴다.
+const SAVED_INSTRUCTION_KEY = 'oi-saved-instruction';
+function loadSavedInstruction(){
+  try{ const v = localStorage.getItem(SAVED_INSTRUCTION_KEY); return v===null ? DEFAULT_INSTRUCTION : v; }
+  catch(e){ return DEFAULT_INSTRUCTION; }
+}
+function persistSavedInstruction(v){
+  try{ localStorage.setItem(SAVED_INSTRUCTION_KEY, v); }catch(e){}
+}
+S.instruction = loadSavedInstruction();
+S.instrSaved = true;
 
 const NAV = [
   {g:'발굴', items:[{k:'list',label:'과제 제안',icon:'≡'},{k:'custom',label:'커스텀 생성',icon:'+'}]},
@@ -1543,7 +1558,8 @@ function viewList(){
         ${OCS.map(o=>`<option value="${o.code}" ${o.code===S.oc?'selected':''}>${o.name}</option>`).join('')}
       </select>
       <span class="ctl-sep"></span>
-      <input class="inp" id="q" placeholder="과제명 · 벤치마크 회사 검색" value="${esc(S.q)}" style="width:200px">
+      <input class="inp" id="q" placeholder="과제명 · 벤치마크 회사 검색" value="${esc(S.q)}" style="width:200px"
+        autocomplete="off" data-lpignore="true" data-1p-ignore>
       <div style="margin-left:auto" class="row-f">
         <button class="btn" id="regen" ${S.regenerating?'disabled':''}>${S.regenerating?'생성 중…':'↻ 재생성'}</button>
         <button class="btn" id="csv">CSV 내려받기</button>
@@ -1721,7 +1737,10 @@ function viewCustom(){
         <div class="row-f" style="gap:7px"><input class="inp" id="cgFree" placeholder="적용 방향을 직접 작성">
         <button class="btn sm" id="cgFreeGo">확인</button></div></div></div>`;
   } else {
+    const defName = `${esc(c.lever)} 개선 — ${esc(OC[c.oc].name)} 커스텀 과제`;
     panel = `<div class="stack" style="gap:14px"><div class="fld-l">아래 내용으로 과제를 만듭니다</div>
+      <div class="fld"><label class="fld-l">과제명</label>
+        <input class="inp" id="cgName" placeholder="${defName}" value="${esc(c.name||'')}"></div>
       <div class="hint"><span class="dot"></span>
         <span>기대효과 금액은 시스템이 산정하지 않습니다. 산출식과 필요 기준값 항목만 생성되고, 값은 상세 화면에서 현업이 입력합니다.</span></div>
       <button class="btn pri" id="cgGo" style="align-self:flex-start">과제 생성</button></div>`;
@@ -2189,7 +2208,8 @@ function viewTrend(){
 
       <div class="card">
         <div class="ctlbar" style="border-radius:14px 14px 0 0">
-          <input class="inp" id="trQ" style="width:230px" placeholder="제목·요약·출처 검색" value="${esc(S.trQ||'')}">
+          <input class="inp" id="trQ" style="width:230px" placeholder="제목·요약·출처 검색" value="${esc(S.trQ||'')}"
+            autocomplete="off" data-lpignore="true" data-1p-ignore>
           <select class="sel" id="trKind">
             ${TR_KINDS.map(k=>`<option ${S.trKind===k?'selected':''}>${esc(k==='전체'?'자료 종류 전체':k)}</option>`).join('')}
           </select>
@@ -2409,6 +2429,20 @@ function render(){
   document.getElementById('main').innerHTML = (VIEWS[S.screen]||viewList)();
 }
 
+// 앱 내 화면 전환을 브라우저 히스토리에 쌓아, 뒤로가기가 로그인 화면이 아니라
+// 직전에 보던 화면(예: 커스텀 생성 → 과제 제안)으로 돌아가게 한다.
+function navigate(screen, extra){
+  S.screen = screen;
+  if (extra) Object.assign(S, extra);
+  history.pushState({screen:S.screen, curId:S.curId}, '', '#'+screen);
+  render();
+}
+window.addEventListener('popstate', e=>{
+  const st = e.state || {screen:'list', curId:S.curId};
+  S.screen = st.screen; S.curId = st.curId;
+  render();
+});
+
 /* ══════════════ 동작 ══════════════ */
 function download(name,text,mime){
   const blob=new Blob(['\uFEFF'+text],{type:(mime||'text/plain')+';charset=utf-8'});
@@ -2452,8 +2486,8 @@ document.addEventListener('click', e=>{
   if(S.calOpen && !el){ S.calOpen=false; return render(); }
   if(!el) return;
   const d=el.dataset;
-  if(d.nav){e.preventDefault(); S.screen=d.nav; return render();}
-  if(d.open){S.curId=Number(d.open); S.screen='detail'; return render();}
+  if(d.nav){e.preventDefault(); return navigate(d.nav);}
+  if(d.open){return navigate('detail', {curId:Number(d.open)});}
   if(d.ver){S.ver=(S.ver===d.ver?'전체':d.ver); S.page=1; S.calOpen=false; return render();}
   if(d.monav){ const len=months().length;
     S.moIdx=Math.min(Math.max(0,S.moIdx+Number(d.monav)),len-1); return render(); }
@@ -2467,8 +2501,8 @@ document.addEventListener('click', e=>{
     const on=rs.length>0 && rs.every(t=>S.sel[t.id]);
     if(on) rs.forEach(t=>delete S.sel[t.id]); else rs.forEach(t=>S.sel[t.id]=true);
     return render(); }
-  if(d.goto){ S.screen=d.goto; return render(); }
-  if(d.cite){ S.screen='list'; S.q=EV[d.cite].src; S.oc='전체'; S.page=1; return render(); }
+  if(d.goto){ return navigate(d.goto); }
+  if(d.cite){ S.q=EV[d.cite].src; S.oc='전체'; S.page=1; return navigate('list'); }
   if(d.cnav){
     const total=VERSIONS.length;
     S.cOff = Math.min(Math.max(0, S.cOff + Number(d.cnav)*3), Math.max(0,total-CHART_N));
@@ -2548,8 +2582,15 @@ document.addEventListener('click', e=>{
       return render();
     case 'regen': return regenerate();
     case 'csv': return exportCsv();
-    case 'cgReset': S.cg={step:0,oc:null,ev:null,lever:null,plan:null,done:false}; return render();
-    case 'cgGo': S.cg.done=true; return render();
+    case 'cgReset': S.cg={step:0,oc:null,ev:null,lever:null,plan:null,name:null,done:false}; return render();
+    case 'cgGo':{
+      const c=S.cg;
+      const nameV=(document.getElementById('cgName')||{}).value;
+      const name=(nameV&&nameV.trim()) || `${c.lever} 개선 — ${OC[c.oc].name} 커스텀 과제`;
+      const sum=`${EV[c.ev].src} 사례 참고 — ${c.lever} 레버 커스텀 과제`;
+      TASKS.unshift({id:nextId++, ver:VERSIONS[0].id, oc:c.oc, lever:c.lever, ev:[c.ev], name, sum, plan:c.plan});
+      c.name=name; c.done=true; return render();
+    }
     case 'cgFreeGo':{const v=(document.getElementById('cgFree')||{}).value;
       if(v&&v.trim()){S.cg.plan=v.trim(); S.cg.step=4; render();} return;}
     case 'exEdit':
@@ -2560,8 +2601,8 @@ document.addEventListener('click', e=>{
     case 'exCopy':{const t=S.ex.editing?document.getElementById('exText').value:(S.ex.text!==null?S.ex.text:buildPrompt());
       try{const r=navigator.clipboard.writeText(t); if(r&&r.catch) r.catch(()=>{});}catch(err){}
       S.ex.copied=true; render(); setTimeout(()=>{S.ex.copied=false; render();},1600); return;}
-    case 'instrSave': S.instruction=document.getElementById('instr').value; S.instrSaved=true; return render();
-    case 'instrReset': S.instruction=DEFAULT_INSTRUCTION; S.instrSaved=true; return render();
+    case 'instrSave': S.instruction=document.getElementById('instr').value; persistSavedInstruction(S.instruction); S.instrSaved=true; return render();
+    case 'instrReset': S.instruction=DEFAULT_INSTRUCTION; persistSavedInstruction(S.instruction); S.instrSaved=true; return render();
     case 'rcAdd':{const v=(document.getElementById('rcInput')||{}).value;
       if(v&&v.trim()){S.recipients.push(v.trim()); render();} return;}
     case 'admAdd':{const v=(document.getElementById('admIn')||{}).value;
@@ -2606,6 +2647,10 @@ document.addEventListener('input', e=>{
   if(el.id==='instr'){S.instruction=el.value; S.instrSaved=false;
     const n=document.querySelector('.card-h .note'); if(n) n.textContent='저장되지 않은 변경'; return;}
   if(el.id==='exResearch'){S.ex.research=el.value; S.ex.text=null; return;}
+  // 프롬프트 편집 textarea — "편집 완료"를 누르기 전에 다른 화면으로 이동해도
+  // 입력한 내용이 사라지지 않도록(같은 세션 안에서는) 타이핑마다 바로 상태에 반영한다.
+  // 새로고침 시에는 저장 개념이 없는 필드라 자동으로 기본값으로 되돌아간다.
+  if(el.id==='exText'){S.ex.text=el.value; return;}
 });
 
 document.addEventListener('keydown', e=>{
@@ -2615,6 +2660,7 @@ document.addEventListener('keydown', e=>{
   if(e.target.id==='cgFree') document.getElementById('cgFreeGo').click();
 });
 
+history.replaceState({screen:S.screen, curId:S.curId}, '', '#'+S.screen);
 render();
 
 /* ===== 테마 토글 ===== */
