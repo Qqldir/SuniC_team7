@@ -27,6 +27,12 @@ CORS_ORIGINS = [
     if o.strip()
 ]
 
+# ── 인증 ──
+# 로그인 토큰 서명용 비밀키. 운영에서는 반드시 OI_AUTH_SECRET 환경변수로 설정.
+AUTH_SECRET = os.getenv("OI_AUTH_SECRET", "dev-insecure-secret-change-me")
+# 토큰 유효기간(시간)
+AUTH_TTL_HOURS = int(os.getenv("OI_AUTH_TTL_HOURS", str(24 * 7)))
+
 # ── 지식 파밍(크롤러) ──
 # OpenDART API 키 (https://opendart.fss.or.kr 발급). 없으면 DART 소스는 건너뜁니다.
 DART_API_KEY = os.getenv("DART_API_KEY", "")
