@@ -9,7 +9,13 @@ load_dotenv()
 BASE_DIR = Path(__file__).resolve().parent.parent  # backend/
 
 ANTHROPIC_API_KEY = os.getenv("ANTHROPIC_API_KEY", "")
+OPENAI_API_KEY = os.getenv("OPENAI_API_KEY", "")
 OI_MODEL = os.getenv("OI_MODEL", "claude-sonnet-4-6")
+
+# LLM 호출 경로 — claude-cli(기본, API 키 불필요) | anthropic | openai. app.llm_client 참고.
+OI_LLM_PROVIDER = os.getenv("OI_LLM_PROVIDER", "claude-cli")
+OI_LLM_BASE_URL = os.getenv("OI_LLM_BASE_URL", "")
+OI_LLM_TIMEOUT = int(os.getenv("OI_LLM_TIMEOUT", "60"))
 
 # DB 경로: 상대경로면 backend/ 기준으로 해석
 _db = os.getenv("OI_DB_PATH", "oi_scout.db")
