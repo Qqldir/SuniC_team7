@@ -22,6 +22,15 @@ CREATE TABLE IF NOT EXISTS source_kind (
     css_class TEXT NOT NULL
 );
 
+-- ─────────────── 인증 (사용자 계정) ───────────────
+-- 관리자가 seed 로 등록. email(=Outlook) 이 로그인 ID, 초기 비밀번호는 해시로 저장.
+CREATE TABLE IF NOT EXISTS app_user (
+    email         TEXT PRIMARY KEY,       -- Outlook 이메일 = 로그인 ID (소문자 정규화)
+    password_hash TEXT NOT NULL,          -- pbkdf2_sha256$iter$salt$hash
+    is_active     INTEGER NOT NULL DEFAULT 1,
+    created_at    TEXT NOT NULL
+);
+
 -- ─────────────── 지식 파밍 결과 (크롤링·PDF·LLM·엔티티) ───────────────
 CREATE TABLE IF NOT EXISTS feed_item (
     id           TEXT PRIMARY KEY,

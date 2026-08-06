@@ -3,7 +3,7 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
 from app.config import CORS_ORIGINS
-from app.api import feed, tasks, discovery, cases, evaluation, proposal
+from app.api import feed, tasks, discovery, cases, evaluation, proposal, auth
 
 app = FastAPI(title="O/I Scout API", version="0.1.0")
 
@@ -20,6 +20,7 @@ app.include_router(discovery.router)
 app.include_router(cases.router)
 app.include_router(evaluation.router)
 app.include_router(proposal.router)
+app.include_router(auth.router)
 
 
 @app.get("/api/health")
