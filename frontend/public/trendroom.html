@@ -8,6 +8,9 @@
 <style>
 /* ===== 디자인 시스템 토큰 (유지) ===== */
 :root{
+  --tmb1:#f2f6fe; --tmb2:#e2ecfd; --tmb3:#cbddfb; --tmb4:#abc7f8; --tmb5:#87acf3;
+  --tmt1:#eefaf8; --tmt2:#d7f1ed; --tmt3:#b2e4dc; --tmt4:#87d2c6; --tmt5:#59bdae;
+  --tmp1:#f5f2fe; --tmp2:#e8e1fd; --tmp3:#d5c6fb; --tmp4:#bda7f8; --tmp5:#a184f3;
   --bg:#ebf1f3; --panel:#fff; --panel-sub:#fafbfc;
   --brand:#2f4a57; --brand-hover:#1e3138; --brand-soft:#e9eff2; --brand-tint:#f4f8f9;
   --ink:#101c21; --t1:#3c4149; --t2:#4b5160; --t3:#6b7280; --t4:#9096a2; --t5:#b4b9c3;
@@ -22,6 +25,9 @@
 }
 /* ===== 다크 테마 (랜딩 페이지 색상표 기반: 딥 네이비/퍼플 + 퍼플·블루 액센트) ===== */
 html[data-theme="dark"]{
+  --tmb1:#181a2c; --tmb2:#1c2440; --tmb3:#233158; --tmb4:#2c4079; --tmb5:#37519b;
+  --tmt1:#151f22; --tmt2:#16302f; --tmt3:#1a4541; --tmt4:#1e5c55; --tmt5:#24756b;
+  --tmp1:#1c1830; --tmp2:#241d47; --tmp3:#2f2465; --tmp4:#3d2d87; --tmp5:#4d38ab;
   --bg:#0a0912; --panel:#14121f; --panel-sub:#1a1730;
   --brand:#a855f7; --brand-hover:#9333ea; --brand-soft:#241a3f; --brand-tint:#1d1733;
   --ink:#edeaf7; --t1:#d6d2e8; --t2:#b3aecf; --t3:#8f8ab0; --t4:#6f6a8e; --t5:#544f6e;
@@ -543,6 +549,77 @@ textarea{width:100%;border:1px solid var(--line-mid);border-radius:10px;padding:
 .thtag{font-size:10.5px;font-weight:600;border-radius:5px;padding:2px 7px}
 .empty2{padding:44px 17px;display:flex;flex-direction:column;gap:6px;align-items:center}
 @media (max-width:1560px){ .tr2{grid-template-columns:1fr} .tr2-r{position:static;order:-1} }
+
+/* ===== 트렌드룸 신규 (트리맵·키워드·브리핑) ===== */
+.lg-i{display:flex;align-items:center;gap:5px;font-size:10.5px;color:var(--t3)}
+.lg-d{width:8px;height:8px;border-radius:2px;flex:none}
+.tr-top{display:grid;grid-template-columns:minmax(0,3fr) minmax(0,1fr);gap:16px;align-items:stretch}
+.tr-card{display:flex;flex-direction:column;min-width:0}
+
+/* OC 트리맵 */
+.tmwrap{padding:12px 15px 15px;flex:1;display:flex;min-height:0}
+.tm{position:relative;width:100%;flex:1;min-height:250px;border-radius:9px;overflow:hidden;
+  background:var(--line-faint)}
+.tmc-n{color:var(--t2)}
+.tmg{position:absolute;pointer-events:none;border:2px solid var(--panel);border-radius:4px;z-index:2}
+.tmc{position:absolute;border:1px solid var(--panel);border-radius:4px;cursor:pointer;padding:9px 9px 8px;
+  display:flex;flex-direction:column;align-items:flex-start;justify-content:center;gap:1px;
+  overflow:hidden;color:var(--ink);text-align:left;transition:filter .12s}
+.tm:hover .tmc{opacity:.5}
+.tmc:hover{opacity:1 !important;z-index:5;box-shadow:0 2px 10px rgba(16,24,40,.12)}
+.tmc.sel{outline:2px solid var(--ink);outline-offset:-2px;z-index:4;opacity:1 !important}
+.tmc-n{font-weight:600;line-height:1.2;opacity:.82;white-space:nowrap;overflow:hidden;
+  text-overflow:ellipsis;max-width:100%}
+.tmc-v{font-weight:700;line-height:1;font-variant-numeric:tabular-nums}
+.tmc-k{font-size:10px;opacity:.6;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:100%}
+
+/* 키워드 랭킹 */
+.kwb{padding:7px 13px 11px;display:flex;flex-direction:column;gap:1px;flex:1;justify-content:center}
+.kwr{display:grid;grid-template-columns:minmax(0,1fr) 54px 20px 26px;align-items:center;gap:7px;
+  border:0;background:none;cursor:pointer;padding:5px 6px;border-radius:6px;text-align:left;width:100%}
+.kwr:hover{background:var(--panel-sub)}
+.kwr.on{background:var(--brand-tint)}
+.kwr.on .kwr-n{color:var(--brand);font-weight:700}
+.kwr-n{font-size:11.5px;color:var(--t1);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.kwr-t{height:6px;background:var(--line-soft);border-radius:4px;overflow:hidden;display:block}
+.kwr-t i{display:block;height:100%;background:#0f62fe;border-radius:4px}
+.kwr-v{font-size:11.5px;font-weight:700;text-align:right;font-variant-numeric:tabular-nums}
+.kwr-d{font-size:9.5px;font-weight:600;text-align:right;font-variant-numeric:tabular-nums}
+.kwr-d.up{color:#dc2626}
+.kwr-d.dn{color:#2563eb}
+.kwr-d.fl{color:var(--t5)}
+
+/* 데일리 브리핑 */
+.bf{display:flex;flex-direction:column;gap:0;border-top:1px solid var(--line-soft)}
+.bf-i{display:flex;gap:13px;padding:11px 0;border-bottom:1px solid var(--line-faint);align-items:flex-start}
+.bf-i:last-child{border-bottom:none}
+.bf-d{flex:none;width:38px;font-size:11px;font-weight:700;color:var(--t3);
+  font-variant-numeric:tabular-nums;padding-top:1px}
+.bf-m{flex:1;min-width:0;display:flex;flex-direction:column;gap:3px}
+.bf-t{font-size:12.5px;line-height:1.45;color:var(--ink)}
+.bf-t b{font-weight:700}
+.bf-s{font-size:11.5px;line-height:1.65;color:var(--t3)}
+.bf-a{flex:none;display:flex;flex-direction:column;align-items:flex-end;gap:5px;width:96px}
+
+/* AI 요약 — 전체 폭 */
+.ai-b2{padding:15px 17px 16px;display:flex;flex-direction:column;gap:8px}
+.ai-hl2{font-size:13px;line-height:1.7;color:var(--t2);margin:0}
+@media (max-width:1245px){ .tr-top{grid-template-columns:1fr} }
+
+/* 목록 행 키워드 칩 */
+.kwline{display:flex;flex-wrap:wrap;gap:4px;margin-top:6px}
+.kwmini{font-size:10px;padding:2px 7px;border:1px solid var(--line-mid);border-radius:99px;
+  background:var(--panel);color:var(--t3);cursor:pointer;white-space:nowrap}
+.kwmini:hover{border-color:var(--brand);color:var(--brand)}
+.kwmini.on{background:var(--brand);border-color:var(--brand);color:#fff;font-weight:600}
+
+/* 적용 중 필터 표시 */
+.fbar{display:flex;align-items:center;gap:7px;padding:9px 15px;background:var(--panel-sub);
+  border-bottom:1px solid var(--line-soft);flex-wrap:wrap}
+.fpill{display:inline-flex;align-items:center;gap:5px;font-size:11px;font-weight:600;
+  color:var(--brand);background:var(--brand-soft);border-radius:99px;padding:3px 6px 3px 10px}
+.fpill button{border:0;background:none;color:var(--brand);cursor:pointer;font-size:11px;
+  padding:0 2px;line-height:1}
 
 
 /* ═══════ 과제 평가·피드백 ═══════ */
@@ -1160,6 +1237,7 @@ let S = {
   trPeriod:'1m',     // 트렌드룸 기간 프리셋
   trFrom:'2026-06-30', trTo:'2026-07-30',
   trTheme:null, trQ:'', trKind:'전체', trSort:'date',
+  trKw:null, trOc:null, trSrc:'전체',
   trNew:false, trUnl:false, trMethod:false, trGenAt:'오늘 08:12',
   calOpen:false,
   calYM:'2026-07',   // 캘린더 표시 월
@@ -2056,7 +2134,151 @@ const EV_BIZ_FB = {
   e6:'에너지·화학', e7:'배터리·소재', e8:'에너지·화학', e9:'에너지·화학', e10:'LNG·전력',
   e11:'에너지·화학', e12:'에너지·화학', e13:'에너지·화학', e14:'에너지·화학',
 };
-const EV_NEW = {e1:1, e3:1, e4:1, e11:1};
+const EV_NEW = {e1:1, e3:1, e4:1, e6:1, e8:1, e11:1};
+const TM_HUE = {'에너지·화학':'b','배터리·소재':'t','LNG·전력':'p'};
+/* 자료별 브리핑 — 무슨 일이 있었고 우리에게 무슨 의미인지 */
+const EV_BRIEF = {
+  e1:'안전·품질 검증은 그대로 두고 공정 순서만 병렬로 바꿔 공기를 줄였습니다. 정비 계획 재설계의 직접 근거입니다.',
+  e2:'절감분 상당액이 유틸리티 원단위 개선에서 나왔다고 답변했습니다. 배럴당 운영비 목표에 아직 여력이 남아 있다는 언급도 있었습니다.',
+  e3:'구매를 지역 단위에서 글로벌 단위로 통합하고 규격 표준화로 관리 품목 수까지 줄였습니다. 공통 MRO에 바로 대입할 수 있는 방식입니다.',
+  e4:'샘플링에서 전수검사로 전환해 불량 유출과 검사 인원을 동시에 줄였습니다. 상위 공정에 먼저 적용하고 검출률을 비교 검증하는 순서를 밟았습니다.',
+  e5:'고장 이력과 정비비를 매칭해 과잉·과소 구간을 나눠 주기를 재설정했습니다. 연장 구간에는 상태 감시 계측을 함께 붙였습니다.',
+  e6:'주요 항로 운임 지수 하락이 이어지며 만료 임박 계약의 재협상 여지가 커졌습니다. 다만 반등 가능성 때문에 계약 기간 분산을 권합니다.',
+  e7:'저가동 라인을 통합해 단위 고정비를 낮췄습니다. 납기 대응력 저하는 안전재고 기준을 따로 조정해 보완했습니다.',
+  e8:'중복 지원 기능을 통합하고 공통 서비스 계약을 재검토했습니다. 절감 규모보다 구조 단순화에 초점을 뒀다고 밝혔습니다.',
+  e9:'단지 내 스팀·질소 유휴 용량을 인접사와 상호 활용하는 안이 의제로 올랐습니다. 계약·정산 구조 합의가 선행 조건입니다.',
+  e10:'정비 계획을 선적 스케줄과 연동해 비가동 시간을 줄였습니다. 물량 변동이 제한적인 장기계약 구조에서 운영비가 수익성의 핵심 변수라고 설명합니다.',
+  e11:'수요 부진으로 가동률을 조정하며 단위 원가 경쟁이 심화될 것으로 봤습니다. 조정 기간에 정기보수를 앞당겨 비가동을 겹치는 방안을 병행합니다.',
+  e12:'수요 변동성에 따라 안전재고를 차등 적용하고 장기체화 재고를 분리 관리했습니다. 금리 상승 구간에서 재고 감축의 재무 효과가 커졌다는 분석입니다.',
+  e13:'운영비를 통제 가능·불가 항목으로 나누고 통제 가능 항목에만 목표를 부여했습니다. 유가 하락 구간에서도 단위 생산비를 방어한 요인으로 제시됩니다.',
+  e14:'전력비 부담에 대응해 자가발전·유틸리티 설비 투자를 결정했습니다. 투자 회수 기간과 요금 전망을 함께 검토했다고 기재했습니다.',
+};
+/* 분야별 브리핑 리드 문장 */
+const BRIEF_LEAD = {
+  '전체':'비용 항목을 개별로 깎기보다 운영 순서와 계약 구조를 다시 짜는 쪽으로 흐름이 모이고 있습니다.',
+  '에너지·화학':'정비 일정과 유틸리티 운영을 재배치해 고정비를 흡수하려는 움직임이 이어지고 있습니다.',
+  '배터리·소재':'검사 자동화와 라인 통합으로 수율과 고정비를 동시에 건드리는 접근이 확산되고 있습니다.',
+  'LNG·전력':'터미널 운영비를 스케줄 연동으로 압축하는 방식이 수익성 관리의 축으로 제시되고 있습니다.',
+};
+/* 자료별 추출 키워드 — 형태소 분석 후 빈도·중요도 가중 (빅카인즈 방식 참고) */
+const EV_KW = {
+  e1:['정기보수','공기 단축','고정비','원가 절감'],
+  e2:['오펙스 절감','유틸리티','원단위','원가 절감'],
+  e3:['원가 절감','통합 조달','MRO','물류비'],
+  e4:['수율','전수검사','자동화','원가 절감'],
+  e5:['정비 주기','고장 이력','상태 감시','비계획 정지'],
+  e6:['해상운임','장기계약','재협상','물류비'],
+  e7:['라인 통합','가동률','분리막','안전재고'],
+  e8:['간접비','기능 통합','원가 절감','유휴 자산'],
+  e9:['공동활용','유틸리티','콤비나트','고정비'],
+  e10:['터미널 운영비','정비 계획','비가동','LNG'],
+  e11:['가동 조정','수요 부진','고정비','정기보수'],
+  e12:['운전자본','재고 회전','안전재고','조달금리'],
+  e13:['생산 단가','운영비','통제 가능','E&P'],
+  e14:['자가발전','전력비','에너지 자립','설비 투자'],
+};
+/* 자료 → 관련 OC (과제 인용 + 사업 특성 기반) */
+const EV_OC = {
+  e1:['SKGC','SKE'], e2:['SKE','SKIPC'], e3:['SKGC','SKE','SKO'], e4:['SKO','SKIET'],
+  e5:['SKE','SKIPC'], e6:['SKTI','SKEN'], e7:['SKIET','SKO'], e8:['SKEN','SKTI'],
+  e9:['SKIPC','SKGC'], e10:['SKES'], e11:['SKGC','SKIPC'], e12:['SKGC','SKO'],
+  e13:['SKEO'], e14:['SKE','SKES'],
+};
+/* 어제 수집분 대비 언급 증감 (데모 값) */
+const KW_TREND = {
+  '원가 절감':+3,'정기보수':+2,'고정비':0,'물류비':-1,
+  '공기 단축':+1,'통합 조달':0,'MRO':+1,'수율':0,'전수검사':+1,'자동화':+1,
+  '해상운임':-1,'장기계약':0,'재협상':+1,'간접비':-1,'기능 통합':+1,
+  '유휴 자산':+1,'가동 조정':+1,'수요 부진':+1,
+};
+/* OC별 수집 현황 — 히트맵 집계 */
+function ocMatrix(scope){
+  const m = {}; OCS.forEach(o => m[o.code] = {n:0, kws:{}, srcs:new Set()});
+  scope.forEach(k => {
+    (EV_OC[k]||[]).forEach(c => {
+      if(!m[c]) return;
+      if(S.trBiz!=='전체' && OC[c].biz!==S.trBiz) return;
+      m[c].n++;
+      (EV_KW[k]||[]).forEach(w => { m[c].kws[w] = (m[c].kws[w]||0)+1; });
+      m[c].srcs.add(EV[k].src);
+    });
+  });
+  const max = Math.max(1, ...OCS.map(o=>m[o.code].n));
+  return {m, max};
+}
+const hexA = (hex, a) => {
+  const n = parseInt(hex.slice(1), 16);
+  return `rgba(${(n>>16)&255},${(n>>8)&255},${n&255},${a.toFixed(2)})`;
+};
+/* 스쿼리파이드 트리맵 — 값에 비례해 사각형 배치 (Finviz 방식) */
+function squarify(items, X, Y, W, H){
+  const list = items.filter(i=>i.v>0).sort((a,b)=>b.v-a.v);
+  if(!list.length) return [];
+  const total = list.reduce((s,i)=>s+i.v,0);
+  const scale = (W*H)/total;
+  const q = list.map(i=>({...i, a:i.v*scale}));
+  const out = [];
+  let x=X, y=Y, w=W, h=H, row=[], i=0;
+
+  const worst = (r, len) => {
+    if(!r.length) return Infinity;
+    const s = r.reduce((a,b)=>a+b.a,0);
+    const mx = Math.max(...r.map(z=>z.a)), mn = Math.min(...r.map(z=>z.a));
+    return Math.max((len*len*mx)/(s*s), (s*s)/(len*len*mn));
+  };
+  const flush = () => {
+    const s = row.reduce((a,b)=>a+b.a,0);
+    if(w >= h){
+      const rw = s/h; let oy = y;
+      row.forEach(r=>{ const rh=r.a/rw; out.push({...r, x, y:oy, w:rw, h:rh}); oy+=rh; });
+      x += rw; w -= rw;
+    } else {
+      const rh = s/w; let ox = x;
+      row.forEach(r=>{ const rw2=r.a/rh; out.push({...r, x:ox, y, w:rw2, h:rh}); ox+=rw2; });
+      y += rh; h -= rh;
+    }
+    row = [];
+  };
+  while(i < q.length){
+    const len = Math.min(w,h);
+    if(!row.length || worst(row,len) >= worst(row.concat([q[i]]),len)){ row.push(q[i]); i++; }
+    else flush();
+  }
+  if(row.length) flush();
+  return out;
+}
+/* OC 트리맵 — 사업부문 2단 배치 */
+function ocTreemap(HM){
+  const W = 1000, H = 330;
+  const bizList = ['에너지·화학','배터리·소재','LNG·전력']
+    .filter(bz => S.trBiz==='전체' || bz===S.trBiz)
+    .map(bz=>({
+    k:bz, v:OCS.filter(o=>o.biz===bz).reduce((s,o)=>s+HM.m[o.code].n,0)
+  }));
+  const outer = squarify(bizList, 0, 0, W, H);
+  const cells = [];
+  outer.forEach(g=>{
+    const list = OCS.filter(o=>o.biz===g.k).map(o=>({k:o.code, v:HM.m[o.code].n}));
+    squarify(list, g.x, g.y, g.w, g.h).forEach(c=>cells.push({...c, biz:g.k}));
+  });
+  return {cells, groups:outer, W, H};
+}
+
+/* 기간 기준 키워드 집계 — AI 요약 문장용 */
+function kwScope(scope){
+  const c = {};
+  scope.forEach(k => (EV_KW[k]||[]).forEach(w => { c[w]=(c[w]||0)+1; }));
+  return Object.keys(c).map(w=>({w, n:c[w]})).sort((a,b)=> b.n-a.n || a.w.localeCompare(b.w));
+}
+/* 오늘 수집분 키워드 빈도 — 기간 필터와 무관하게 당일 기준 */
+function kwToday(){
+  const todays = Object.keys(EV).filter(k=>EV_NEW[k]);
+  const c = {};
+  todays.forEach(k => (EV_KW[k]||[]).forEach(w => { c[w]=(c[w]||0)+1; }));
+  const rows = Object.keys(c).map(w=>({w, n:c[w], d:KW_TREND[w]||0}))
+    .sort((a,b)=> b.n-a.n || a.w.localeCompare(b.w));
+  return {rows, max: rows.length?rows[0].n:1, n: todays.length};
+}
 
 const KIND_MAP = {
   '결산설명회':'실적발표', 'Earnings call':'실적발표',
@@ -2109,45 +2331,28 @@ function viewTrend(){
   const scopeSpan = S.trPeriod==='all' ? `수집 전 기간 · ~${trDot(t)}` : `${trDot(f)} – ${trDot(t)}`;
   const bizLabel = S.trBiz==='전체' ? '전 분야' : S.trBiz;
 
-  /* ── 테마 집계 ── */
-  const cnt={}; scope.forEach(k=>{ const th=EV_TH[k]; cnt[th]=(cnt[th]||0)+1; });
-  const ranked = Object.keys(cnt).sort((a,b)=> cnt[b]-cnt[a] || a.localeCompare(b));
-  const maxC = ranked.length ? cnt[ranked[0]] : 1;
+  const HM = ocMatrix(scope);
+  const TM = ocTreemap(HM);
+  const KW = kwToday();
+  const srcList = ['전체', ...[...new Set(Object.keys(EV).map(k=>EV[k].src))].sort()];
 
-  /* ── 요약 헤드라인 ── */
-  let headline = '선택한 기간에 수집된 자료가 없습니다. 기간을 넓혀 보세요.';
-  if (ranked.length===1)
-    headline = `${bizLabel} 자료 ${scope.length}건은 모두 ${ranked[0]} 축에 모였습니다.`;
-  else if (ranked.length>1)
-    headline = `${bizLabel} 자료 ${scope.length}건이 ${ranked.length}개 테마에 걸쳐 있고, `
-      + `${ranked[0]}(${cnt[ranked[0]]}건)과 ${ranked[1]}(${cnt[ranked[1]]}건)에 언급이 집중됐습니다. `
-      + `공통 논조는 비용 항목을 개별로 깎기보다 운영 순서·계약 구조를 다시 짜는 쪽입니다.`;
-
-  const bullets = ranked.slice(0,3).map(th=>{
-    const T=TH2[th];
-    const srcs = scope.filter(k=>EV_TH[k]===th).slice(0,3).map(k=>EV[k].src).join(' · ');
-    return `<div class="ai-i">
-      <span style="background:${T.c}"></span>
-      <div class="ai-i-b">
-        <div class="row-f" style="gap:8px">
-          <button class="ai-tag" style="background:${T.c}" data-tr="theme:${esc(th)}">${esc(th)}</button>
-          <span style="font-size:11px;font-weight:600;color:var(--t3)" class="num">자료 ${cnt[th]}건</span>
-          <span style="font-size:11px;color:var(--t5)">${esc(srcs)}</span>
-        </div>
-        <div class="ai-h">${esc(T.head)}</div>
-        <div class="ai-p">${esc(T.body)}</div>
-      </div></div>`;
-  }).join('');
+  /* ── 데일리 브리핑 — 최근 주요 소식 ── */
+  const lead = BRIEF_LEAD[S.trBiz] || BRIEF_LEAD['전체'];
+  const briefRows = scope.slice()
+    .sort((a,b)=> (trPd(EV[b].date)-trPd(EV[a].date)) || (evRefs(b).length-evRefs(a).length))
+    .slice(0,3);
 
   /* ── 목록 필터 ── */
   const q = (S.trQ||'').trim().toLowerCase();
   let rows = scope.filter(k=>{
-    const e=EV[k];
-    if (S.trTheme && EV_TH[k]!==S.trTheme) return false;
+    const e = EV[k];
+    if (S.trKw && !(EV_KW[k]||[]).includes(S.trKw)) return false;
+    if (S.trOc && !(EV_OC[k]||[]).includes(S.trOc)) return false;
+    if (S.trSrc!=='전체' && e.src!==S.trSrc) return false;
     if (S.trKind!=='전체' && evKind(k)!==S.trKind) return false;
     if (S.trNew && !EV_NEW[k]) return false;
     if (S.trUnl && evRefs(k).length>0) return false;
-    if (q && !(e.title+e.sum+e.src).toLowerCase().includes(q)) return false;
+    if (q && !(e.title+e.sum+e.src+(EV_KW[k]||[]).join(' ')).toLowerCase().includes(q)) return false;
     return true;
   });
   rows.sort((a,b)=> S.trSort==='cite'
@@ -2168,31 +2373,32 @@ function viewTrend(){
   });
 
   const rowHtml = k=>{
-      const e=EV[k], th=EV_TH[k], T=TH2[th], bz=evBiz(k)[0], n=evRefs(k).length;
-      return `<div class="tr2-row">
-        <div class="tr2-d">
-          <span class="tr2-dd">${esc(trMD(trPd(e.date)))}</span>
-          ${EV_NEW[k]?'<span class="nb">NEW</span>':''}
+    const e=EV[k], bz=evBiz(k)[0], n=evRefs(k).length;
+    return `<div class="tr2-row">
+      <div class="tr2-d">
+        <span class="tr2-dd">${esc(trMD(trPd(e.date)))}</span>
+        ${EV_NEW[k]?'<span class="nb">NEW</span>':''}
+      </div>
+      <div class="tr2-m">
+        <div class="row-f" style="gap:7px">
+          <span class="bizdot" style="background:${BIZ_C[bz]||'var(--c2)'}"></span>
+          <span style="font-size:11.5px;font-weight:700">${esc(e.src)}</span>
+          <span style="font-size:11px;color:var(--t5)">·</span>
+          <span style="font-size:11px;color:var(--t3)">${esc(evKind(k))}</span>
+          ${(EV_OC[k]||[]).slice(0,2).map(c=>`<span class="tag oc">${esc(OC[c].name)}</span>`).join('')}
         </div>
-        <div class="tr2-m">
-          <div class="row-f" style="gap:7px">
-            <span class="bizdot" style="background:${BIZ_C[bz]||'var(--c2)'}"></span>
-            <span style="font-size:11.5px;font-weight:700">${esc(e.src)}</span>
-            <span style="font-size:11px;color:var(--t5)">·</span>
-            <span style="font-size:11px;color:var(--t3)">${esc(evKind(k))}</span>
-            <span class="thtag" style="background:${T.bg};color:${T.c}">${esc(th)}</span>
-          </div>
-          <div class="tr2-t">${esc(e.title)}</div>
-          <div class="tr2-s">${esc(e.sum)}</div>
-        </div>
-        <div class="tr2-a">
-          <button class="citep" style="background:${n?'var(--brand-soft)':'#fdf4e7'};color:${n?'var(--brand)':'#a06a08'}"
-            ${n?`data-cite="${k}"`:''}>${n?`인용 과제 ${n}건`:'미연결'}</button>
-          <a class="tr-lk" href="${esc(e.url)}" target="_blank" rel="noopener">원문 ↗</a>
-        </div>
-      </div>`;
+        <div class="tr2-t">${esc(e.title)}</div>
+        <div class="tr2-s">${esc(e.sum)}</div>
+        <div class="kwline">${(EV_KW[k]||[]).map(w=>
+          `<button class="kwmini ${S.trKw===w?'on':''}" data-tr="kw:${esc(w)}">${esc(w)}</button>`).join('')}</div>
+      </div>
+      <div class="tr2-a">
+        <button class="citep" style="background:${n?'var(--brand-soft)':'#fdf4e7'};color:${n?'var(--brand)':'#a06a08'}"
+          ${n?`data-cite="${k}"`:''}>${n?`인용 과제 ${n}건`:'미연결'}</button>
+        <a class="tr-lk" href="${esc(e.url)}" target="_blank" rel="noopener">원문 ↗</a>
+      </div>
+    </div>`;
   };
-  /* 인용 많은 순 정렬에서는 주차 그룹을 접고 단일 목록으로 — 두 순서는 양립 불가 */
   const groupHtml = S.trSort==='cite'
     ? rows.map(rowHtml).join('')
     : groups.map(g=>`
@@ -2200,15 +2406,13 @@ function viewTrend(){
       <span class="g-s" style="margin-left:auto">${g.rows.length}건</span></div>
     ${g.rows.map(rowHtml).join('')}`).join('');
 
-  const newN = scope.filter(k=>EV_NEW[k]).length;
-  const unlN = scope.filter(k=>evRefs(k).length===0).length;
-  const hasF = !!(S.trTheme || q || S.trKind!=='전체' || S.trNew || S.trUnl);
+  const hasF = !!(S.trKw || S.trOc || q || S.trKind!=='전체' || S.trSrc!=='전체');
 
   return `
   <div class="page-h">
     <div class="stack" style="gap:5px">
       <h1>트렌드룸</h1>
-      <p class="lede">수집된 외부 자료를 기간·분야 단위로 요약해 산업 동향으로 보여줍니다. 여기 실린 자료들은 과제 생성의 근거로 사용됩니다.</p>
+      <p class="lede">수집된 외부 자료를 OC·키워드 단위로 정리해 산업 동향으로 보여줍니다. 여기 실린 자료들은 과제 생성의 근거로 사용됩니다.</p>
     </div>
     <div class="row-f">
       <span class="note">수집 ${Object.keys(EV).length}건 · 오늘 08:00 갱신</span>
@@ -2216,95 +2420,127 @@ function viewTrend(){
     </div>
   </div>
 
-  <div class="tr2">
-    <div class="tr2-l">
-
-      <div class="card">
-        <div class="card-h">
-          <h2 style="white-space:nowrap">상위 테마</h2>
-          <span class="note">선택한 기간 내 자료를 테마 축에 배정한 결과 · 클릭하면 아래 목록이 좁혀집니다</span>
-          <button class="btn sm" style="margin-left:auto" data-tr="method:x">테마 선정 기준 ${S.trMethod?'▴':'▾'}</button>
+  <div class="tr-top">
+    <div class="card tr-card">
+      <div class="card-h">
+        <h2 style="white-space:nowrap">OC별 수집 현황</h2>
+        <div style="margin-left:auto" class="row-f" style="gap:10px">
+          ${['에너지·화학','배터리·소재','LNG·전력'].filter(bz=>S.trBiz==='전체'||bz===S.trBiz).map(bz=>
+            `<span class="lg-i"><span class="lg-d" style="background:${BIZ_C[bz]}"></span>${esc(bz)}</span>`).join('')}
+          ${S.trOc?`<button class="btn sm" data-tr="oc:${S.trOc}">${esc(OC[S.trOc].name)} 해제</button>`:''}
         </div>
-        <div class="thg">
-          ${ranked.length? ranked.map(th=>{
-            const T=TH2[th], on=S.trTheme===th;
-            return `<button class="thc" data-tr="theme:${esc(th)}"
-              style="${on?`background:${T.bg};border-color:${T.c}`:''}">
-              <span class="thc-t">
-                <span class="thc-n" style="${on?`color:${T.c}`:''}">${esc(th)}</span>
-                <span class="thc-c" style="color:${T.c}">${cnt[th]}</span>
-              </span>
-              <span class="thc-bar"><i style="background:${T.c};width:${Math.round(cnt[th]/maxC*100)}%"></i></span>
+      </div>
+      <div class="tmwrap">
+        <div class="tm">
+          ${TM.groups.map(g=>`<div class="tmg" style="left:${(g.x/TM.W*100).toFixed(3)}%;top:${(g.y/TM.H*100).toFixed(3)}%;
+            width:${(g.w/TM.W*100).toFixed(3)}%;height:${(g.h/TM.H*100).toFixed(3)}%"></div>`).join('')}
+          ${TM.cells.map(c=>{
+            const o = OC[c.k], d = HM.m[c.k], on = S.trOc===c.k;
+            const gmax = Math.max(1, ...OCS.map(x=>HM.m[x.code].n));
+            const step = Math.max(1, Math.ceil(d.n/gmax*5));
+            const top = Object.keys(d.kws).sort((x,y)=>d.kws[y]-d.kws[x])[0] || '';
+            const wpc = c.w/TM.W*100, hpc = c.h/TM.H*100;
+            const big = wpc>14 && hpc>32, mid = wpc>9 && hpc>22;
+            return `<button class="tmc ${on?'sel':''}" data-tr="oc:${c.k}"
+              title="${esc(o.name)} · 자료 ${d.n}건${top?' · 최다 키워드 '+esc(top):''}"
+              style="left:${(c.x/TM.W*100).toFixed(3)}%;top:${(c.y/TM.H*100).toFixed(3)}%;
+                width:${wpc.toFixed(3)}%;height:${hpc.toFixed(3)}%;
+                background:var(--tm${TM_HUE[c.biz]}${step})">
+              <span class="tmc-n" style="${big?'font-size:12px':(mid?'font-size:11px':'font-size:10px')}">${esc(o.name.replace('SK',''))}</span>
+              <span class="tmc-v" style="${big?'font-size:23px':(mid?'font-size:17px':'font-size:13px')}">${d.n}</span>
+              ${big&&top?`<span class="tmc-k">${esc(top)}</span>`:''}
             </button>`;
-          }).join('') : '<span class="note">해당 기간에 자료가 없습니다.</span>'}
-        </div>
-        ${S.trMethod?`<div class="method">
-          <b>테마는 이렇게 정해집니다</b>
-          <p>① <strong>고정 축</strong> — 과제 레버 체계(정비·에너지·구매·수율·물류·간접비·운전자본)를 그대로 테마 축으로 씁니다. 축이 고정이라 기간을 바꿔도 증감 비교가 가능합니다.<br>
-          ② <strong>배정</strong> — LLM이 자료 1건을 축 1개에 배정하고, 배정 근거 문장을 함께 남깁니다.<br>
-          ③ <strong>미배정 처리</strong> — 배정 확신도가 낮은 자료는 축에 넣지 않고 '미배정 풀'로 보냅니다. 이때 <strong>"이 자료의 핵심 동인" 한 문장</strong>을 함께 생성해 둡니다.<br>
-          ④ <strong>신규 테마 승격</strong> — 미배정 자료끼리 그 동인 문장의 유사도로 묶고, <strong>같은 묶음이 3건 이상</strong>이 되면 LLM이 이름·정의·기존 축과의 경계를 제안해 관리자 승인 대기열에 올립니다. 승인 시 과거 자료까지 재배정합니다.<br>
-          ⑤ <strong>접힘</strong> — 어디에도 묶이지 않은 잔여 자료와 기간 내 1건뿐인 테마는 '기타'로 묶습니다.</p>
-        </div>`:''}
-      </div>
-
-      <div class="card">
-        <div class="ctlbar" style="border-radius:14px 14px 0 0">
-          <input class="inp" id="trQ" style="width:230px" placeholder="제목·요약·출처 검색" value="${esc(S.trQ||'')}">
-          <select class="sel" id="trKind">
-            ${TR_KINDS.map(k=>`<option ${S.trKind===k?'selected':''}>${esc(k==='전체'?'자료 종류 전체':k)}</option>`).join('')}
-          </select>
-          <select class="sel" id="trSort">
-            <option value="date" ${S.trSort==='date'?'selected':''}>최신순</option>
-            <option value="cite" ${S.trSort==='cite'?'selected':''}>인용 많은 순</option>
-          </select>
-          <span class="ctl-sep"></span>
-          <button class="chip ${S.trNew?'on':''}" data-tr="new:x">신규 ${newN}</button>
-          <button class="chip ${S.trUnl?'on':''}" data-tr="unl:x">미연결 ${unlN}</button>
-          ${hasF?`<button class="chip" data-tr="clear:x" style="border:0;text-decoration:underline;text-underline-offset:3px">필터 해제</button>`:''}
-          <span class="note num" style="margin-left:auto">${rows.length}건 표시</span>
-        </div>
-        ${rows.length? groupHtml : `<div class="empty2">
-          <span style="font-size:14px;font-weight:700">조건에 맞는 자료가 없습니다</span>
-          <span class="note">기간을 넓히거나 필터를 해제해 보세요.</span></div>`}
-      </div>
-
-    </div>
-
-    <div class="tr2-r">
-      <div class="card">
-        <div class="card-h" style="padding:13px 15px">
-          <span class="ai-mk">AI</span>
-          <h2>동향 요약</h2>
-          <span class="note" style="font-size:11px">${esc(pLabel)} · ${scopeSpan} · ${esc(bizLabel)}</span>
-          <button class="btn sm" style="margin-left:auto" data-tr="regen:x">↻ 다시 생성</button>
-        </div>
-        <div class="ai-ctl">
-          <div class="ai-row">
-            <span class="ai-k">분야</span>
-            ${TR_BIZS.map(x=>`<button class="chip ${S.trBiz===x?'on':''}" data-tr="biz:${esc(x)}">${esc(x)}</button>`).join('')}
-          </div>
-          <div class="ai-row">
-            <span class="ai-k">기간</span>
-            ${TR_PERIODS.map(p=>`<button class="chip ${S.trPeriod===p.k?'on':''}" data-tr="period:${p.k}">${esc(p.l)}</button>`).join('')}
-          </div>
-          ${S.trPeriod==='custom'?`<div class="ai-row">
-            <span class="ai-k"></span>
-            <input type="date" class="dinp" id="trFrom" value="${esc(S.trFrom)}">
-            <span class="note">–</span>
-            <input type="date" class="dinp" id="trTo" value="${esc(S.trTo)}">
-          </div>`:''}
-        </div>
-        <div class="ai-b" id="aiBody">
-          <p class="ai-hl">${esc(headline)}</p>
-          <div class="stack" style="gap:10px">${bullets}</div>
-          <div class="stack" style="gap:3px">
-            <span class="ai-f">근거 ${scope.length}건 · 출처 ${new Set(scope.map(k=>EV[k].src)).size}곳 · ${esc(S.trGenAt)} 생성</span>
-            <span class="ai-f" style="color:var(--t5)">요약은 기간·분야 선택에만 반응합니다 (왼쪽 검색·필터와 무관)</span>
-          </div>
+          }).join('')}
         </div>
       </div>
     </div>
+
+    <div class="card tr-card">
+      <div class="card-h">
+        <h2 style="white-space:nowrap">오늘 언급된 키워드</h2>
+        <span class="note" style="margin-left:auto;font-size:11px">수집 ${KW.n}건</span>
+      </div>
+      <div class="kwb">
+        ${KW.rows.length? KW.rows.slice(0,11).map(x=>{
+          const on = S.trKw===x.w;
+          const dc = x.d>0?'up':(x.d<0?'dn':'fl');
+          return `<button class="kwr ${on?'on':''}" data-tr="kw:${esc(x.w)}">
+            <span class="kwr-n">${esc(x.w)}</span>
+            <span class="kwr-t"><i style="width:${Math.round(x.n/KW.max*100)}%"></i></span>
+            <span class="kwr-v">${x.n}</span>
+            <span class="kwr-d ${dc}">${x.d>0?'▲'+x.d:(x.d<0?'▼'+Math.abs(x.d):'–')}</span>
+          </button>`;
+        }).join('') : '<span class="note" style="padding:12px 15px;display:block">오늘 수집된 자료가 없습니다.</span>'}
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-h" style="padding:13px 17px">
+      <span class="ai-mk">AI</span>
+      <h2>데일리 브리핑</h2>
+      <div style="margin-left:auto" class="row-f" style="gap:7px">
+        <select class="sel" id="trBizSel">
+          ${TR_BIZS.map(x=>`<option ${S.trBiz===x?'selected':''}>${esc(x==='전체'?'전 분야':x)}</option>`).join('')}
+        </select>
+        <select class="sel" id="trPdSel">
+          ${TR_PERIODS.map(p=>`<option value="${p.k}" ${S.trPeriod===p.k?'selected':''}>${esc(p.l)}</option>`).join('')}
+        </select>
+        ${S.trPeriod==='custom'?`
+          <input type="date" class="dinp" id="trFrom" value="${esc(S.trFrom)}">
+          <span class="note">–</span>
+          <input type="date" class="dinp" id="trTo" value="${esc(S.trTo)}">`:''}
+        <button class="btn sm" data-tr="regen:x">↻ 다시 생성</button>
+      </div>
+    </div>
+    <div class="ai-b2" id="aiBody">
+      ${briefRows.length? `
+        <p class="ai-hl2">${esc(lead)}</p>
+        <div class="bf">
+          ${briefRows.map(k=>{
+            const e=EV[k], n=evRefs(k).length;
+            return `<div class="bf-i">
+              <span class="bf-d">${esc(trMD(trPd(e.date)))}</span>
+              <div class="bf-m">
+                <div class="bf-t"><b>${esc(e.src)}</b> · ${esc(e.title)}</div>
+                <div class="bf-s">${esc(EV_BRIEF[k]||e.sum)}</div>
+              </div>
+              <div class="bf-a">
+                ${n?`<button class="citep" style="background:var(--brand-soft);color:var(--brand)" data-cite="${k}">인용 과제 ${n}건</button>`:''}
+                <a class="tr-lk" href="${esc(e.url)}" target="_blank" rel="noopener">원문 ↗</a>
+              </div>
+            </div>`;
+          }).join('')}
+        </div>`
+        : `<p class="ai-hl2">선택한 기간에 수집된 자료가 없습니다. 기간을 넓혀 보세요.</p>`}
+      <span class="ai-f">${scopeSpan} · ${esc(S.trGenAt)} 생성</span>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="ctlbar" style="border-radius:14px 14px 0 0">
+      <input class="inp" id="trQ" style="width:190px" placeholder="제목·요약·키워드 검색" value="${esc(S.trQ||'')}">
+      <select class="sel" id="trSrc">
+        ${srcList.map(s=>`<option ${S.trSrc===s?'selected':''}>${esc(s==='전체'?'출처 전체':s)}</option>`).join('')}
+      </select>
+      <select class="sel" id="trKind">
+        ${TR_KINDS.map(k=>`<option ${S.trKind===k?'selected':''}>${esc(k==='전체'?'종류 전체':k)}</option>`).join('')}
+      </select>
+      <select class="sel" id="trSort">
+        <option value="date" ${S.trSort==='date'?'selected':''}>최신순</option>
+        <option value="cite" ${S.trSort==='cite'?'selected':''}>인용 많은 순</option>
+      </select>
+      ${hasF?`<button class="chip" data-tr="clear:x" style="border:0;text-decoration:underline;text-underline-offset:3px">필터 해제</button>`:''}
+      <span class="note num" style="margin-left:auto">${rows.length}건 표시</span>
+    </div>
+    ${(S.trKw||S.trOc)?`<div class="fbar">
+      <span class="note">적용 중</span>
+      ${S.trOc?`<span class="fpill">${esc(OC[S.trOc].name)}<button data-tr="oc:${S.trOc}">✕</button></span>`:''}
+      ${S.trKw?`<span class="fpill">${esc(S.trKw)}<button data-tr="kw:${esc(S.trKw)}">✕</button></span>`:''}
+    </div>`:''}
+    ${rows.length? groupHtml : `<div class="empty2">
+      <span style="font-size:14px;font-weight:700">조건에 맞는 자료가 없습니다</span>
+      <span class="note">기간을 넓히거나 필터를 해제해 보세요.</span></div>`}
   </div>
   `;
 }
@@ -2323,15 +2559,18 @@ document.addEventListener('click', e=>{
   if(k==='biz'){ S.trBiz=v; render(); return trBump(); }
   if(k==='period'){ S.trPeriod=v; render(); return trBump(); }
   if(k==='regen'){ return trBump(); }
-  if(k==='theme'){ S.trTheme = (S.trTheme===v?null:v); return render(); }
-  if(k==='method'){ S.trMethod=!S.trMethod; return render(); }
+  if(k==='kw'){ S.trKw = (S.trKw===v?null:v); return render(); }
+  if(k==='oc'){ S.trOc = (S.trOc===v?null:v); return render(); }
   if(k==='new'){ S.trNew=!S.trNew; return render(); }
   if(k==='unl'){ S.trUnl=!S.trUnl; return render(); }
-  if(k==='clear'){ S.trTheme=null; S.trQ=''; S.trKind='전체'; S.trNew=false; S.trUnl=false; return render(); }
+  if(k==='clear'){ S.trKw=null; S.trOc=null; S.trQ=''; S.trKind='전체'; S.trSrc='전체'; S.trNew=false; S.trUnl=false; return render(); }
 });
 document.addEventListener('change', e=>{
   const el=e.target;
-  if(el.id==='trKind'){ S.trKind = el.value==='자료 종류 전체' ? '전체' : el.value; return render(); }
+  if(el.id==='trBizSel'){ S.trBiz = el.value==='전 분야'?'전체':el.value; render(); return trBump(); }
+  if(el.id==='trPdSel'){ S.trPeriod = el.value; render(); return trBump(); }
+  if(el.id==='trSrc'){ S.trSrc = el.value==='출처 전체'?'전체':el.value; return render(); }
+  if(el.id==='trKind'){ S.trKind = el.value==='종류 전체' ? '전체' : el.value; return render(); }
   if(el.id==='trSort'){ S.trSort=el.value; return render(); }
   if(el.id==='trFrom'){ S.trFrom=el.value; render(); return trBump(); }
   if(el.id==='trTo'){ S.trTo=el.value; render(); return trBump(); }
