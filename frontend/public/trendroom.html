@@ -563,6 +563,35 @@ html[data-theme="dark"] .fxq{border-color:var(--line-mid)}
 .fxq-c:hover{border-color:var(--brand);color:var(--brand)}
 .fxq-c:disabled{opacity:.5;cursor:default}
 
+/* ===== 프롬프트 미리보기 렌더링 ===== */
+.pp{max-height:460px;overflow:auto;padding:2px 4px 2px 0}
+.pp-h1{font-size:15px;font-weight:700;letter-spacing:-.3px;line-height:1.45;color:var(--ink);margin:2px 0 6px}
+.pp-h2{font-size:11.5px;font-weight:700;color:var(--brand);letter-spacing:.02em;
+  margin:18px 0 9px;padding-left:9px;border-left:3px solid var(--brand)}
+.pp-h2:first-child{margin-top:2px}
+.pp-p{font-size:12.5px;line-height:1.72;color:var(--t1);margin:0 0 4px}
+.pp-sub{font-size:11.5px;font-weight:700;color:var(--t2);margin:11px 0 5px}
+.pp-div{height:1px;background:var(--line);margin:16px 0}
+.pp-ul{margin:0 0 4px;padding-left:15px;list-style:none}
+.pp-ul li{position:relative;font-size:12.5px;line-height:1.72;color:var(--t1);padding:2px 0}
+.pp-ul li::before{content:'';position:absolute;left:-11px;top:11px;width:4px;height:4px;
+  border-radius:50%;background:var(--t4)}
+.pp-c{border:1px solid var(--line-soft);border-radius:10px;background:var(--panel-sub);
+  padding:11px 13px;margin-bottom:8px}
+.pp-c-m{display:flex;align-items:center;gap:6px;font-size:10.5px;color:var(--t4);
+  margin-bottom:5px;flex-wrap:wrap}
+.pp-c-m .pp-src{font-weight:700;color:var(--ink);font-size:11.5px}
+.pp-dot{color:var(--t5)}
+.pp-c-t{font-size:12.5px;font-weight:600;line-height:1.45;color:var(--ink)}
+.pp-c-b{font-size:11.5px;line-height:1.68;color:var(--t3);margin-top:5px}
+.pp-c-u{display:inline-block;font-size:10.5px;color:var(--brand);margin-top:7px;word-break:break-all}
+.pp-c-u:hover{text-decoration:underline;text-underline-offset:2px}
+.pp-add{border:1.5px dashed var(--line-mid);border-radius:10px;background:var(--brand-tint);
+  padding:12px 14px;margin-top:14px}
+.pp-add-l{font-size:11px;font-weight:700;color:var(--brand);margin-bottom:6px}
+.pp-add-b{font-size:12px;line-height:1.7;color:var(--t1);white-space:pre-wrap}
+.pp-empty .pp-add-b{color:var(--t4)}
+
 /* ===== 트렌드룸 신규 (트리맵·키워드·브리핑) ===== */
 .lg-i{display:flex;align-items:center;gap:5px;font-size:10.5px;color:var(--t3)}
 .lg-d{width:8px;height:8px;border-radius:2px;flex:none}
@@ -1983,6 +2012,72 @@ function buildPrompt(){
 S.ex.research || '(미입력)',
   ].join('\n');
 }
+/* 조립된 프롬프트를 읽기 좋은 형태로 렌더링 (복사·내보내기는 마크다운 원문 유지) */
+function promptHtml(txt){
+  const L = txt.split('\n');
+  const out = [];
+  let i = 0, bul = [], par = [];
+  const flushBul = () => { if(bul.length){ out.push(`<ul class="pp-ul">${bul.map(b=>`<li>${esc(b)}</li>`).join('')}</ul>`); bul=[]; } };
+  const flushPar = () => { if(par.length){ out.push(`<div class="pp-p">${esc(par.join(' '))}</div>`); par=[]; } };
+  const flush = () => { flushPar(); flushBul(); };
+
+  while(i < L.length){
+    const raw = L[i], t = raw.trim();
+    if(t === ''){ flush(); i++; continue; }
+    if(t === '---'){ flush(); out.push('<div class="pp-div"></div>'); i++; continue; }
+    if(t.startsWith('# ')){ flush(); out.push(`<div class="pp-h1">${esc(t.slice(2))}</div>`); i++; continue; }
+    if(t.startsWith('## ')){ flush(); out.push(`<div class="pp-h2">${esc(t.slice(3))}</div>`); i++; continue; }
+
+    // 추가 자료 블록 — 이후 내용을 점선 박스에 담음
+    if(t.startsWith('[▼')){
+      flush();
+      const label = t.replace(/^\[▼\s*/,'').replace(/\]$/,'');
+      i++;
+      const rest = [];
+      while(i < L.length){ rest.push(L[i]); i++; }
+      const body = rest.join('\n').trim();
+      const empty = (body === '' || body === '(미입력)');
+      out.push(`<div class="pp-add ${empty?'pp-empty':''}">
+        <div class="pp-add-l">${esc(label)}</div>
+        <div class="pp-add-b">${empty?'아직 입력된 자료가 없습니다':esc(body).replace(/\n/g,'<br>')}</div>
+      </div>`);
+      continue;
+    }
+
+    // 벤치마크 사례 — "- [날짜 · 매체 · 유형] 제목" + 들여쓴 본문/출처
+    const m = t.match(/^- \[(.+?)\]\s*(.*)$/);
+    if(m){
+      flush();
+      const meta = m[1].split('·').map(s=>s.trim()).filter(Boolean);
+      const title = m[2];
+      let body = '', url = '';
+      i++;
+      while(i < L.length && /^\s{2,}\S/.test(L[i])){
+        const s = L[i].trim();
+        if(s.startsWith('출처:')) url = s.slice(3).trim();
+        else body += (body ? ' ' : '') + s;
+        i++;
+      }
+      out.push(`<div class="pp-c">
+        <div class="pp-c-m">${meta.map((x,k)=>`<span class="${k===1?'pp-src':''}">${esc(x)}</span>`).join('<span class="pp-dot">·</span>')}</div>
+        <div class="pp-c-t">${esc(title)}</div>
+        ${body?`<div class="pp-c-b">${esc(body)}</div>`:''}
+        ${url?`<a class="pp-c-u" href="${esc(url)}" target="_blank" rel="noopener">${esc(url)} ↗</a>`:''}
+      </div>`);
+      continue;
+    }
+
+    if(t.startsWith('- ')){ flushPar(); bul.push(t.slice(2)); i++; continue; }
+    if(/^[가-힣A-Za-z ]{1,8}:$/.test(t)){ flush(); out.push(`<div class="pp-sub">${esc(t)}</div>`); i++; continue; }
+
+    flushBul();
+    par.push(t);
+    i++;
+  }
+  flush();
+  return out.join('');
+}
+
 function viewExport(){
   const text = S.ex.text!==null ? S.ex.text : buildPrompt();
   return `
@@ -2000,11 +2095,11 @@ function viewExport(){
   <div class="grid-a">
     <div class="card">
       <div class="card-h"><h2>조립된 프롬프트</h2>
-        <span class="note" style="margin-left:auto">${text.length.toLocaleString()}자 · 약 ${Math.round(text.length/1.6).toLocaleString()} 토큰</span></div>
+        <span class="note" style="margin-left:auto">${S.ex.editing?'마크다운 원문 · ':''}${text.length.toLocaleString()}자 · 약 ${Math.round(text.length/1.6).toLocaleString()} 토큰</span></div>
       <div class="card-b">
         ${S.ex.editing
-          ? `<textarea id="exText" style="height:420px">${esc(text)}</textarea>`
-          : `<div class="mono" style="font-size:11.5px;line-height:1.85;white-space:pre-wrap;max-height:420px;overflow:auto;color:var(--t1)">${esc(text)}</div>`}
+          ? `<textarea id="exText" style="height:460px">${esc(text)}</textarea>`
+          : `<div class="pp">${promptHtml(text)}</div>`}
       </div>
     </div>
     <div class="col">
