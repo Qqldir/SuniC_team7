@@ -12,7 +12,7 @@ import sys
 from datetime import datetime, timezone
 from pathlib import Path
 
-from app.db.database import get_connection
+from app.db.database import get_connection, ensure_auth_columns
 from app.security import hash_password
 
 SCHEMA_PATH = Path(__file__).with_name("schema.sql")
@@ -23,15 +23,19 @@ DEFAULT_USERS = [
     "user1@sk.com",
     "user2@sk.com",
 ]
+# 기본 관리자 (사용자 관리 권한). --admin 으로 추가 지정 가능.
+DEFAULT_ADMINS = {"admin@sk.com"}
 
 
 def ensure_table(conn):
-    # app_user 테이블이 없으면 스키마로 생성 (CREATE IF NOT EXISTS 라 기존 데이터 안전)
+    # app_user 테이블 생성(CREATE IF NOT EXISTS) + 기존 DB 컬럼 마이그레이션
     conn.executescript(SCHEMA_PATH.read_text(encoding="utf-8"))
+    conn.commit()
+    ensure_auth_columns()
 
 
 def parse_args(argv):
-    pw, reset, emails = "1111", False, []
+    pw, reset, emails, admins = "1111", False, [], set()
     i = 0
     while i < len(argv):
         a = argv[i]
@@ -39,23 +43,31 @@ def parse_args(argv):
             pw = argv[i + 1]; i += 2; continue
         if a == "--reset-pw":
             reset = True; i += 1; continue
+        if a == "--admin":
+            admins.add(argv[i + 1].strip().lower()); i += 2; continue
         if a == "--file":
             emails += Path(argv[i + 1]).read_text(encoding="utf-8").split(); i += 2; continue
         emails.append(a); i += 1
     emails = [e.strip().lower() for e in (emails or DEFAULT_USERS) if e.strip()]
-    return pw, reset, emails
+    # --admin 지정이 있으면 그걸, 없으면 기본 관리자. 실제 시드하는 이메일과 교집합만.
+    admins = (admins or set(DEFAULT_ADMINS)) & set(emails)
+    return pw, reset, emails, admins
 
 
 def main(argv):
-    pw, reset, emails = parse_args(argv)
+    pw, reset, emails, admins = parse_args(argv)
     now = datetime.now(timezone.utc).isoformat(timespec="seconds")
     conn = get_connection()
     try:
         ensure_table(conn)
         created, skipped, reseted = [], [], []
         for e in emails:
+            adm = 1 if e in admins else 0
             exists = conn.execute("SELECT 1 FROM app_user WHERE email = ?", (e,)).fetchone()
             if exists:
+                # 관리자 지정은 항상 반영 (기존 계정도 승격)
+                if adm:
+                    conn.execute("UPDATE app_user SET is_admin = 1 WHERE email = ?", (e,))
                 if reset:
                     conn.execute(
                         "UPDATE app_user SET password_hash = ?, is_active = 1 WHERE email = ?",
@@ -66,8 +78,8 @@ def main(argv):
                     skipped.append(e)
             else:
                 conn.execute(
-                    "INSERT INTO app_user(email, password_hash, is_active, created_at) VALUES (?,?,1,?)",
-                    (e, hash_password(pw), now),
+                    "INSERT INTO app_user(email, password_hash, is_active, is_admin, created_at) VALUES (?,?,1,?,?)",
+                    (e, hash_password(pw), adm, now),
                 )
                 created.append(e)
         conn.commit()
@@ -79,6 +91,7 @@ def main(argv):
         print(f"[seed_users] 비밀번호 초기화 {len(reseted)}건: {reseted}")
     if skipped:
         print(f"[seed_users] 이미 존재해 건너뜀 {len(skipped)}건: {skipped}  (--reset-pw 로 초기화 가능)")
+    print(f"[seed_users] 관리자: {sorted(admins)}")
     print(f"[seed_users] 초기 비밀번호: {pw!r}")
 
 

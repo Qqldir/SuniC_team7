@@ -64,6 +64,7 @@ button,input,select,textarea{font-family:inherit;color:inherit}
 .ski-logo i{color:#FF7A00;font-weight:700;font-style:normal}
 @font-face{font-family:'Chillax';src:url('/fonts/Chillax-Semibold.woff2') format('woff2'),url('/fonts/Chillax-Semibold.woff') format('woff');font-weight:600;font-style:normal;font-display:swap}
 .oi-logo{font-family:'Chillax','Pretendard Variable',Arial,sans-serif;font-weight:600;letter-spacing:-.02em;white-space:nowrap;background:linear-gradient(100deg,#f5f3ff,#a855f7 45%,#38bdf8);-webkit-background-clip:text;background-clip:text;color:transparent}
+html[data-theme="light"] .oi-logo{background:linear-gradient(100deg,#7c3aed,#2563eb);-webkit-background-clip:text;background-clip:text}
 .logout-b{color:var(--t3)}
 .logout-b:hover{background:var(--fill);color:var(--bad)}
 .logout-b:hover .nav-i{border-color:var(--bad);color:var(--bad)}
@@ -1153,6 +1154,7 @@ let S = {
   per:10,            // 페이지당 건수
   fb:{},             // 평가·피드백 {id:{s,t}}
   memoOpen:null,     // 열린 피드백 패널 (하나만)
+  users:[], usersLoaded:false, usersErr:'', usersMsg:'',   // 관리자 계정 관리
   sel:{},            // 스크리닝 체크박스
   trBiz:'전체',       // 트렌드룸 분야 필터
   trPeriod:'1m',     // 트렌드룸 기간 프리셋
@@ -2311,9 +2313,53 @@ document.addEventListener('mousemove',e=>{ if(!PT||PT.style.display==='none')ret
   const s=e.target.closest?.('.psl'); if(s) ptMove(e); else ptHide(); });
 document.addEventListener('mouseout',e=>{ if(e.target.closest?.('.psl')) ptHide(); });
 
+/* ---------- 계정 관리 (관리자 API 연동) ---------- */
+function admAuth(){ return { Authorization:'Bearer '+(localStorage.getItem('oi-token')||'') }; }
+async function loadAdminUsers(){
+  S.usersErr='';
+  try{
+    const r=await fetch('/api/admin/users',{headers:admAuth()});
+    if(r.status===403){ S.usersErr='관리자 권한이 있는 계정만 사용자 관리를 사용할 수 있습니다.'; S.users=[]; }
+    else if(!r.ok){ S.usersErr='목록을 불러오지 못했습니다.'; S.users=[]; }
+    else { const d=await r.json(); S.users=d.users||[]; }
+  }catch(e){ S.usersErr='백엔드에 연결할 수 없습니다. 서버(8000)가 실행 중인지 확인하세요.'; S.users=[]; }
+  S.usersLoaded=true; render();
+}
+async function adminAddUser(){
+  const email=(document.getElementById('nuEmail')?.value||'').trim();
+  const isAdm=!!document.getElementById('nuAdmin')?.checked;
+  S.usersMsg='';
+  if(!email){ S.usersErr='이메일을 입력하세요.'; return render(); }
+  try{
+    const r=await fetch('/api/admin/users',{method:'POST',headers:{'Content-Type':'application/json',...admAuth()},body:JSON.stringify({email,is_admin:isAdm})});
+    const d=await r.json().catch(()=>({}));
+    if(!r.ok){ S.usersErr=d.detail||'추가에 실패했습니다.'; return render(); }
+    S.usersErr=''; S.usersMsg=`${d.email} 추가됨 · 초기 비밀번호 ${d.initial_password}`;
+    return loadAdminUsers();
+  }catch(e){ S.usersErr='서버 연결 오류'; return render(); }
+}
+async function adminResetPw(email){
+  if(!confirm(`${email} 의 비밀번호를 1111 로 초기화할까요?`)) return;
+  try{
+    const r=await fetch(`/api/admin/users/${encodeURIComponent(email)}/reset-password`,{method:'POST',headers:admAuth()});
+    const d=await r.json().catch(()=>({}));
+    if(!r.ok){ alert(d.detail||'초기화 실패'); return; }
+    alert(`${email} 의 비밀번호가 1111 로 초기화되었습니다.`);
+  }catch(e){ alert('서버 연결 오류'); }
+}
+async function adminDelUser(email){
+  if(!confirm(`${email} 계정을 삭제할까요? 되돌릴 수 없습니다.`)) return;
+  try{
+    const r=await fetch(`/api/admin/users/${encodeURIComponent(email)}`,{method:'DELETE',headers:admAuth()});
+    const d=await r.json().catch(()=>({}));
+    if(!r.ok){ alert(d.detail||'삭제 실패'); return; }
+    S.usersMsg=`${email} 삭제됨`; loadAdminUsers();
+  }catch(e){ alert('서버 연결 오류'); }
+}
+
 /* ---------- 6. 관리자 ---------- */
 function viewAdmin(){
-  const tabs=[['prompt','생성 인스트럭션'],['sources','크롤링 소스'],['uploads','내부 자료'],['perm','권한']];
+  const tabs=[['prompt','생성 인스트럭션'],['sources','크롤링 소스'],['uploads','내부 자료'],['users','계정 관리']];
   let body='';
   if (S.admTab==='prompt'){
     body=`<div class="card">
@@ -2373,31 +2419,37 @@ function viewAdmin(){
         </div></div>
     </div>`;
   }
-  if (S.admTab==='perm'){
+  if (S.admTab==='users'){
+    if(!S.usersLoaded){ setTimeout(loadAdminUsers,0); }
     body=`<div class="grid-a">
-      <div class="card"><div class="card-h"><h2>권한</h2><span class="note">${ADMINS.length}명</span></div>
-        <table><thead><tr><th style="min-width:220px">Outlook 메일</th><th style="width:110px">권한</th><th style="width:170px">비고</th><th style="width:70px" class="tr"></th></tr></thead>
-        <tbody>${ADMINS.map((a,i)=>`<tr class="r-hover">
-          <td class="mono" style="font-size:12px">${esc(a.mail)}</td>
-          <td><span class="tag ${a.role==='관리자'?'lv':'nt'}">${esc(a.role)}</span></td>
-          <td class="note">${esc(a.note)}</td>
-          <td class="tr"><button class="btn sm" data-rm-adm="${i}">삭제</button></td></tr>`).join('')}</tbody></table>
+      <div class="card"><div class="card-h"><h2>계정 목록</h2><span class="note num">${S.users.length}명</span>
+        <button class="btn sm" style="margin-left:auto" onclick="loadAdminUsers()">↻ 새로고침</button></div>
+        ${S.usersErr?`<div class="hint" style="margin:12px 17px"><span class="dot" style="background:var(--bad)"></span><span>${esc(S.usersErr)}</span></div>`:''}
+        <table><thead><tr><th style="min-width:200px">이메일 (로그인 ID)</th><th style="width:84px">권한</th><th style="width:72px">상태</th><th style="width:158px" class="tr"></th></tr></thead>
+        <tbody>${S.users.map(u=>`<tr class="r-hover">
+          <td class="mono" style="font-size:12px">${esc(u.email)}</td>
+          <td><span class="tag ${u.is_admin?'lv':'nt'}">${u.is_admin?'관리자':'일반'}</span></td>
+          <td><span class="tag ${u.is_active?'ok':'wn'}">${u.is_active?'활성':'비활성'}</span></td>
+          <td class="tr"><button class="btn sm" onclick="adminResetPw('${esc(u.email)}')">비번 초기화</button>
+            <button class="btn sm" onclick="adminDelUser('${esc(u.email)}')">삭제</button></td></tr>`).join('')
+          || `<tr><td colspan="4" class="note" style="padding:16px 17px">${S.usersLoaded?'계정이 없습니다.':'불러오는 중…'}</td></tr>`}</tbody></table>
       </div>
-      <div class="card"><div class="card-h"><h2>권한 추가</h2></div>
+      <div class="card"><div class="card-h"><h2>계정 추가</h2></div>
         <div class="card-b stack" style="gap:11px">
+          ${S.usersMsg?`<div class="hint" style="background:var(--ok-bg);border-color:var(--ok)"><span>${esc(S.usersMsg)}</span></div>`:''}
           <div class="fld"><label class="fld-l">Outlook 메일 주소</label>
-            <input class="inp" id="admIn" placeholder="name@sk.com">
-            <span class="fld-h">사내 HR 명부와 연계되지 않아 이름 검색은 지원하지 않습니다.</span></div>
-          <div class="fld"><label class="fld-l">권한</label>
-            <select class="sel" id="admRole"><option>관리자</option><option>조회 전용</option></select></div>
-          <button class="btn pri" id="admAdd">추가</button>
+            <input class="inp" id="nuEmail" placeholder="name@sk.com">
+            <span class="fld-h">이 주소가 로그인 ID가 됩니다.</span></div>
+          <label class="row-f" style="gap:8px;font-size:12.5px;color:var(--t1)"><input type="checkbox" id="nuAdmin"> 관리자 권한 부여</label>
+          <button class="btn pri" onclick="adminAddUser()">추가 (초기 비밀번호 1111)</button>
+          <span class="note">추가된 계정은 초기 비밀번호 <strong>1111</strong> 로 생성됩니다. 사용자가 첫 로그인 후 직접 변경할 수 있습니다.</span>
         </div></div>
     </div>`;
   }
   return `
   <div class="page-h"><div class="stack" style="gap:5px">
     <h1>관리자</h1>
-    <p class="lede">생성 인스트럭션, 크롤링 소스, 내부 자료, 권한을 관리합니다.</p>
+    <p class="lede">생성 인스트럭션, 크롤링 소스, 내부 자료, 로그인 계정을 관리합니다.</p>
   </div></div>
   <div class="tabs">${tabs.map(([k,l])=>`<button class="tab ${S.admTab===k?'on':''}" data-atab="${k}">${esc(l)}</button>`).join('')}</div>
   ${body}`;

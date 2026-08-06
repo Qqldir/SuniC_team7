@@ -28,6 +28,7 @@ CREATE TABLE IF NOT EXISTS app_user (
     email         TEXT PRIMARY KEY,       -- Outlook 이메일 = 로그인 ID (소문자 정규화)
     password_hash TEXT NOT NULL,          -- pbkdf2_sha256$iter$salt$hash
     is_active     INTEGER NOT NULL DEFAULT 1,
+    is_admin      INTEGER NOT NULL DEFAULT 0,   -- 관리자 여부 (사용자 관리 권한)
     created_at    TEXT NOT NULL
 );
 

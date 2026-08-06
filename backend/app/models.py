@@ -20,6 +20,12 @@ class ChangePwIn(BaseModel):
     new_password: str
 
 
+class AdminUserIn(BaseModel):
+    email: str
+    password: Optional[str] = None   # 미지정 시 초기비번 1111
+    is_admin: bool = False
+
+
 class FeedItem(BaseModel):
     id: str
     d: str            # published_on (프론트 데이터 형태와 일치)
