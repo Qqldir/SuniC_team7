@@ -1170,7 +1170,7 @@ let S = {
   fxDraft:null,     // 수식 편집 중인 과제 id
   fxCopied:false,
   regenerating:false,
-  cg:{step:0, oc:null, ev:null, lever:null, plan:null, done:false},
+  cg:{step:0, oc:null, ev:null, lever:null, plan:null, name:'', sum:'', err:'', saving:false, done:false},
   ex:{oc:'SKGC', days:30, research:'', editing:false, text:null, copied:false},
   admTab:'prompt',
   instruction:DEFAULT_INSTRUCTION,
@@ -1205,7 +1205,7 @@ function ocBreakdown(vid){
 }
 function timeline(){
   let run=0;
-  return VERSIONS.slice().reverse().map(v=>{ const n=verCount(v.id); run+=n; return {...v,n,cum:run}; });
+  return VERSIONS.slice().reverse().filter(v=>v.id!=='saved').map(v=>{ const n=verCount(v.id); run+=n; return {...v,n,cum:run}; });
 }
 function chartWindow(){
   const tl=timeline();
@@ -1218,7 +1218,7 @@ function ticks(max){
 }
 /* 월 목록 (최신 우선) */
 function months(){
-  const s=new Set(VERSIONS.map(v=>v.label.slice(0,7)));
+  const s=new Set(VERSIONS.filter(v=>v.id!=='saved').map(v=>v.label.slice(0,7)));
   return [...s].sort().reverse();
 }
 /* 백분율 최대잉여법 — 합계 100% 보장 */
@@ -1691,6 +1691,59 @@ function resultInner(t){
          <span class="note mono">${esc(LOGIC[t.lever].show(f))}</span>`);
 }
 
+/* ---------- 커스텀 과제 DB 저장/로드 ---------- */
+function ensureSavedVersion(){
+  if(!VERSIONS.some(v=>v.id==='saved'))
+    VERSIONS.unshift({id:'saved', label:'커스텀 저장', trigger:'사용자가 직접 만든 과제'});
+}
+function dbTaskToMock(d){
+  return {
+    id:d.id, ver:'saved',
+    oc:(OC[d.aff]?d.aff:'SKGC'),
+    lever:(LOGIC[d.category]?d.category:LEVERS[0]),
+    name:d.title, sum:d.background||d.plan||'', plan:d.plan||'',
+    ev:(d.evidence||[]).filter(k=>EV[k]),
+  };
+}
+async function saveCustomTask(){
+  const c=S.cg;
+  c.name=(document.getElementById('cgName')?.value||'').trim();
+  c.sum=(document.getElementById('cgSum')?.value||'').trim();
+  c.err='';
+  if(!c.name){ c.err='과제명을 입력하세요.'; return render(); }
+  const L=c.lever?LOGIC[c.lever]:null;
+  const payload={
+    createdAt: new Date().toISOString().slice(0,10),
+    aff:c.oc, title:c.name, category:c.lever||'', background:c.sum, plan:c.plan||'',
+    kpiName:L?L.metric:'-', kpiFormula:L?L.text:'-',
+    evidence:c.ev?[c.ev]:[], status:'검토중', origin:'커스텀',
+  };
+  c.saving=true; render();
+  try{
+    const r=await fetch('/api/tasks',{method:'POST',headers:{'Content-Type':'application/json',Authorization:'Bearer '+(localStorage.getItem('oi-token')||'')},body:JSON.stringify(payload)});
+    if(!r.ok) throw 0;
+    const d=await r.json();
+    ensureSavedVersion();
+    TASKS.unshift(dbTaskToMock(d.task));
+    c.saving=false; c.done=true; render();
+  }catch(e){
+    c.saving=false; c.err='DB 저장에 실패했습니다. 백엔드(8000) 실행을 확인하세요.'; render();
+  }
+}
+async function loadSavedTasks(){
+  try{
+    const r=await fetch('/api/tasks',{headers:{Authorization:'Bearer '+(localStorage.getItem('oi-token')||'')}});
+    if(!r.ok) return;
+    const d=await r.json();
+    const saved=(d.tasks||[]).filter(t=>t.origin==='커스텀');
+    if(!saved.length) return;
+    ensureSavedVersion();
+    const have=new Set(TASKS.map(t=>String(t.id)));
+    saved.forEach(t=>{ if(!have.has(String(t.id))) TASKS.unshift(dbTaskToMock(t)); });
+    render();
+  }catch(e){}
+}
+
 /* ---------- 3. 커스텀 생성 ---------- */
 const CG_STEPS = ['OC','근거 사례','레버','적용 방향','확인'];
 function viewCustom(){
@@ -1724,10 +1777,15 @@ function viewCustom(){
         <div class="row-f" style="gap:7px"><input class="inp" id="cgFree" placeholder="적용 방향을 직접 작성">
         <button class="btn sm" id="cgFreeGo">확인</button></div></div></div>`;
   } else {
-    panel = `<div class="stack" style="gap:14px"><div class="fld-l">아래 내용으로 과제를 만듭니다</div>
+    panel = `<div class="stack" style="gap:12px">
+      <div class="fld"><label class="fld-l">과제명 <span style="color:var(--bad)">*</span></label>
+        <input class="inp" id="cgName" value="${esc(c.name||'')}" placeholder="예: NCC 정기보수 공기 단축 — 공정 병렬화 적용"></div>
+      <div class="fld"><label class="fld-l">요약 · 배경 <span class="note">(선택)</span></label>
+        <textarea id="cgSum" style="height:76px" placeholder="과제 배경·핵심 내용을 직접 작성하세요">${esc(c.sum||'')}</textarea></div>
       <div class="hint"><span class="dot"></span>
         <span>기대효과 금액은 시스템이 산정하지 않습니다. 산출식과 필요 기준값 항목만 생성되고, 값은 상세 화면에서 현업이 입력합니다.</span></div>
-      <button class="btn pri" id="cgGo" style="align-self:flex-start">과제 생성</button></div>`;
+      ${c.err?`<div class="hint" style="border-color:var(--bad)"><span class="dot" style="background:var(--bad)"></span><span>${esc(c.err)}</span></div>`:''}
+      <button class="btn pri" id="cgGo" style="align-self:flex-start" ${c.saving?'disabled':''}>${c.saving?'저장 중…':'과제 생성 · DB 저장'}</button></div>`;
   }
 
   return `
@@ -2601,8 +2659,8 @@ document.addEventListener('click', e=>{
       return render();
     case 'regen': return regenerate();
     case 'csv': return exportCsv();
-    case 'cgReset': S.cg={step:0,oc:null,ev:null,lever:null,plan:null,done:false}; return render();
-    case 'cgGo': S.cg.done=true; return render();
+    case 'cgReset': S.cg={step:0,oc:null,ev:null,lever:null,plan:null,name:'',sum:'',err:'',saving:false,done:false}; return render();
+    case 'cgGo': return saveCustomTask();
     case 'cgFreeGo':{const v=(document.getElementById('cgFree')||{}).value;
       if(v&&v.trim()){S.cg.plan=v.trim(); S.cg.step=4; render();} return;}
     case 'exEdit':
@@ -2669,6 +2727,7 @@ document.addEventListener('keydown', e=>{
 });
 
 render();
+loadSavedTasks();   // 백엔드에 저장된 커스텀 과제를 불러와 목록에 반영
 
 /* ===== 테마 토글 ===== */
 (function(){
