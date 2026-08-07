@@ -1075,6 +1075,7 @@ let S = {
   fb:{},             // 평가·피드백 {id:{s,t}}
   memoOpen:null,     // 열린 피드백 패널 (하나만)
   userEmail:'',      // 토큰 주인 — applyBootstrap 이 서버 d.user.email 로 채운다
+  isAdmin:false,     // 토큰 주인의 관리자 여부 — 서버 d.user.is_admin. 사이드바 '관리자' 노출 결정
   users:[], usersLoaded:false, usersErr:'', usersMsg:'',   // 관리자 계정 관리
   sel:{},            // 스크리닝 체크박스
   trBiz:'전체',       // 트렌드룸 분야 필터
@@ -1095,7 +1096,8 @@ let S = {
   regenerating:false,
   cg:{step:0, oc:null, ev:null, lever:null, plan:null, name:'', sum:'', err:'', dupId:null, saving:false, phase:'', done:false},
   ex:{oc:'전체', days:30, research:'', editing:false, text:null, copied:false},
-  admTab:'prompt',
+  admTab:'prompt',   // 관리자 페이지 탭 (prompt·users)
+  dbTab:'sources',   // DB 관리 페이지 탭 (sources·uploads)
   upNow:false, upMsg:'', upErr:'',   // 내부 자료 업로드
   instruction:'',    // 서버 app_setting.instruction
   instrSaved:true,
@@ -1117,7 +1119,7 @@ let S = {
 const NAV = [
   {g:'발굴', items:[{k:'list',label:'과제 제안',icon:'≡'},{k:'custom',label:'커스텀 생성',icon:'+'}]},
   {g:'활용', items:[{k:'trend',label:'트렌드룸',icon:'T'},{k:'export',label:'프롬프트 내보내기',icon:'>'},{k:'report',label:'AI Reporting',icon:'↗'}]},
-  {g:'관리', items:[{k:'admin',label:'관리자',icon:'⚙'}]},
+  {g:'관리', items:[{k:'admin',label:'관리자',icon:'⚙',adminOnly:true},{k:'dbadmin',label:'DB 관리',icon:'▤'}]},
 ];
 
 /* ══════════════ 유틸 ══════════════ */
@@ -1238,13 +1240,18 @@ function pipePanel(){
 }
 function renderNav(){
   document.getElementById('nav').innerHTML =
-    NAV.map(g => `<div class="nav-g"><div class="nav-t">${g.g}</div>` +
-      g.items.map(it => {
-        const on = S.screen===it.k || (it.k==='list' && S.screen==='detail');
-        const c = it.k==='list' ? `<span class="nav-c num">${TASKS.length}</span>` : '';
-        return `<button class="nav-b ${on?'on':''}" data-nav="${it.k}">
-          <span class="nav-i">${it.icon}</span><span>${it.label}</span>${c}</button>`;
-      }).join('') + `</div>`).join('') + pipePanel();
+    NAV.map(g => {
+      // adminOnly 항목은 관리자에게만 — 필터 결과가 비면 그룹(제목·구분선)째로 감춘다
+      const items = g.items.filter(it => !it.adminOnly || S.isAdmin);
+      if(!items.length) return '';
+      return `<div class="nav-g"><div class="nav-t">${g.g}</div>` +
+        items.map(it => {
+          const on = S.screen===it.k || (it.k==='list' && S.screen==='detail');
+          const c = it.k==='list' ? `<span class="nav-c num">${TASKS.length}</span>` : '';
+          return `<button class="nav-b ${on?'on':''}" data-nav="${it.k}">
+            <span class="nav-i">${it.icon}</span><span>${it.label}</span>${c}</button>`;
+        }).join('') + `</div>`;
+    }).join('') + pipePanel();
 }
 
 /* ---------- 캘린더 ---------- */
@@ -2645,12 +2652,13 @@ async function adminSetAdmin(email, makeAdmin){
   }catch(e){ alert('서버 연결 오류'); }
 }
 
-/* ---------- 6. 관리자 ---------- */
-function viewAdmin(){
-  const tabs=[['prompt','생성 인스트럭션'],['sources','크롤링 소스'],['uploads','내부 자료'],['users','계정 관리']];
-  let body='';
-  if (S.admTab==='prompt'){
-    body=`<div class="card">
+/* ---------- 6. 관리자 · DB 관리 ----------
+   한 화면이던 관리자 페이지를 둘로 나눴다:
+     · 관리자   = 생성 인스트럭션 + 계정 관리 (adminBodyPrompt·adminBodyUsers) — 관리자 전용
+     · DB 관리  = 크롤링 소스 + 내부 자료   (dbBodySources·dbBodyUploads)
+   탭 본문은 아래 4개 빌더가 만들고, 두 뷰가 각자 탭 셋만 얹어 재사용한다. */
+function adminBodyPrompt(){
+  return `<div class="card">
       <div class="card-h"><h2>과제 생성 인스트럭션</h2>
         <span class="note" style="margin-left:auto">${S.instrSaved?'저장됨':'저장되지 않은 변경'}</span></div>
       <div class="card-b stack" style="gap:11px">
@@ -2658,9 +2666,35 @@ function viewAdmin(){
         <div class="row-f"><button class="btn pri" id="instrSave">저장</button>
           <button class="btn" id="instrReset">초기값 복원</button></div>
       </div></div>`;
-  }
-  if (S.admTab==='sources'){
-    body=`<div class="card">
+}
+function adminBodyUsers(){
+  if(!S.usersLoaded){ setTimeout(loadAdminUsers,0); }
+  return `<div class="grid-a">
+      <div class="card"><div class="card-h"><h2>계정 목록</h2><span class="note num">${S.users.length}명</span>
+        <button class="btn sm" style="margin-left:auto" onclick="loadAdminUsers()">↻ 새로고침</button></div>
+        ${S.usersErr?`<div class="hint" style="margin:12px 17px"><span class="dot" style="background:var(--bad)"></span><span>${esc(S.usersErr)}</span></div>`:''}
+        <table><thead><tr><th style="min-width:200px">이메일 (로그인 ID)</th><th style="width:84px">권한</th><th style="width:72px">상태</th><th style="width:250px" class="tr"></th></tr></thead>
+        <tbody>${S.users.map(u=>`<tr class="r-hover">
+          <td class="mono" style="font-size:12px">${esc(u.email)}</td>
+          <td><span class="tag ${u.is_admin?'lv':'nt'}">${u.is_admin?'관리자':'일반'}</span></td>
+          <td><span class="tag ${u.is_active?'ok':'wn'}">${u.is_active?'활성':'비활성'}</span></td>
+          <td class="tr"><button class="btn sm" onclick="adminSetAdmin('${esc(u.email)}',${u.is_admin?'false':'true'})">${u.is_admin?'권한 해제':'관리자 지정'}</button>
+            <button class="btn sm" onclick="adminResetPw('${esc(u.email)}')">비번 초기화</button>
+            <button class="btn sm" onclick="adminDelUser('${esc(u.email)}')">삭제</button></td></tr>`).join('')
+          || `<tr><td colspan="4" class="note" style="padding:16px 17px">${S.usersLoaded?'계정이 없습니다.':'불러오는 중…'}</td></tr>`}</tbody></table>
+      </div>
+      <div class="card"><div class="card-h"><h2>계정 추가</h2></div>
+        <div class="card-b stack" style="gap:11px">
+          ${S.usersMsg?`<div class="hint" style="background:var(--ok-bg);border-color:var(--ok)"><span>${esc(S.usersMsg)}</span></div>`:''}
+          <div class="fld"><label class="fld-l">Outlook 메일 주소</label>
+            <input class="inp" id="nuEmail" placeholder="name@sk.com"></div>
+          <label class="row-f" style="gap:8px;font-size:12.5px;color:var(--t1)"><input type="checkbox" id="nuAdmin"> 관리자 권한 부여</label>
+          <button class="btn pri" onclick="adminAddUser()">추가 (초기 비밀번호 1111)</button>
+        </div></div>
+    </div>`;
+}
+function dbBodySources(){
+  return `<div class="card">
       <div class="card-h"><h2>크롤링 소스</h2><span class="note">${SOURCES.length}건</span>
         <button class="btn sm" style="margin-left:auto">+ 소스 추가</button></div>
       <table><thead><tr>
@@ -2676,9 +2710,9 @@ function viewAdmin(){
         <td><span class="tag ${SRC_ST[s.st]}">${esc(s.st)}</span></td>
         <td class="tr"><button class="btn sm">편집</button></td></tr>`).join('')}</tbody></table>
     </div>`;
-  }
-  if (S.admTab==='uploads'){
-    body=`<div class="grid-a">
+}
+function dbBodyUploads(){
+  return `<div class="grid-a">
       <div class="card"><div class="card-h"><h2>업로드된 내부 자료</h2><span class="note">${UPLOADS.length}건</span></div>
         <table><thead><tr><th style="min-width:250px">파일</th><th style="width:130px">귀속 OC</th><th style="width:104px">업로드</th><th style="width:92px">상태</th></tr></thead>
         <tbody>${UPLOADS.map(u=>`<tr class="r-hover">
@@ -2704,38 +2738,27 @@ function viewAdmin(){
           ${S.upErr?`<div class="hint" style="border-color:var(--bad)"><span class="dot" style="background:var(--bad)"></span><span>${esc(S.upErr)}</span></div>`:''}
         </div></div>
     </div>`;
-  }
-  if (S.admTab==='users'){
-    if(!S.usersLoaded){ setTimeout(loadAdminUsers,0); }
-    body=`<div class="grid-a">
-      <div class="card"><div class="card-h"><h2>계정 목록</h2><span class="note num">${S.users.length}명</span>
-        <button class="btn sm" style="margin-left:auto" onclick="loadAdminUsers()">↻ 새로고침</button></div>
-        ${S.usersErr?`<div class="hint" style="margin:12px 17px"><span class="dot" style="background:var(--bad)"></span><span>${esc(S.usersErr)}</span></div>`:''}
-        <table><thead><tr><th style="min-width:200px">이메일 (로그인 ID)</th><th style="width:84px">권한</th><th style="width:72px">상태</th><th style="width:250px" class="tr"></th></tr></thead>
-        <tbody>${S.users.map(u=>`<tr class="r-hover">
-          <td class="mono" style="font-size:12px">${esc(u.email)}</td>
-          <td><span class="tag ${u.is_admin?'lv':'nt'}">${u.is_admin?'관리자':'일반'}</span></td>
-          <td><span class="tag ${u.is_active?'ok':'wn'}">${u.is_active?'활성':'비활성'}</span></td>
-          <td class="tr"><button class="btn sm" onclick="adminSetAdmin('${esc(u.email)}',${u.is_admin?'false':'true'})">${u.is_admin?'권한 해제':'관리자 지정'}</button>
-            <button class="btn sm" onclick="adminResetPw('${esc(u.email)}')">비번 초기화</button>
-            <button class="btn sm" onclick="adminDelUser('${esc(u.email)}')">삭제</button></td></tr>`).join('')
-          || `<tr><td colspan="4" class="note" style="padding:16px 17px">${S.usersLoaded?'계정이 없습니다.':'불러오는 중…'}</td></tr>`}</tbody></table>
-      </div>
-      <div class="card"><div class="card-h"><h2>계정 추가</h2></div>
-        <div class="card-b stack" style="gap:11px">
-          ${S.usersMsg?`<div class="hint" style="background:var(--ok-bg);border-color:var(--ok)"><span>${esc(S.usersMsg)}</span></div>`:''}
-          <div class="fld"><label class="fld-l">Outlook 메일 주소</label>
-            <input class="inp" id="nuEmail" placeholder="name@sk.com"></div>
-          <label class="row-f" style="gap:8px;font-size:12.5px;color:var(--t1)"><input type="checkbox" id="nuAdmin"> 관리자 권한 부여</label>
-          <button class="btn pri" onclick="adminAddUser()">추가 (초기 비밀번호 1111)</button>
-        </div></div>
-    </div>`;
-  }
+}
+function viewAdmin(){
+  const tabs=[['prompt','생성 인스트럭션'],['users','계정 관리']];
+  if(!tabs.some(([k])=>k===S.admTab)) S.admTab='prompt';
+  const body = S.admTab==='users' ? adminBodyUsers() : adminBodyPrompt();
   return `
   <div class="page-h"><div class="stack" style="gap:5px">
     <h1>관리자</h1>
   </div></div>
   <div class="tabs">${tabs.map(([k,l])=>`<button class="tab ${S.admTab===k?'on':''}" data-atab="${k}">${esc(l)}</button>`).join('')}</div>
+  ${body}`;
+}
+function viewDbAdmin(){
+  const tabs=[['sources','크롤링 소스'],['uploads','내부 자료']];
+  if(!tabs.some(([k])=>k===S.dbTab)) S.dbTab='sources';
+  const body = S.dbTab==='uploads' ? dbBodyUploads() : dbBodySources();
+  return `
+  <div class="page-h"><div class="stack" style="gap:5px">
+    <h1>DB 관리</h1>
+  </div></div>
+  <div class="tabs">${tabs.map(([k,l])=>`<button class="tab ${S.dbTab===k?'on':''}" data-dbtab="${k}">${esc(l)}</button>`).join('')}</div>
   ${body}`;
 }
 
@@ -2798,8 +2821,10 @@ function viewMy(){
   </div>`;
 }
 
-const VIEWS={list:viewList, detail:viewDetail, trend:viewTrend, custom:viewCustom, export:viewExport, report:viewReport, admin:viewAdmin, my:viewMy};
+const VIEWS={list:viewList, detail:viewDetail, trend:viewTrend, custom:viewCustom, export:viewExport, report:viewReport, admin:viewAdmin, dbadmin:viewDbAdmin, my:viewMy};
 function render(){
+  // 관리자 페이지는 관리자만 — 히스토리 복원·직접 해시 진입 등 어떤 경로로 와도 여기서 막는다
+  if(S.screen==='admin' && !S.isAdmin) S.screen='list';
   renderNav();
   document.getElementById('main').innerHTML = (VIEWS[S.screen]||viewList)();
   syncTopbar();
@@ -2868,7 +2893,7 @@ async function regenerate(){
 }
 
 document.addEventListener('click', e=>{
-  const el=e.target.closest('[data-nav],[data-open],[data-lv],[data-ver],[data-pg],[data-atab],[data-tn],[data-ch],[data-ex-d],[data-dl],[data-rm-rc],[data-cg-oc],[data-cg-ev],[data-cg-lv],[data-cg-plan],[data-cal-d],[data-cal-m],[data-cnav],[data-fxp],[data-sendtog],[data-freq],[data-monav],[data-slice],[data-memo],[data-star],[data-msave],[data-ck],[data-ckall],[data-goto],[data-tr],[data-cite],button');
+  const el=e.target.closest('[data-nav],[data-open],[data-lv],[data-ver],[data-pg],[data-atab],[data-dbtab],[data-tn],[data-ch],[data-ex-d],[data-dl],[data-rm-rc],[data-cg-oc],[data-cg-ev],[data-cg-lv],[data-cg-plan],[data-cal-d],[data-cal-m],[data-cnav],[data-fxp],[data-sendtog],[data-freq],[data-monav],[data-slice],[data-memo],[data-star],[data-msave],[data-ck],[data-ckall],[data-goto],[data-tr],[data-cite],button');
   // 캘린더 외부 클릭 시 닫기
   if(S.calOpen && !e.target.closest('#cal') && el && el.id!=='calBtn'){ S.calOpen=false; }
   if(S.calOpen && !el){ S.calOpen=false; return render(); }
@@ -2923,6 +2948,7 @@ document.addEventListener('click', e=>{
   }
   if(d.pg){const n=Number(d.pg); if(n>=1){S.page=n; render();} return;}
   if(d.atab){S.admTab=d.atab; return render();}
+  if(d.dbtab){S.dbTab=d.dbtab; return render();}
   if(d.sendtog){const id=Number(d.sendtog);
     rpMaterialize(); S.sendSel[id]=!S.sendSel[id]; saveReport(); return render();}
   if(d.freq){S.send.freq=d.freq; saveReport(); return render();}
@@ -3191,6 +3217,7 @@ function applyBootstrap(d){
   // 한 번 심기는 값이라 다른 탭의 oiClear()·탈퇴로 토큰과 어긋날 수 있고, 그러면 화면에
   // 보이는 계정과 실제로 저장되는 계정이 갈라진다. 서버 응답을 진실의 원천으로 삼는다.
   S.userEmail = (d.user && d.user.email) || '';
+  S.isAdmin = !!(d.user && d.user.is_admin);   // 사이드바 '관리자' 노출 판단
   if(S.userEmail) localStorage.setItem('oi-user', S.userEmail);
 
   fill(OCS, d.ocs); fill(OC_COLOR, d.ocColor); fill(BIZ_C, d.bizColor);
