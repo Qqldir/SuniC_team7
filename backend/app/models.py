@@ -20,6 +20,15 @@ class ChangePwIn(BaseModel):
     new_password: str
 
 
+# 관리자가 만드는 **로그인 계정**. 화면 표시용 명단이 아니라 app_user 그 자체라
+# 관리자 섹션이 아니라 이 인증 섹션에 둔다.
+# password 는 프론트가 보내지 않는다 — 서버가 기본 '1111' 을 쓴다(seed_users 기본값과 동일).
+class AdminUserIn(BaseModel):
+    email: str
+    password: Optional[str] = None
+    is_admin: bool = False
+
+
 class FeedItem(BaseModel):
     id: str
     d: str            # published_on (프론트 데이터 형태와 일치)
@@ -115,6 +124,9 @@ class CustomProposalIn(BaseModel):
     plan: str = ""
     name: Optional[str] = None
     sum: Optional[str] = None
+    # 유사 중복(duplicate_similar) 경고를 사용자가 확인하고 진행한 경우에만 True.
+    # ★ 완전일치(duplicate_exact)는 이 값으로도 못 뚫는다 — 이름을 바꿔야 한다.
+    force: bool = False
 
 
 # ── 관리자 ──
@@ -122,11 +134,8 @@ class InstructionIn(BaseModel):
     text: str
 
 
-class AdminMemberIn(BaseModel):
-    mail: str
-    role: str = "조회 전용"
-    note: str = "수동 추가"
-
+# ★ AdminMemberIn(화면 표시용 관리자 명단)은 제거했다. 계정 관리 탭이 로그인 계정을
+#   직접 다루므로 입력 스키마는 AdminUserIn(인증 섹션) 하나뿐이다.
 
 # 내부 자료 업로드에는 입력 스키마가 없다 — 경로가 multipart 하나뿐이고
 # (POST /api/admin/uploads/file), 승인 여부는 그 요청의 use_now 폼 필드로 정해진다.

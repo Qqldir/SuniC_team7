@@ -1,6 +1,6 @@
 """환경변수 기반 설정."""
 import os
-from datetime import date
+from datetime import datetime, timedelta, timezone
 from pathlib import Path
 
 from dotenv import load_dotenv
@@ -163,7 +163,45 @@ DATA_DIR = BASE_DIR / "data"
 # 정제 단계에서 LLM 이 뱉은 계열사 코드를 검증하는 화이트리스트로 씁니다.
 AFFILIATE_CODES = ["SKE", "SKGC", "SKEN", "SKIPC", "SKTI", "SKEO", "SKO", "SKIET", "SKES"]
 
-# 기준일 — 데모 시드(2026-06~07)와 정합을 맞추려고 고정돼 있습니다.
-# 실제 크롤 데이터를 쓸 때는 .env 에 `OI_TODAY=` (빈 값)로 두어 오늘 날짜로 전환하세요.
+# 기준일 — **빈 값이 정상**이며, 값을 주는 것은 데모 재현용입니다.
 # 고정값이면 오늘 수집한 항목이 discovery 의 최근 30일 창 밖으로 밀려 발굴에서 빠집니다.
-TODAY = os.getenv("OI_TODAY", "2026-07-30") or date.today().isoformat()
+# ★ 예전 기본값 "2026-07-30" 은 truthy 라 `or` 뒤로 넘어가지 않았습니다 — .env 가 없는
+#   환경(배포·CI·docker·다른 체크아웃)에서 기준일이 데모 시드에 고착됐습니다.
+#
+# farmed_at 은 UTC ISO 로 저장하고, '오늘' 판정만 아래 로컬 축(KST)으로 합니다.
+# SQLite 에서는 date(farmed_at, LOCAL_TZ_SQL) 로 씁니다 — 'localtime' 은 서버 TZ 에
+# 의존해 docker 에서 깨지므로 오프셋을 명시합니다.
+UTC_OFFSET_HOURS = int(os.getenv("OI_UTC_OFFSET_HOURS", "9"))
+LOCAL_TZ     = timezone(timedelta(hours=UTC_OFFSET_HOURS))
+LOCAL_TZ_SQL = f"{UTC_OFFSET_HOURS:+d} hours"   # SQLite date() 모디파이어 '+9 hours'
+
+
+def today_local() -> str:
+    """운영 기준일(KST). ★ 상수가 아니라 함수다 — 서버가 자정을 넘겨도 따라간다.
+
+    OI_TODAY 를 **여기서** 읽는 이유: 이 함수를 순수 시계로 두면 기준일이 두 개가 된다.
+    OI_TODAY 는 validator·prefetch·seed 만 쓰는 아래 TODAY 상수로 흘러가고, 화면 날짜와
+    NEW 배지(store._evidence)는 이 함수를 쓰므로, 데모용으로 OI_TODAY 를 줘도 트렌드룸은
+    실제 오늘을 계속 보여준다. 그러면 "OI_TODAY 로 날짜를 고정했는데 화면만 안 따라온다" 가
+    된다. 오버라이드는 한 곳에서만 해석하고 전 경로가 같은 기준일을 본다.
+    ★ 매 호출마다 읽는다 — 모듈 로드 1회 평가가 아니므로 부팅일에 굳지 않는다.
+    """
+    return os.getenv("OI_TODAY", "") or datetime.now(LOCAL_TZ).date().isoformat()
+
+
+# ★ 하위호환용 상수. 모듈 로드 시점에 1회 평가되므로 **서버를 며칠 띄우면 부팅일에 굳는다.**
+#   새 코드는 today_local() 을 부를 것 (validator.py:164,288 · seed.py:274 ·
+#   prefetch.py:336 만 이 상수를 쓴다).
+TODAY = today_local()
+
+# ── 관심 종목 시세 (app/market.py) ──
+# 주 소스는 네이버 금융(실시간·키 불필요). 아래 키는 **폴백**인 공공데이터포털
+# 금융위원회_주식시세정보(직전 영업일 종가)에만 쓴다.
+# ★ 인증키는 계정당 하나지만 **활용신청한 서비스에만** 통한다. 주식시세정보를 따로 신청해야
+#   같은 키로 그 엔드포인트가 열린다(신청 전에는 SERVICE_KEY_IS_NOT_REGISTERED_ERROR).
+# ★ params 로 넘기므로 **Decoding 키(원문)** 를 쓴다. Encoding 키(%2F…)를 넣으면
+#   httpx 가 % 를 %25 로 한 번 더 인코딩해 인증이 깨진다.
+DATA_GO_KR_SERVICE_KEY = os.getenv("DATA_GO_KR_SERVICE_KEY", "")
+# 시세 캐시 수명(초). 장중 체결가라 짧게 잡되, 화면을 열 때마다 12종목을 다시 묻지는 않는다.
+QUOTE_TTL_SEC = int(os.getenv("OI_QUOTE_TTL_SEC", "60"))
+QUOTE_TIMEOUT = float(os.getenv("OI_QUOTE_TIMEOUT", "8"))

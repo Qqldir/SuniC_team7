@@ -1,9 +1,13 @@
-"""관리자 화면 API — 생성 인스트럭션 · 크롤링 소스 · 내부 자료 · 권한."""
+"""관리자 화면 API — 생성 인스트럭션 · 내부 자료 · 로그인 계정 관리."""
+from datetime import datetime, timezone
+
 from fastapi import APIRouter, Depends, File, Form, HTTPException, UploadFile
 
 from app import store
-from app.api.deps import current_email
-from app.models import AdminMemberIn, InstructionIn
+from app.api.deps import current_admin, current_email
+from app.db.database import get_connection
+from app.models import AdminUserIn, InstructionIn
+from app.security import hash_password
 
 router = APIRouter(prefix="/api/admin", tags=["admin"])
 
@@ -18,9 +22,11 @@ MAX_BODY_CHARS = 300_000
 
 
 # ★ 관리자 데이터의 조회는 GET /api/bootstrap 이 담당한다 —
-#   instruction·sources·uploads·admins 를 같은 store 함수
-#   (store.instruction/_sources/_uploads/_admins)로 내려준다. 여기에는 변경(PUT/POST/DELETE)만 둔다.
+#   instruction·sources·uploads 를 같은 store 함수
+#   (store.instruction/_sources/_uploads)로 내려준다. 여기에는 변경(PUT/POST/DELETE)만 둔다.
 #   **그 store 함수들은 절대 지우지 마라** — bootstrap 과 아래 reset_instruction 이 쓴다.
+#   예외는 로그인 계정 목록(GET /users)이다 — 계정은 화면 초기 데이터가 아니고
+#   관리자만 볼 수 있어야 해서 bootstrap 에 실을 수 없다.
 
 
 @router.put("/instruction")
@@ -131,17 +137,107 @@ def add_upload_file(
     return {"upload": upload, "chars": len(body) if body else 0, "st": status}
 
 
-@router.post("/members")
-def add_member(body: AdminMemberIn, _: str = Depends(current_email)):
-    mail = body.mail.strip().lower()
-    if "@" not in mail:
+# ─────────────── 로그인 계정 관리 (화면 '계정 관리' 탭) ───────────────
+#
+# ★ 이 4개에만 current_admin(403)을 씌운다. 위쪽 instruction / instruction-reset /
+#   uploads/file 에는 **씌우지 마라** — 관리자 탭은 모든 로그인 사용자에게 보이고
+#   프론트가 그 3개에는 403 분기를 두지 않아, 게이트를 씌우면 저장 버튼이 아무 메시지
+#   없이 실패한다. 계정 목록만 403 메시지로 "권한 있는 계정만" 을 안내하는 설계다.
+#
+# 초기 비밀번호는 서버가 정한다(프론트가 password 를 보내지 않는다). seed_users 와 같은 값.
+DEFAULT_PASSWORD = "1111"
+
+
+@router.get("/users")
+def list_users(_: str = Depends(current_admin)):
+    conn = get_connection()
+    try:
+        rows = conn.execute(
+            "SELECT email, is_active, is_admin, created_at FROM app_user "
+            "ORDER BY is_admin DESC, created_at"
+        ).fetchall()
+    finally:
+        conn.close()
+    # is_admin/is_active 는 화면이 truthy 로만 보므로 SQLite 0/1 정수 그대로 내린다.
+    return {"users": [dict(r) for r in rows]}
+
+
+@router.post("/users")
+def create_user(body: AdminUserIn, _: str = Depends(current_admin)):
+    email = body.email.strip().lower()
+    if "@" not in email:
         raise HTTPException(status_code=400, detail="올바른 이메일이 아닙니다.")
-    store.add_admin(mail, body.role, body.note)
-    return {"ok": True}
+    pw = body.password or DEFAULT_PASSWORD
+    now = datetime.now(timezone.utc).isoformat(timespec="seconds")
+    conn = get_connection()
+    try:
+        if conn.execute("SELECT 1 FROM app_user WHERE email = ?", (email,)).fetchone():
+            raise HTTPException(status_code=409, detail="이미 등록된 계정입니다.")
+        conn.execute(
+            "INSERT INTO app_user(email, password_hash, is_active, is_admin, created_at) "
+            "VALUES (?,?,1,?,?)",
+            (email, hash_password(pw), int(body.is_admin), now),
+        )
+        conn.commit()
+    finally:
+        conn.close()
+    return {"email": email, "initial_password": pw}
 
 
-@router.delete("/members/{mail}")
-def remove_member(mail: str, _: str = Depends(current_email)):
-    if not store.remove_admin(mail.strip().lower()):
+@router.post("/users/{email}/reset-password")
+def reset_user_password(email: str, _: str = Depends(current_admin)):
+    # 경로 파라미터는 프론트가 encodeURIComponent 로 보내고 Starlette 이 디코딩해 준다.
+    email = email.strip().lower()
+    conn = get_connection()
+    try:
+        n = conn.execute(
+            "UPDATE app_user SET password_hash = ? WHERE email = ?",
+            (hash_password(DEFAULT_PASSWORD), email),
+        ).rowcount
+        conn.commit()
+    finally:
+        conn.close()
+    if n == 0:
         raise HTTPException(status_code=404, detail="해당 계정을 찾을 수 없습니다.")
+    return {"ok": True, "email": email, "initial_password": DEFAULT_PASSWORD}
+
+
+@router.delete("/users/{email}")
+def delete_user(email: str, me: str = Depends(current_admin)):
+    """계정 삭제 — 개인 데이터까지 **한 트랜잭션으로** 함께 지운다.
+
+    ★ `DELETE FROM app_user` 한 줄로 하면 안 된다. app_user.email 을 참조하는 FK 가
+      하나도 없어 CASCADE 가 돌지 않고, 같은 이메일로 계정을 다시 만들면 신규 사용자가
+      전임자의 별점·기준값·산출식·발송설정을 그대로 물려받는다.
+      탈퇴(DELETE /api/auth/me)와 같은 범위를 쓰려고 store.purge_user 를 부른다.
+    ★ 마지막 관리자 가드가 필요하다. 관리자 둘이 서로를 지우면 0명이 될 수 있고,
+      관리자를 만드는 유일한 API(POST /users)가 current_admin 뒤에 있어 그 순간부터
+      CLI 로 다시 시드하기 전엔 아무도 계정 관리를 못 쓴다.
+    """
+    email = email.strip().lower()
+    if email == me.strip().lower():
+        raise HTTPException(status_code=400, detail="본인 계정은 삭제할 수 없습니다.")
+    conn = get_connection()
+    try:
+        conn.execute("BEGIN IMMEDIATE")
+        row = conn.execute(
+            "SELECT is_admin FROM app_user WHERE email = ?", (email,)
+        ).fetchone()
+        if not row:
+            conn.rollback()
+            raise HTTPException(status_code=404, detail="해당 계정을 찾을 수 없습니다.")
+        if row["is_admin"]:
+            n = conn.execute("SELECT COUNT(*) AS n FROM app_user WHERE is_admin = 1").fetchone()["n"]
+            if n <= 1:
+                conn.rollback()
+                raise HTTPException(status_code=400, detail="마지막 관리자 계정은 삭제할 수 없습니다.")
+        store.purge_user(conn, email)
+        conn.commit()
+    except HTTPException:
+        raise
+    except Exception:
+        conn.rollback()
+        raise
+    finally:
+        conn.close()
     return {"ok": True}

@@ -274,16 +274,17 @@ CREATE TABLE feed_item (
     is_new INTEGER NOT NULL DEFAULT 0, levers TEXT, importance INTEGER, reason TEXT,
     case_worthy INTEGER NOT NULL DEFAULT 0, enriched INTEGER NOT NULL DEFAULT 0,
     source_label TEXT, title_label TEXT, publisher TEXT,
-    metrics TEXT NOT NULL DEFAULT '[]', evidence_grade TEXT NOT NULL DEFAULT '제목만'
+    metrics TEXT NOT NULL DEFAULT '[]', evidence_grade TEXT NOT NULL DEFAULT '제목만',
+    brief TEXT
 );
 """
 
 
-def _upsert(conn, *, summary, grade, enriched, theme="간접비·원가구조"):
+def _upsert(conn, *, summary, grade, enriched, theme="간접비·원가구조", brief=None):
     conn.execute(ingest._UPSERT, (
         "news-x", "2026-08-01", "news", "롯데케미칼", "제목", summary, "u", "t",
         "뉴스", theme, "에너지·화학", "연합뉴스", None, None, "[]", grade,
-        None, 50, None, 0, int(enriched),
+        None, 50, None, brief, 0, int(enriched),
     ))
 
 
@@ -319,3 +320,14 @@ def test_새로_정제되면_교체된다():
     _upsert(conn, summary="옛 요약.", grade="요약문", enriched=True)
     _upsert(conn, summary="새 정제 요약.", grade="원문 확보", enriched=True)
     assert _row(conn) == ("새 정제 요약.", "원문 확보", 1)
+
+
+def test_재크롤이_브리핑을_지우지_않는다():
+    """brief 는 LLM 만 만든다 — --no-llm 재크롤이 빈 값으로 덮으면 브리핑 카드가 죽는다."""
+    conn = sqlite3.connect(":memory:")
+    conn.executescript(_MINI_SCHEMA)
+    _upsert(conn, summary="정제 요약.", grade="원문 확보", enriched=True,
+            brief="공기를 줄였습니다. 정비 계획의 직접 근거입니다.")
+    _upsert(conn, summary="", grade="제목만", enriched=False, brief=None)
+    brief = conn.execute("SELECT brief FROM feed_item").fetchone()[0]
+    assert brief == "공기를 줄였습니다. 정비 계획의 직접 근거입니다."

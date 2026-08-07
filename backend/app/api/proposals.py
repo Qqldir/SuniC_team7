@@ -4,6 +4,7 @@
 평가·기준값·산출식은 사람마다 다르므로 로그인 계정별로 저장됩니다.
 """
 from fastapi import APIRouter, Depends, HTTPException
+from fastapi.responses import JSONResponse
 
 from app import jobs, store
 from app.api.deps import current_email
@@ -57,16 +58,63 @@ def create_custom(body: CustomProposalIn, _: str = Depends(current_email)):
     사람이 발굴 조건(OC 지정 + note 주입)을 직접 넣는 유일한 경로다.
     사용자가 고른 OC·근거·레버를 제약으로, 적용 방향을 note 로 넘겨 발굴 LLM 이
     배경·리스크·기대효과·KPI 까지 채운다(계열사당 60초 안팎 → 재생성과 같은 폴링).
-    LLM 이 실패하면 예전 문자열 조립으로 폴백하므로 과제는 반드시 만들어진다.
+    LLM 이 실패하면 예전 문자열 조립으로 폴백한다 — 즉 과제가 만들어지지 않는 유일한
+    사유는 **중복**이다.
+
+    중복 차단 3층 (사용자 요구: "물리적으로 막아야 한다")
+      L1  (aff_code, name_key) 완전일치 → 409 duplicate_exact. force 로도 못 뚫는다.
+      L1' persist.find_duplicate 퍼지  → 409 duplicate_similar. 화면 확인 후
+                                          force:true 재요청으로 통과한다(오탐이 실재한다 —
+                                          '육상운송'↔'해상운송' 재협상 0.645).
+      L2  store.create_custom 저장 직전 재확인 → {"id": null, "reason": …}
+      L3  DB UNIQUE INDEX (aff_code, name_key)
+    ★ L1/L1' 은 jobs.start **앞**에 있다. 커스텀 발굴은 계열사당 60초라, 중복인 게
+      확정인 요청에 1분을 태우고 나서 거부하면 안 된다.
+    ★ detail 은 반드시 **문자열**이다 — 화면 api() 가 그대로 표시하므로 dict 를 실으면
+      '[object Object]' 가 뜬다. 부가 정보는 별도 키로 싣는다.
     """
     if not body.oc or not body.lever:
         raise HTTPException(status_code=400, detail="대상 OC 와 레버는 필수입니다.")
     oc, lever, ev, plan = body.oc, body.lever, list(body.ev), body.plan
     name, summary = body.name, body.sum
+
+    from app.pipeline.discovery import persist
+    from app.pipeline.discovery.lever_map import normalize_lever
+
+    conn = get_connection()
+    try:
+        canon = normalize_lever(lever, conn)
+        if not canon:
+            raise HTTPException(status_code=400, detail=f"알 수 없는 레버입니다: {lever}")
+
+        key = store.name_key(name) if name else ""
+        if key:
+            row = store.find_by_name_key(conn, oc, key)
+            if row is not None:
+                return JSONResponse(status_code=409, content={
+                    "detail": f"같은 이름의 과제가 이미 있습니다 — #{row['id']} "
+                              f"({(row['created_at'] or '')[:10]} 생성). "
+                              f"과제명을 바꾸거나 기존 과제를 여세요.",
+                    "code": "duplicate_exact",
+                    "id": row["id"], "name": row["name"],
+                })
+
+        if not body.force:
+            dup = persist.find_duplicate(conn, oc, canon, key, ev)
+            if dup is not None:
+                return JSONResponse(status_code=409, content={
+                    "detail": f"비슷한 과제가 이미 있습니다 — #{dup['id']} {dup['name']} "
+                              f"({dup['why']}).",
+                    "code": "duplicate_similar",
+                    "id": dup["id"], "name": dup["name"],
+                })
+    finally:
+        conn.close()
+
     return {
         "job": jobs.start(
             "custom",
-            lambda: store.create_custom_llm(oc, lever, ev, plan, name, summary),
+            lambda: store.create_custom_llm(oc, canon, ev, plan, name, summary),
         ),
         "status": "running",
     }

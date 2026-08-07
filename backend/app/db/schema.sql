@@ -31,6 +31,7 @@ CREATE TABLE IF NOT EXISTS app_user (
     email         TEXT PRIMARY KEY,       -- Outlook 이메일 = 로그인 ID (소문자 정규화)
     password_hash TEXT NOT NULL,          -- pbkdf2_sha256$iter$salt$hash
     is_active     INTEGER NOT NULL DEFAULT 1,
+    is_admin      INTEGER NOT NULL DEFAULT 0,  -- 1이면 계정 관리(/api/admin/users) 사용 가능
     created_at    TEXT NOT NULL
 );
 
@@ -92,13 +93,37 @@ CREATE TABLE IF NOT EXISTS feed_item (
     title_label    TEXT,                          -- 화면 표기용 한국어 한 줄 제목. 비면 title 로 폴백
     publisher      TEXT,                          -- 매체·발행처 (연합뉴스 / Reuters / SEC EDGAR / DART)
     metrics        TEXT NOT NULL DEFAULT '[]',    -- 핵심 지표 JSON 배열 [{label,value,period}] 최대 3개
-    evidence_grade TEXT NOT NULL DEFAULT '제목만' -- 원문 확보 / 요약문 / 제목만
+    evidence_grade TEXT NOT NULL DEFAULT '제목만', -- 원문 확보 / 요약문 / 제목만
+    brief          TEXT                           -- 트렌드룸 브리핑 1~2문장(LLM 전용).
+                                                  -- reason(중요도 판단 근거)과 목적이 다르다 — 섞지 마라.
 );
 
 CREATE TABLE IF NOT EXISTS feed_item_tag (
     feed_id  TEXT NOT NULL REFERENCES feed_item(id) ON DELETE CASCADE,
     aff_code TEXT NOT NULL REFERENCES affiliate(code),
     PRIMARY KEY (feed_id, aff_code)
+);
+
+-- 자료별 동향 키워드 (화면 EV_KW). 사전 기반 추출(pipeline/farming/keywords.py)이 주(主)고
+-- LLM 정제 결과가 있으면 앞자리를 덮는다. seq 0..3 = 화면 표기 순서.
+-- ★ feed_item.levers 로 대신하지 마라 — 값이 '비용 절감/수익 증대/운영 효율' 3종뿐이라
+--   화면이 기대하는 동향 키워드('정기보수','통합 조달' ...)와 입도가 완전히 다르다.
+CREATE TABLE IF NOT EXISTS feed_item_keyword (
+    feed_id TEXT NOT NULL REFERENCES feed_item(id) ON DELETE CASCADE,
+    keyword TEXT NOT NULL,
+    seq     INTEGER NOT NULL DEFAULT 0,
+    PRIMARY KEY (feed_id, keyword)
+);
+
+CREATE INDEX IF NOT EXISTS idx_fik_kw ON feed_item_keyword(keyword);
+
+-- 일자별 키워드 등장 건수 스냅샷 (화면 KW_TREND 의 전일 대비 증감 원천).
+-- 파밍 실행 끝에 그날치를 1회 갱신한다. distinct day 가 1개 이하면 증감은 {} 로 내린다.
+CREATE TABLE IF NOT EXISTS keyword_daily (
+    day     TEXT NOT NULL,   -- YYYY-MM-DD
+    keyword TEXT NOT NULL,
+    n       INTEGER NOT NULL DEFAULT 0,
+    PRIMARY KEY (day, keyword)
 );
 
 -- ─────────────── 지식 기반 (정제된 계열사 지식) ───────────────
@@ -347,11 +372,10 @@ CREATE TABLE IF NOT EXISTS upload_file (
     extracted_at TEXT                        -- 본문 추출 완료 시각(ISO). NULL 이면 추출 전
 );
 
-CREATE TABLE IF NOT EXISTS admin_member (
-    mail TEXT PRIMARY KEY,
-    role TEXT NOT NULL DEFAULT '조회 전용',     -- 관리자 / 조회 전용
-    note TEXT
-);
+-- ★ admin_member 는 제거했다. 화면 '관리자 명단' 표시용 별도 테이블이었는데,
+--   새 계정 관리 탭은 **로그인 계정 자체**(app_user.is_admin)를 관리한다.
+--   두 개를 같이 두면 "관리자 명단에는 있는데 로그인은 안 되는 계정" 이 생긴다.
+--   기존 DB 의 테이블은 seed._DROPS 가 지운다(여기서만 지우면 executescript 가 도로 만든다).
 
 -- ─────────────── 비동기 작업 ───────────────
 -- LLM 발굴은 계열사 1곳당 1분 내외라 HTTP 응답으로 붙잡고 있을 수 없다
@@ -373,6 +397,22 @@ CREATE TABLE IF NOT EXISTS job (
 CREATE TABLE IF NOT EXISTS app_setting (
     key   TEXT PRIMARY KEY,
     value TEXT NOT NULL
+);
+
+-- 관심 종목 시세 캐시 (공공데이터포털 금융위원회_주식시세정보).
+-- ★ 성능용 캐시가 아니다. 외부 API 가 죽거나 키가 만료돼도 티커가 비지 않게 하는 것이 목적이다.
+--   그래서 기준일별로 누적한다(덮어쓰지 않는다) — 나중에 추세를 그리려면 그대로 쓰면 된다.
+-- ★ app/market.py 가 첫 사용 시 CREATE TABLE IF NOT EXISTS 로 한 번 더 보장한다.
+--   schema.sql 을 다시 돌리지 않은 기존 DB 를 위해서다. 둘 다 있는 것이 맞다.
+CREATE TABLE IF NOT EXISTS quote_daily (
+    code       TEXT    NOT NULL,
+    bas_dt     TEXT    NOT NULL,              -- 'YYYYMMDD' (금융위 basDt 원형)
+    name       TEXT    NOT NULL,
+    close      INTEGER NOT NULL,              -- 종가(원)
+    diff       INTEGER NOT NULL,              -- 전일 대비(원)
+    rate       REAL    NOT NULL,              -- 등락률(%)
+    fetched_at TEXT    NOT NULL,              -- 우리가 받아 온 시각(UTC ISO)
+    PRIMARY KEY (code, bas_dt)
 );
 
 -- ─────────────── 집계 뷰 ───────────────
@@ -400,9 +440,16 @@ CREATE INDEX IF NOT EXISTS idx_feed_tag_aff   ON feed_item_tag(aff_code);
 CREATE INDEX IF NOT EXISTS idx_case_status    ON kb_innovation_case(status);
 CREATE INDEX IF NOT EXISTS idx_case_aff       ON kb_case_affiliate(aff_code);
 CREATE INDEX IF NOT EXISTS idx_proposal_ver   ON proposal(ver_id);
--- ★ 저장 직전 같은 계열사 내 동일 과제명 검사용(store.name_key_exists). 지우지 마라 —
---   없으면 재생성 1건마다 proposal 전체를 풀스캔한다. 기존 중복 행 때문에 UNIQUE 로는 못 만든다.
-CREATE INDEX IF NOT EXISTS idx_proposal_namekey ON proposal(aff_code, name_key);
+-- ★ 저장 직전 같은 계열사 내 동일 과제명 검사이자 **제약**이다(store.name_key_exists /
+--   find_by_name_key). 커스텀 생성이 같은 과제를 반복 INSERT 하는 것을 DB 층에서
+--   물리적으로 막는다 — 파이썬 사전검사는 동시 job 두 개를 막지 못한다.
+--   지우지 마라: 없으면 재생성 1건마다 proposal 전체를 풀스캔한다.
+--   기존 중복 행은 seed._disambiguate_proposal_name_key 가 늦은 쪽 키에 '#id' 를 붙여
+--   해소한 뒤에 이 인덱스를 만든다(행은 지우지 않는다).
+-- ★ 부분조건에 `AND name_key <> ''` 를 절대 붙이지 마라 — SQLite 가 부분 인덱스를 못 쓰고
+--   조회가 풀스캔이 된다(EXPLAIN QUERY PLAN 실측: SEARCH → SCAN).
+CREATE UNIQUE INDEX IF NOT EXISTS idx_proposal_namekey ON proposal(aff_code, name_key)
+    WHERE name_key IS NOT NULL;
 CREATE INDEX IF NOT EXISTS idx_pev_proposal ON proposal_evaluation(proposal_id, id DESC);
 -- ★ 과제 1건당 is_latest=1 행이 정확히 하나임을 DB 가 강제한다(최신 평가를 LEFT JOIN 1회로
 --   조회). 제약이지 성능 인덱스가 아니다 — 지우면 _proposals 의 LEFT JOIN 이 행을 곱한다.

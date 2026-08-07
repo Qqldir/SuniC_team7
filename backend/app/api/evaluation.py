@@ -19,8 +19,9 @@ router = APIRouter(prefix="/api/evaluation", tags=["evaluation"])
 def criteria(_: str = Depends(current_email)):
     """선정 기준 + 축 가중치.
 
-    화면은 이 값을 GET /api/bootstrap 의 evalCriteria(문장)로 받는다. 여기는 가중치
-    원본까지 필요한 곳(봇·대시보드·운영자 확인)이 쓰는 경로라 남긴다.
+    ★ 예전에는 이 문장을 GET /api/bootstrap 이 evalCriteria 키로도 함께 내렸는데,
+      화면에 렌더 지점이 없어 페이로드에서 뺐다. 기준 문장이 필요한 곳(봇·대시보드·
+      운영자 확인)은 가중치 원본까지 주는 이 경로 하나만 쓴다.
     """
     return {"criteria": criteria_text(), "weights": WEIGHTS}
 

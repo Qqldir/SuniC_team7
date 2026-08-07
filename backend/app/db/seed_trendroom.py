@@ -11,6 +11,8 @@ import json
 from datetime import date
 from pathlib import Path
 
+from app.pipeline.farming.keywords import KEYWORDS_MAX
+
 ASSET = Path(__file__).with_name("seed_assets") / "trendroom.json"
 
 # 사업부문 라벨 → biz_segment.key
@@ -34,7 +36,12 @@ KIND_CSS = {
 REPORT_DEFAULTS = {
     "freq": "매일",
     "time": "08:00",
-    "lastAt": "2026.07.24 08:00",
+    # ★ 지어낸 발송 이력을 넣지 않는다. 한 번도 보낸 적 없는 계정에 날짜가 박히면
+    #   시간이 갈수록 '지난 발송 … 이후 N건' 문구가 점점 더 거짓이 된다.
+    #   빈 값이면 화면이 `발송 이력이 없습니다.`(trendroom.html:1895)를 그리고
+    #   sendTargets()(1815)가 전 버전을 대상으로 잡는다. 실제 발송 시각은
+    #   store.mark_report_sent() 가 datetime.now() 로 채운다.
+    "lastAt": "",
     "recipients": ["O/I추진단 (jin.k@sk.com)", "SKGC 혁신팀 (gc-innov@sk.com)"],
     "channels": {"outlook": True, "teams": True},
 }
@@ -202,23 +209,46 @@ def seed_business(conn) -> None:
 
 
 def seed_evidence(conn, d: dict) -> None:
-    """근거 자료 = feed_item. 파밍 파이프라인이 채우는 테이블과 같은 곳에 넣는다."""
+    """근거 자료 = feed_item(+ brief · feed_item_keyword).
+
+    파밍 파이프라인이 채우는 테이블과 같은 곳에 넣는다.
+
+    ★ brief 와 키워드는 화면 상수(EV_BRIEF · EV_KW)를 그대로 옮긴 **손질된 값**이다.
+      실서비스에서는 brief 를 LLM 이(farming/llm.py), 키워드를 사전 추출이
+      (farming/keywords.py) 채우지만, 시드 14건은 사람이 고른 이 값이 더 정확하다.
+      그래서 backfill_trendroom 은 **키워드가 이미 있는 자료를 건너뛴다**(--force 예외).
+    """
     for fid, ev in d["evidence"].items():
         cat = d["kindMap"].get(ev["kind"], "IR·보고서")
         conn.execute(
             """INSERT INTO feed_item
                (id, published_on, kind, source, title, summary, url,
-                kind_label, theme, biz_hint, is_new)
-               VALUES (?,?,?,?,?,?,?,?,?,?,?)
+                kind_label, theme, biz_hint, is_new, brief)
+               VALUES (?,?,?,?,?,?,?,?,?,?,?,?)
                ON CONFLICT(id) DO UPDATE SET
                  published_on=excluded.published_on, kind=excluded.kind,
                  source=excluded.source, title=excluded.title, summary=excluded.summary,
                  url=excluded.url, kind_label=excluded.kind_label, theme=excluded.theme,
-                 biz_hint=excluded.biz_hint, is_new=excluded.is_new""",
+                 biz_hint=excluded.biz_hint,
+                 -- ★ NEW 배지는 **되살리지 않는다**(ingest._UPSERT 와 같은 규칙).
+                 --   시드 자료는 farmed_at 이 NULL 이라 감쇠 대상이 아니어서
+                 --   backfill_trendroom 이 한 번 떼 준다. 여기서 excluded 로 덮으면
+                 --   재시드할 때마다 4건이 영구히 NEW 로 되살아난다.
+                 is_new=feed_item.is_new,
+                 brief=COALESCE(excluded.brief, feed_item.brief)""",
             (fid, _iso(ev["date"]), KIND_KEY[cat], ev["src"], ev["title"], ev["sum"],
              ev.get("url", ""), ev["kind"], d["evTheme"].get(fid),
-             d["evBizFallback"].get(fid), 1 if d["evNew"].get(fid) else 0),
+             d["evBizFallback"].get(fid), 1 if d["evNew"].get(fid) else 0,
+             d.get("evBrief", {}).get(fid)),
         )
+        # 키워드는 지우고 다시 넣는다 — 자산 파일을 고쳤을 때 재시드로 갱신되어야 한다.
+        kws = d.get("evKw", {}).get(fid) or []
+        conn.execute("DELETE FROM feed_item_keyword WHERE feed_id = ?", (fid,))
+        for seq, kw in enumerate(kws[:KEYWORDS_MAX]):
+            conn.execute(
+                "INSERT OR IGNORE INTO feed_item_keyword(feed_id, keyword, seq) VALUES (?,?,?)",
+                (fid, kw, seq),
+            )
 
 
 def seed_proposals(conn, d: dict) -> None:
@@ -265,17 +295,32 @@ def seed_proposals(conn, d: dict) -> None:
         )
 
 
-def seed_feed_tags(conn) -> None:
-    """근거 자료 ↔ 계열사 태그를 과제 참조 관계에서 역산한다.
+def seed_feed_tags(conn, d: dict) -> None:
+    """근거 자료 ↔ 계열사 태그(feed_item_tag = 화면 EV_OC).
 
-    과제 발굴(discovery)이 `feed_item_tag` 로 계열사별 컨텍스트를 뽑기 때문에
-    화면 데이터만 넣으면 발굴 쪽이 비어 버린다.
+    두 갈래를 합친다.
+      ① 과제 참조 관계에서 역산 — 과제 발굴(discovery)이 이 표로 계열사별 컨텍스트를
+        뽑기 때문에, 화면 데이터만 넣으면 발굴 쪽이 비어 버린다.
+      ② 화면 상수 EV_OC — 자료가 '시사점을 주는' 계열사라 과제를 아직 안 만든 조합이
+        빠진다(예: e1 은 SKGC 과제만 인용하지만 SKE 에도 그대로 시사점이 있다).
+
+    ★ 둘 다 INSERT OR IGNORE 로 **더하기만** 한다. 실서비스에서는 파밍의
+      entity.tag_affiliates 가 같은 표를 채우므로, 시드가 지우는 쪽으로 움직이면
+      크롤로 얻은 태그가 재시드 한 번에 날아간다.
     """
     conn.execute(
         """INSERT OR IGNORE INTO feed_item_tag(feed_id, aff_code)
            SELECT DISTINCT pe.feed_id, p.aff_code
            FROM proposal_evidence pe JOIN proposal p ON p.id = pe.proposal_id"""
     )
+    for fid, codes in (d.get("evOc") or {}).items():
+        for code in codes:
+            # 마스터에 없는 코드는 FK 위반이 되므로 EXISTS 로 거른다.
+            conn.execute(
+                """INSERT OR IGNORE INTO feed_item_tag(feed_id, aff_code)
+                   SELECT ?, ? WHERE EXISTS (SELECT 1 FROM affiliate WHERE code = ?)""",
+                (fid, code, code),
+            )
 
 
 def seed_admin(conn, d: dict) -> None:
@@ -305,12 +350,9 @@ def seed_admin(conn, d: dict) -> None:
                  u.get("st", "검수 대기")),
             )
 
-    for a in d["admins"]:
-        conn.execute(
-            "INSERT INTO admin_member(mail, role, note) VALUES (?,?,?) "
-            "ON CONFLICT(mail) DO UPDATE SET role=excluded.role, note=excluded.note",
-            (a["mail"], a["role"], a.get("note", "")),
-        )
+    # ★ 관리자 명단(admin_member) 시드는 제거했다. 계정 관리 탭이 로그인 계정
+    #   (app_user.is_admin)을 직접 다루므로, 관리자는 `python -m app.db.seed_users
+    #   --admin <email>` 로 지정한다.
 
     # 초기값 복원 버튼이 쓰는 기본 인스트럭션은 항상 최신으로 유지하고,
     # 관리자가 저장한 현재값은 이미 있으면 건드리지 않는다.
@@ -335,6 +377,6 @@ def seed_all(conn) -> dict:
     seed_business(conn)          # affiliate 마스터 직후 — FK 가 성립하는 순서
     seed_evidence(conn, d)
     seed_proposals(conn, d)
-    seed_feed_tags(conn)
+    seed_feed_tags(conn, d)
     seed_admin(conn, d)
     return d

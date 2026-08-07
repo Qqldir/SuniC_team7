@@ -30,6 +30,7 @@ from app.config import (
 )
 from app.pipeline.farming import classify
 from app.pipeline.farming.base import RawDoc
+from app.pipeline.farming.keywords import KEYWORDS_MAX
 
 LEVERS = ["비용 절감", "수익 증대", "운영 효율"]
 
@@ -42,6 +43,9 @@ HEADLINE_CHARS = 60
 ORG_CHARS = 40
 METRICS_MAX = 3          # 지표는 최대 3개 (설계 확정값)
 METRIC_FIELD_CHARS = 40
+# 브리핑은 1~2문장 규격. 200자는 그 상한을 감싼 안전판이며 화면 .bf-s 가 잘라 보여준다.
+BRIEF_CHARS = 200
+KEYWORD_CHARS = 20       # 키워드 1개 길이 상한. 화면 칩이 한 줄로 들어가는 폭
 
 SYSTEM = (
     "당신은 SK이노베이션 계열의 O/I(운영개선) 과제 발굴을 지원하는 외부 동향 분석가다. "
@@ -144,6 +148,19 @@ metrics — 원문에 **숫자로** 적힌 핵심 지표만 최대 3개. 없으�
   period : 그 값이 속한 기간. 없으면 "" (예: "FY2025", "2026년 2분기", "2026~2028")
   → 원문에 없는 지표를 만들지 마라. 본문이 없으면 반드시 [].
 
+keywords — 이 자료의 **동향 키워드** 최대 4개. 없으면 [].
+  화면 트렌드룸의 키워드 칩·필터에 그대로 찍히는 말이라 아래를 지킨다.
+  - 명사구 2~8자. 회사명·매체명·날짜·숫자는 넣지 마라.
+  - levers 3종("비용 절감"…)처럼 뭉뚱그린 말이 아니라 **무엇을 건드렸는지** 를 쓴다:
+    "정기보수", "공기 단축", "통합 조달", "전수검사", "해상운임", "자가발전", "안전재고".
+  - 중요한 것부터 나열한다. 앞자리가 화면 칩의 첫 칸이다.
+
+brief — 트렌드룸 '데일리 브리핑' 카드 1~2문장. 근거가 없으면 "".
+  **무슨 일이 있었고 우리에게 무슨 의미인지**를 쓴다. 개조식 종결(…했습니다./…입니다.).
+  - summary(사실 재진술)·reason(중요도 판단 근거)과 목적이 다르다. 셋을 같은 문장으로 쓰지 마라.
+  - 자료의 쓸모를 깎아내리는 평가문("사례성은 제한적임")은 brief 가 아니다 — 그건 reason 이다.
+  - 본문이 없어 할 말이 없으면 억지로 짓지 말고 빈 문자열을 낸다(화면이 summary 로 폴백한다).
+
 case_worthy — 구체적인 손익개선·혁신 '사례'(무엇을 어떻게 바꿨는지)가 담겼으면 true.
   단순 실적 발표·목차·시황·인사·투자 계획 발표는 false.
 
@@ -162,6 +179,8 @@ importance — 0~100. 구체적 개선 수단과 수치가 있으면 높게, 일
   "levers": ["비용 절감" | "수익 증대" | "운영 효율"],
   "affiliates": ["SKE" | "SKGC" | "SKEN" | "SKIPC" | "SKTI" | "SKEO" | "SKO" | "SKIET" | "SKES"],
   "metrics": [{{"label": "지표명", "value": "단위 포함 값", "period": "기간 또는 빈 문자열"}}],
+  "keywords": ["동향 키워드 명사구 최대 4개"],
+  "brief": "무슨 일이 있었고 우리에게 무슨 의미인지 1~2문장, 개조식 종결. 근거 없으면 빈 문자열",
   "case_worthy": true,
   "importance": 0,
   "reason": "중요도 판단 근거 1문장, 개조식 종결"}}
@@ -185,8 +204,13 @@ importance — 0~100. 구체적 개선 수단과 수치가 있으면 높게, 일
 OUTPUT_SCHEMA = {
     "type": "object",
     "additionalProperties": False,
+    # ★ keywords · brief 도 required 에 넣는다. 위 규칙("properties 전 키가 required")은
+    #   OpenAI strict structured outputs 의 하드 제약이라, 빼면 codex 경로가 통째로
+    #   HTTP 400 invalid_json_schema 로 죽는다. 값이 없을 때는 빈 배열·빈 문자열을
+    #   내도록 프롬프트가 지시하고, _parse 가 다시 한 번 정규화한다
+    #   (headline·org·reason 도 같은 방식이다).
     "required": ["headline", "summary", "org", "theme", "levers", "affiliates",
-                 "metrics", "case_worthy", "importance", "reason"],
+                 "metrics", "keywords", "brief", "case_worthy", "importance", "reason"],
     "properties": {
         "headline": {
             "type": "string",
@@ -225,6 +249,19 @@ OUTPUT_SCHEMA = {
                     "period": {"type": "string", "description": "값이 속한 기간. 없으면 빈 문자열"},
                 },
             },
+        },
+        # ★ keywords · brief 는 required 에 넣지 않는다. 이미 검증된 정제 경로를
+        #   흔들지 않기 위해서다 — 모델이 빠뜨려도 _parse 가 빈 값으로 정규화하고,
+        #   evKw 는 사전 추출(farming/keywords.py)이 주(主)라 비어도 화면이 산다.
+        "keywords": {
+            "type": "array",
+            "description": "동향 키워드 명사구 2~8자 최대 4개. 회사명·숫자 금지. 중요한 것부터",
+            "items": {"type": "string"},
+        },
+        "brief": {
+            "type": "string",
+            "description": "트렌드룸 브리핑 1~2문장. 무슨 일이 있었고 우리에게 무슨 의미인지."
+                           " 개조식 종결. 근거가 없으면 빈 문자열",
         },
         "case_worthy": {
             "type": "boolean",
@@ -273,6 +310,9 @@ def _blank(doc: RawDoc) -> dict:
         "summary": naive_summary(doc), "levers": [], "affiliates": [],
         "case_worthy": False, "importance": None, "reason": "", "enriched": False,
         "headline": "", "org": "", "theme": None, "metrics": [],
+        # 키워드는 ingest 가 사전 추출(farming/keywords.py)로 채우고, brief 는 LLM 전용이라
+        # 폴백에서는 빈 값이다 — 화면이 EV_BRIEF 대신 요약(e.sum)으로 폴백한다.
+        "keywords": [], "brief": "",
     }
 
 
@@ -310,6 +350,21 @@ def _metrics(raw) -> List[dict]:
     return out
 
 
+def _keywords(raw) -> List[str]:
+    """동향 키워드를 [표시형] 로 정규화한다.
+
+    화면 칩에 그대로 찍히므로 공백 정리 · 길이 상한 · 중복 제거까지 여기서 끝낸다.
+    개수 상한은 keywords.KEYWORDS_MAX 하나만 본다 — 사전 추출과 같은 규격이어야
+    ingest 가 두 출처를 이어 붙일 때 자릿수가 어긋나지 않는다.
+    """
+    out: List[str] = []
+    for item in (raw or []):
+        word = _one_paragraph(item)[:KEYWORD_CHARS]
+        if word and word not in out:
+            out.append(word)
+    return out[:KEYWORDS_MAX]
+
+
 def _parse(raw: str) -> dict:
     """모델 응답에서 JSON 을 꺼내 화이트리스트로 정규화한다.
 
@@ -338,6 +393,10 @@ def _parse(raw: str) -> dict:
         "levers": [x for x in (data.get("levers") or []) if x in LEVERS],
         "affiliates": [x for x in (data.get("affiliates") or []) if x in AFFILIATE_CODES],
         "metrics": _metrics(data.get("metrics")),
+        # 동향 키워드 — 사전 추출(farming/keywords.py)보다 앞자리에 놓인다(ingest.store).
+        "keywords": _keywords(data.get("keywords")),
+        # 트렌드룸 브리핑. summary(사실 재진술)·reason(중요도 근거)과 목적이 다르다.
+        "brief": _one_paragraph(data.get("brief"))[:BRIEF_CHARS],
         "case_worthy": bool(data.get("case_worthy", False)),
         "importance": max(0, min(100, importance)),
         "reason": _one_paragraph(data.get("reason")),

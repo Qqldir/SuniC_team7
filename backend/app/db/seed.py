@@ -40,6 +40,13 @@ _MIGRATIONS = {
         ("publisher", "TEXT"),
         ("metrics", "TEXT NOT NULL DEFAULT '[]'"),
         ("evidence_grade", "TEXT NOT NULL DEFAULT '제목만'"),
+        ("brief", "TEXT"),                         # 트렌드룸 브리핑 1~2문장(LLM 전용)
+    ],
+    # ★ is_admin 을 여기 넣지 않으면 기존 DB(oi_scout.db)에 컬럼이 끝내 안 생기고
+    #   deps.current_admin 의 SELECT 가 no such column 으로 500 을 낸다.
+    #   프론트는 403 분기를 못 타서 원인이 화면에 드러나지 않는다.
+    "app_user": [
+        ("is_admin", "INTEGER NOT NULL DEFAULT 0"),
     ],
     "affiliate": [
         ("color", "TEXT"),
@@ -78,8 +85,126 @@ def create_schema(conn):
     # 돌리면 "no such column" 으로 죽습니다. 새 DB 에서는 테이블이 아직 없어
     # _migrate 가 전부 건너뛰고 executescript 가 스키마 전량을 만듭니다.
     _migrate(conn)
+    # ★ 순서가 전부다. schema.sql 이 idx_proposal_namekey 를 **UNIQUE** 로 만들므로
+    #   그 전에 ① name_key 를 채우고 ①' 정규화 규칙이 바뀌었으면 전량 재계산하고
+    #   ② 옛 비-UNIQUE 인덱스를 떨구고 ③ 이미 쌓인 중복을 해소해야 한다. 하나라도
+    #   빠지면 executescript 가
+    #   'UNIQUE constraint failed: proposal.aff_code, proposal.name_key' 로 죽는다.
+    backfill_name_key(conn)
+    _recompute_name_key(conn)
+    _upgrade_namekey_index(conn)
+    _disambiguate_proposal_name_key(conn)
     _drop_legacy(conn)
     conn.executescript(SCHEMA_PATH.read_text(encoding="utf-8"))
+    # 규칙 개정 번호는 executescript 가 app_setting 을 만든 **뒤에** 기록한다
+    # (새 DB 에는 이 시점까지 app_setting 테이블 자체가 없다).
+    _mark_name_key_rev(conn)
+
+
+_NAME_KEY_REV_SETTING = "name_key_rev"
+
+
+def _table_exists(conn, name: str) -> bool:
+    return conn.execute(
+        "SELECT 1 FROM sqlite_master WHERE type='table' AND name=?", (name,)
+    ).fetchone() is not None
+
+
+def _recompute_name_key(conn):
+    """store.name_key 규칙이 바뀌었으면 기존 proposal 의 name_key 를 전량 재계산한다.
+
+    ★ 왜 필요한가: 정규화 규칙을 바꿔도 **이미 저장된 행의 키는 옛 규칙 그대로**다.
+      그러면 새 규칙으로 만든 키와 서로 안 걸려 중복 차단(L1·L3)이 조용히 뚫린다.
+      실측으로 뚫렸던 구멍이 정확히 이것이다 — 과제명 끝에 마침표 하나.
+    ★ UNIQUE 인덱스를 **먼저 떨군다.** 재계산은 서로 다른 옛 키를 같은 새 키로 모으므로
+      인덱스가 걸린 채 UPDATE 하면 IntegrityError 로 죽는다. 새로 생긴 충돌은 바로
+      뒤 _disambiguate_proposal_name_key 가 '#id' 로 해소하고, schema.sql 이 인덱스를
+      다시 만든다. **행은 지우지 않는다.**
+    ★ 멱등: app_setting 에 기록된 개정 번호가 store.NAME_KEY_REV 와 같으면 건너뛴다.
+    """
+    from app import store  # 순환 import 회피 — 정규화 규칙은 저장 계층이 단독 소유한다
+
+    if not _table_exists(conn, "proposal"):
+        return
+    if _table_exists(conn, "app_setting"):
+        row = conn.execute(
+            "SELECT value FROM app_setting WHERE key = ?", (_NAME_KEY_REV_SETTING,)
+        ).fetchone()
+        if row and (row["value"] or "") == str(store.NAME_KEY_REV):
+            return
+
+    rows = conn.execute("SELECT id, name, name_key FROM proposal").fetchall()
+    # '#id' 는 이전 마이그레이션이 붙인 중복 구분자다 — 이름에서 파생되지 않으므로
+    # 재계산하면 사라진다. 그래야 아래 _disambiguate 가 새 기준으로 다시 붙인다.
+    changed = [(store.name_key(r["name"]), r["id"])
+               for r in rows if store.name_key(r["name"]) != (r["name_key"] or "")]
+    if not changed:
+        return
+    if conn.execute(
+        "SELECT 1 FROM sqlite_master WHERE type='index' AND name='idx_proposal_namekey'"
+    ).fetchone():
+        conn.execute("DROP INDEX idx_proposal_namekey")
+    conn.executemany("UPDATE proposal SET name_key = ? WHERE id = ?", changed)
+    print(f"마이그레이션: name_key 정규화 규칙 개정(rev {store.NAME_KEY_REV}) — "
+          f"{len(changed)}행 재계산(행 유지)")
+
+
+def _mark_name_key_rev(conn):
+    """재계산이 끝났음을 기록한다(멱등 판정용). app_setting 이 생긴 뒤에만 부른다."""
+    from app import store
+
+    if not _table_exists(conn, "app_setting"):
+        return
+    conn.execute(
+        "INSERT INTO app_setting(key, value) VALUES (?,?) "
+        "ON CONFLICT(key) DO UPDATE SET value = excluded.value",
+        (_NAME_KEY_REV_SETTING, str(store.NAME_KEY_REV)),
+    )
+
+
+def _upgrade_namekey_index(conn):
+    """옛 비-UNIQUE idx_proposal_namekey 를 떨군다. schema.sql 이 UNIQUE 로 다시 만든다.
+
+    CREATE ... IF NOT EXISTS 는 **이름만** 보므로, 이미 같은 이름의 일반 인덱스가 있으면
+    조용히 건너뛰어 제약이 영원히 안 걸린다.
+    """
+    row = conn.execute(
+        "SELECT sql FROM sqlite_master WHERE type='index' AND name='idx_proposal_namekey'"
+    ).fetchone()
+    if row and "UNIQUE" not in (row["sql"] or "").upper():
+        conn.execute("DROP INDEX idx_proposal_namekey")
+        print("마이그레이션: idx_proposal_namekey 를 UNIQUE 로 승격합니다(옛 인덱스 제거)")
+
+
+def _disambiguate_proposal_name_key(conn):
+    """(aff_code, name_key) 중복 그룹의 name_key 를 구분한다. **행은 지우지 않는다.**
+
+    가장 이른 id 를 원본으로 두고 나머지 행의 name_key 뒤에만 '#id' 를 붙인다.
+    ★ 왜 삭제하지 않나: 사용자가 만든 데이터이고, 무엇이 버릴 값인지 마이그레이션에는
+      판단 근거가 없다. 키만 구분해도 원본이 클린 키를 유지하므로 새 중복 생성은 계속 막힌다.
+    ★ 화면의 name 은 건드리지 않는다 — 중복 과제가 '…#1402' 로 보이면 안 된다.
+    """
+    if not conn.execute(
+        "SELECT 1 FROM sqlite_master WHERE type='table' AND name='proposal'"
+    ).fetchone():
+        return
+    groups = conn.execute(
+        """SELECT aff_code, name_key, COUNT(*) AS n FROM proposal
+            WHERE name_key IS NOT NULL
+            GROUP BY aff_code, name_key HAVING n > 1"""
+    ).fetchall()
+    for g in groups:
+        ids = [r["id"] for r in conn.execute(
+            "SELECT id FROM proposal WHERE aff_code = ? AND name_key = ? ORDER BY id",
+            (g["aff_code"], g["name_key"]),
+        )]
+        for pid in ids[1:]:
+            conn.execute(
+                "UPDATE proposal SET name_key = name_key || ? WHERE id = ?",
+                (f"#{pid}", pid),
+            )
+        print(f"마이그레이션: {g['aff_code']} 중복 과제명 {g['n']}건 — "
+              f"#{ids[0]} 를 원본으로 두고 {ids[1:]} 의 name_key 를 구분합니다(행 유지)")
 
 
 # 이름을 바로잡은 컬럼 — ADD COLUMN 으로는 못 하므로 따로 처리한다.
@@ -108,10 +233,15 @@ _VIEWS_TO_REBUILD = ["v_feedback_by_lever"]
 # 남겨 두면 "과제 테이블이 둘" 인 상태가 이어져 다음 사람이 어느 쪽을 봐야 할지 헷갈린다.
 # `kb_process`/`kb_technology`/`kb_kpi_benefit` 은 정의만 있고 3개 다 전량 0행이었으며
 # INSERT·SELECT 하는 코드가 0건이었다(지식은 파일 KB 와 kb_innovation_case 로 들어온다).
+# `admin_member` 는 화면 표시용 관리자 명단이었는데, 계정 관리 탭이 로그인 계정
+# (app_user.is_admin)을 직접 다루게 되면서 이중 명단이 됐다.
 # ★ kb_business 는 여기 넣지 마라 — prefetch._profile_block 이 읽는 현역 테이블이다.
+# ★ 여기에만 넣으면 안 된다. create_schema 가 _migrate → _drop_legacy → executescript 순이라
+#   schema.sql 에 CREATE 문이 남아 있으면 드롭 직후 빈 테이블로 되살아난다. 두 곳을 같이 고칠 것.
 _DROPS = [
     "task_evidence", "task",                              # FK 때문에 자식 테이블 먼저
     "kb_process", "kb_technology", "kb_kpi_benefit",
+    "admin_member",
 ]
 
 # 제거된 인덱스 — 어느 쿼리에도 안 쓰이는데 INSERT 마다 갱신 비용만 냈다.
@@ -206,6 +336,11 @@ def backfill_name_key(conn):
     """
     from app import store  # 순환 import 회피 — 정규화 규칙은 저장 계층이 단독 소유한다
 
+    # create_schema 가 executescript **앞에서도** 부르므로 새 DB(테이블 없음)를 견뎌야 한다.
+    if not conn.execute(
+        "SELECT 1 FROM sqlite_master WHERE type='table' AND name='proposal'"
+    ).fetchone():
+        return
     rows = conn.execute(
         "SELECT id, name FROM proposal WHERE name_key IS NULL OR name_key = ''"
     ).fetchall()
@@ -216,6 +351,33 @@ def backfill_name_key(conn):
         )
     if rows:
         print(f"백필: proposal.name_key {len(rows)}행")
+
+
+def clear_fabricated_timestamps(conn):
+    """시드가 지어낸 '오늘 08:52' · '2026.07.24 08:00' 같은 값을 지운다(멱등).
+
+    시드 JSON·상수는 이미 '—' / 빈 값으로 고쳤지만, **이미 만들어진 행은 시드가 다시
+    쓰지 않는다**(upload_file 은 INSERT-only, report_setting 은 사용자 행이라 시드가
+    아예 안 건드린다). 그래서 화면은 계속 '오늘 08:52 업로드' 라고 말한다.
+
+    ★ 지우는 대상은 **시드 리터럴 완전일치뿐**이다. 사람이 실제로 만든 값
+      (mark_report_sent 가 넣는 '2026.08.07 14:02' 형태, 실제 업로드 시각)은
+      형태가 달라 여기 걸리지 않는다.
+    """
+    fake_uploads = ("오늘 08:52", "오늘 09:20", "어제 17:41")
+    cur = conn.execute(
+        f"UPDATE upload_file SET uploaded_at = '—' "
+        f" WHERE uploaded_at IN ({','.join('?' * len(fake_uploads))})", fake_uploads,
+    )
+    if cur.rowcount:
+        print(f"정리: upload_file.uploaded_at 지어낸 값 {cur.rowcount}행 → '—'")
+    # 한 번도 발송한 적 없는 계정에 박힌 가짜 발송 이력. 빈 값이면 화면이
+    # '발송 이력이 없습니다.' 를 그린다.
+    cur = conn.execute(
+        "UPDATE report_setting SET last_at = '' WHERE last_at = '2026.07.24 08:00'"
+    )
+    if cur.rowcount:
+        print(f"정리: report_setting.last_at 가짜 발송 이력 {cur.rowcount}행 → 빈 값")
 
 
 def backfill_version_label(conn):
@@ -285,6 +447,7 @@ def main():
         # lever 마스터가 들어간 직후 — FK 가 성립하는 유일한 순서다
         seed_lever_aliases(conn)
         backfill_name_key(conn)
+        clear_fabricated_timestamps(conn)
         backfill_version_label(conn)
         seed_cases(conn)
         conn.commit()

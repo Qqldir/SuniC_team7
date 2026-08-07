@@ -1,11 +1,29 @@
 """O/I Scout FastAPI 진입점."""
+import logging
+import os
+
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import FileResponse
 from fastapi.staticfiles import StaticFiles
 
 from app.config import CORS_ORIGINS, FRONTEND_DIST, SERVE_FRONTEND
-from app.api import admin, auth, bootstrap, evaluation, feed, proposals, report
+from app.api import admin, auth, bootstrap, evaluation, feed, proposals, quotes, report
+
+# ── app.* 로거를 서버 로그에 실제로 내보낸다 ──────────────────────────────
+# uvicorn 은 자기 로거에만 핸들러를 달고 root 는 건드리지 않는다. 그래서 app 쪽
+# log.info 는 **한 줄도 안 보였다** — '재생성이 초안 5건 중 3건을 중복으로 버렸다',
+# '후보 풀로 폴백했다' 같은, 결과가 왜 그런지 설명하는 유일한 정보가 전부 사라진다
+# (log.warning 만 파이썬 최후수단 핸들러로 겨우 나왔다).
+# ★ 'app' 트리에만 핸들러를 단다. root 에 basicConfig 를 걸면 httpx·httpcore 의
+#   요청 로그까지 INFO 로 쏟아져 정작 볼 것이 묻힌다.
+_app_log = logging.getLogger("app")
+if not _app_log.handlers:
+    _handler = logging.StreamHandler()
+    _handler.setFormatter(logging.Formatter("%(levelname)s [%(name)s] %(message)s"))
+    _app_log.addHandler(_handler)
+    _app_log.propagate = False          # 핸들러가 있으니 root 로 또 올리지 않는다
+_app_log.setLevel(os.getenv("OI_LOG_LEVEL", "INFO").upper())
 
 app = FastAPI(title="O/I Scout API", version="0.2.0")
 
@@ -22,6 +40,7 @@ app.include_router(bootstrap.router)
 app.include_router(proposals.router)
 app.include_router(admin.router)
 app.include_router(report.router)
+app.include_router(quotes.router)
 
 # ── 파이프라인 API ──
 # 파이프라인에는 HTTP 진입점을 최소로 둔다. 화면이 안 부르는 것은 라우터가 아니라

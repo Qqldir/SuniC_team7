@@ -101,6 +101,7 @@ def main():
     stats = ingest.store(docs, use_llm=not args.no_llm, enrich_limit=args.enrich_limit)
     print(
         f"적재 완료: feed_item {stats['written']}건 · 태그 {stats['tags']}건 "
+        f"· 키워드 {stats['keywords']}건 "
         f"· LLM 정제 {stats['enriched']}건 · 테마 규칙폴백 {stats['theme_default']}건"
     )
     _summary(body_stats, stats, time.monotonic() - started)

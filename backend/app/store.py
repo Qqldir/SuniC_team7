@@ -7,13 +7,14 @@
 import json
 import logging
 import re
+import unicodedata
 from datetime import date, datetime
 from typing import Any, Dict, List, Optional
 
 from app import llm_client
 from app.config import (
-    OI_CODEX_MODEL, OI_MODEL, OI_REGEN_LLM, OI_REGEN_OCS, OI_REGEN_TASKS,
-    OI_REGEN_TIMEOUT, OI_TASK_PROVIDER, TODAY,
+    LOCAL_TZ_SQL, OI_CODEX_MODEL, OI_MODEL, OI_REGEN_LLM, OI_REGEN_OCS,
+    OI_REGEN_TASKS, OI_REGEN_TIMEOUT, OI_TASK_PROVIDER, today_local,
 )
 from app.db.database import get_connection
 
@@ -96,21 +97,21 @@ def _levers(conn):
     }
 
 
-def _themes(conn):
-    rows = conn.execute(
-        "SELECT name, color, bg, head, body FROM theme ORDER BY sort_order, name"
-    ).fetchall()
-    return {
-        r["name"]: {"c": r["color"], "bg": r["bg"], "head": r["head"], "body": r["body"]}
-        for r in rows
-    }
-
-
 # ─────────────── 근거 자료 (feed_item) ───────────────
 
+# ★ theme 은 여기서 **읽지 않는다.** 화면이 테마 축을 쓰지 않게 되어 bootstrap 에서
+#   themes/evTheme 두 키를 뺐다(프론트 TH2·EV_TH·S.trTheme 은 정의만 있고 참조 0건).
+#   theme **테이블과 feed_item.theme 컬럼은 그대로 둔다** — FK 이고 파밍이 90/90 채우며
+#   LLM 분류·평가가 쓴다. 없앤 것은 페이로드 2키뿐이다.
 _EV_SELECT = """
     SELECT f.id, f.published_on, f.url,
-           f.theme, f.biz_hint, f.is_new,
+           f.biz_hint,
+           -- NEW 배지 = '오늘(KST) 크롤분'. 저장 플래그가 아니라 읽는 시점 판정이다.
+           -- ★ substr(farmed_at,1,10) 로 비교하면 안 된다 — 그건 UTC 날짜라
+           --   KST 새벽 크롤분이 통째로 '어제' 가 된다(실측 76건 → 0건).
+           CASE WHEN f.farmed_at IS NOT NULL
+                 AND date(f.farmed_at, :tz) = :today
+                THEN 1 ELSE 0 END AS is_new,
            -- 표시용 라벨이 있으면 그것을, 없으면 크롤러 원문 값을 쓴다.
            COALESCE(NULLIF(f.source_label, ''), f.source) AS src,
            COALESCE(NULLIF(f.title_label, ''), f.title)   AS title,
@@ -123,13 +124,17 @@ _EV_SELECT = """
 
 
 def _evidence(conn):
-    """화면의 EV / EV_TH / EV_BIZ_FB / EV_NEW / KIND_MAP 을 한 번에 만든다.
+    """화면의 EV / EV_BIZ_FB / EV_NEW / KIND_MAP 을 한 번에 만든다.
 
     ★ EV 원소의 키(src/kind/date/url/title/sum/metrics)는 이름·의미가 불변이다.
       화면 벤치마크 카드와 검색 haystack 이 EV[id] 를 직접 읽는다.
     """
-    rows = conn.execute(_EV_SELECT + " ORDER BY f.published_on DESC, f.id").fetchall()
-    ev, theme, biz_fb, is_new, kind_map = {}, {}, {}, {}, {}
+    # ★ _EV_SELECT 는 문자열 결합으로 쓰이므로 반드시 named placeholder 다.
+    rows = conn.execute(
+        _EV_SELECT + " ORDER BY f.published_on DESC, f.id",
+        {"tz": LOCAL_TZ_SQL, "today": today_local()},
+    ).fetchall()
+    ev, biz_fb, is_new, kind_map = {}, {}, {}, {}
     for r in rows:
         ev[r["id"]] = {
             "src": r["src"],
@@ -141,8 +146,6 @@ def _evidence(conn):
             # 핵심 지표 [{label,value,period}]. 화면 벤치마크 카드가 그대로 렌더링한다.
             "metrics": _loads(r["metrics"], []),
         }
-        if r["theme"]:
-            theme[r["id"]] = r["theme"]
         if r["biz_hint"]:
             biz_fb[r["id"]] = r["biz_hint"]
         if r["is_new"]:
@@ -150,7 +153,77 @@ def _evidence(conn):
         # 자료명(Earnings call) → 종류 필터 카테고리(실적발표) 매핑
         if r["kind_label"] and r["kind_cat"]:
             kind_map[r["kind_label"]] = r["kind_cat"]
-    return ev, theme, biz_fb, is_new, kind_map
+    return ev, biz_fb, is_new, kind_map
+
+
+def _ev_oc(conn) -> Dict[str, List[str]]:
+    """자료 → 관련 계열사 코드 배열 (화면 EV_OC).
+
+    원천은 feed_item_tag — 파밍의 entity.tag_affiliates 가 채우고, 시드 자료는
+    seed_trendroom.seed_feed_tags 가 과제 인용 관계에서 역산한다(실측 90/90 태그 보유).
+    ★ 정렬은 affiliate.sort_order 다. 화면 OC 칩 순서가 계열사 마스터 순서와 같아야
+      트리맵·필터와 나란히 읽힌다(코드 알파벳 순이면 SKE 가 SKGC 뒤로 간다).
+    """
+    rows = conn.execute(
+        "SELECT t.feed_id, t.aff_code FROM feed_item_tag t "
+        "JOIN affiliate a ON a.code = t.aff_code "
+        "ORDER BY t.feed_id, a.sort_order, t.aff_code"
+    ).fetchall()
+    out: Dict[str, List[str]] = {}
+    for r in rows:
+        out.setdefault(r["feed_id"], []).append(r["aff_code"])
+    return out
+
+
+def _ev_kw(conn) -> Dict[str, List[str]]:
+    """자료 → 동향 키워드 배열 (화면 EV_KW). seq 가 곧 화면 칩 순서다."""
+    rows = conn.execute(
+        "SELECT feed_id, keyword FROM feed_item_keyword ORDER BY feed_id, seq, keyword"
+    ).fetchall()
+    out: Dict[str, List[str]] = {}
+    for r in rows:
+        out.setdefault(r["feed_id"], []).append(r["keyword"])
+    return out
+
+
+def _ev_brief(conn) -> Dict[str, str]:
+    """자료 → 데일리 브리핑 문장 (화면 EV_BRIEF).
+
+    ★ 비면 **키 자체를 내리지 않는다.** 화면이 `EV_BRIEF[k] || e.sum` 으로 요약에
+      폴백하므로, 빈 문자열을 내리면 브리핑 카드가 빈 줄로 뜬다.
+    """
+    rows = conn.execute(
+        "SELECT id, brief FROM feed_item WHERE brief IS NOT NULL AND brief <> ''"
+    ).fetchall()
+    return {r["id"]: r["brief"] for r in rows}
+
+
+def _kw_trend(conn) -> Dict[str, int]:
+    """키워드 → 직전 스냅샷 대비 증감 (화면 KW_TREND).
+
+    ★ distinct day 가 2개 미만이면 **{} 를 내린다.** 화면은 `KW_TREND[w] || 0` 을
+      '–' 로 그리므로 "비교 기준이 아직 없다"는 정직한 표시가 된다.
+      첫 스냅샷만 있는 상태에서 n-0=+n 을 내려 전 키워드에 ▲ 를 붙이는 편이 훨씬 나쁘다.
+    ★ 증감이 0 인 키워드는 뺀다 — 화면 렌더 결과가 같고 페이로드만 커진다.
+    """
+    days = [r["day"] for r in conn.execute(
+        "SELECT DISTINCT day FROM keyword_daily ORDER BY day DESC LIMIT 2"
+    ).fetchall()]
+    if len(days) < 2:
+        return {}
+
+    def counts(day: str) -> Dict[str, int]:
+        return {
+            r["keyword"]: r["n"] for r in
+            conn.execute("SELECT keyword, n FROM keyword_daily WHERE day = ?", (day,))
+        }
+
+    cur, prev = counts(days[0]), counts(days[1])
+    return {
+        w: cur.get(w, 0) - prev.get(w, 0)
+        for w in (cur.keys() | prev.keys())
+        if cur.get(w, 0) != prev.get(w, 0)
+    }
 
 
 # ─────────────── 과제 제안 ───────────────
@@ -161,11 +234,41 @@ def _versions(conn) -> List[Dict[str, str]]:
     ★ 키 3개(id/label/trigger)는 이름·의미·순서가 불변이다.
       label 은 화면 표기(2026.08.06)이고, 버전 선택·정렬은 label 이 아니라
       id 와 sort_order 로 한다(_next_version 주석 참조).
+
+    ★ 네 번째 키 at 은 **날짜가 아니라 시각**이다('2026.08.06 16:05').
+      AI Reporting 의 '지난 발송 이후 생성분' 필터가 이 값을 report_setting.last_at
+      과 문자열 비교한다. 예전에는 label(날짜)만으로 비교해서, 발송한 날에 만든
+      과제가 그날 하루 통째로 발송 대상에서 빠졌다(같은 날짜끼리는 > 가 거짓).
+      그래서 last_at 과 **같은 표기(점 구분 · 분 단위)** 로 맞춰서 내린다 —
+      두 값의 포맷이 다르면 문자열 비교가 조용히 뒤집힌다('-'(45) < '.'(46)).
     """
     rows = conn.execute(
-        "SELECT id, label, trigger FROM gen_version ORDER BY sort_order DESC, id DESC"
+        "SELECT id, label, trigger, created_at FROM gen_version "
+        " ORDER BY sort_order DESC, id DESC"
     ).fetchall()
-    return [{"id": r["id"], "label": dot(r["label"]), "trigger": r["trigger"] or ""} for r in rows]
+    return [
+        {
+            "id": r["id"],
+            "label": dot(r["label"]),
+            "trigger": r["trigger"] or "",
+            # created_at 은 ISO('2026-08-06T16:05:24'). 없으면 label 로 폴백한다
+            # (시각을 모르는 시드 버전은 날짜만으로 비교돼 그날 발송분에서 빠진다 —
+            #  없는 시각을 지어내는 것보다 낫다).
+            "at": _dot_minute(r["created_at"]) or dot(r["label"]),
+        }
+        for r in rows
+    ]
+
+
+def _dot_minute(iso: Optional[str]) -> str:
+    """'2026-08-06T16:05:24' → '2026.08.06 16:05'. 값이 없으면 빈 문자열.
+
+    화면 표기(report_setting.last_at)와 **한 글자도 다르지 않은** 형식이어야 한다.
+    """
+    text = (iso or "").strip()
+    if len(text) < 16:
+        return ""
+    return f"{dot(text[:10])} {text[11:16]}"
 
 
 def _eval_flags(conn) -> Dict[int, List[Dict[str, str]]]:
@@ -268,6 +371,25 @@ def _sources(conn):
     ]
 
 
+def _crawl_at(conn) -> str:
+    """마지막 파밍 완료 시각 '2026.08.07 03:00'(KST). 크롤 이력이 없으면 빈 문자열.
+
+    ★ crawl_source.last_at 을 쓰지 않는 이유: 파이프라인이 그 컬럼에 **쓰지 않는다.**
+      시드가 넣어 둔 '오늘 08:00' 을 그대로 보여 주다가 한 달 뒤에도 "오늘 08:00 갱신"
+      이라고 말하는 화면이 됐고, 그래서 전부 '—' 로 지웠다. 그 결과 이번에는 자료가
+      90건 실재하는데 사이드바가 '수집 이력 없음' 이라고 단정했다. 둘 다 거짓이다.
+      **실제로 크롤한 시각은 feed_item.farmed_at 에 있다** — 진짜 값을 여기서 만든다.
+    ★ farmed_at 은 UTC ISO 라 표시 전에 KST 로 옮긴다(NEW 배지와 같은 시계).
+    ★ 값이 없으면 빈 문자열이다. 화면은 이때 그 줄을 통째로 렌더하지 않는다 —
+      '수집 이력 없음' 같은 문구로 때우지 않는다.
+    """
+    row = conn.execute(
+        "SELECT MAX(datetime(farmed_at, ?)) AS at FROM feed_item WHERE farmed_at IS NOT NULL",
+        (LOCAL_TZ_SQL,),
+    ).fetchone()
+    return _dot_minute((row["at"] or "").replace(" ", "T")) if row else ""
+
+
 def _uploads(conn):
     """내부 자료 목록 — bootstrap 페이로드용.
 
@@ -286,11 +408,6 @@ def _uploads(conn):
          "size": r["size"] or "", "at": r["uploaded_at"] or "", "st": r["status"]}
         for r in rows
     ]
-
-
-def _admins(conn):
-    rows = conn.execute("SELECT mail, role, note FROM admin_member ORDER BY rowid").fetchall()
-    return [{"mail": r["mail"], "role": r["role"], "note": r["note"] or ""} for r in rows]
 
 
 # ─────────────── 사용자별 상태 ───────────────
@@ -356,49 +473,50 @@ def _user_state(conn, email: str) -> Dict[str, Any]:
 
 
 # ─────────────── bootstrap ───────────────
-
-def eval_criteria() -> str:
-    """과제 선정·평가 기준 설명 1문장 (화면·봇에 그대로 노출).
-
-    가중치와 등급 경계가 env(OI_W_*, OI_GRADE_*)로 조정 가능하므로 상수로 박지 않고
-    평가 파이프라인이 실제로 쓰는 값에서 만들어 온다. 함수 안에서 import 하는 이유는
-    store ↔ pipeline 순환 import 를 만들지 않기 위해서다.
-    """
-    try:
-        from app.pipeline.evaluation import criteria_text
-        return criteria_text()
-    except Exception:                     # 평가 모듈이 없어도 화면은 떠야 한다
-        return ""
+# ★ eval_criteria() 래퍼는 지웠다. bootstrap 의 evalCriteria 키 하나만 쓰던 함수인데
+#   화면이 그 문장을 렌더하는 지점이 없다. 평가 기준 문장이 필요하면
+#   GET /api/evaluation/criteria (가중치까지 함께 준다)를 쓰면 된다.
 
 
 def bootstrap(email: str) -> Dict[str, Any]:
-    """화면이 뜰 때 한 번 호출하는 초기 데이터 묶음."""
+    """화면이 뜰 때 한 번 호출하는 초기 데이터 묶음 — 최상위 22키.
+
+    ★ 키 이름은 프론트 상수명을 camelCase 로 옮긴 것이다(EV_OC→evOc, KW_TREND→kwTrend).
+      화면 applyBootstrap 이 이 이름으로 상수를 채우므로 마음대로 바꾸지 마라.
+    ★ 여기 없는 키를 화면이 쓰면 그 화면은 상수 데모로 되돌아간다. 반대로 화면이 안 쓰는
+      키를 내리면 페이로드만 커진다 — themes/evTheme/admins/evalCriteria 4키를 뺀 이유다.
+    """
     conn = get_connection()
     try:
         ocs, oc_color = _ocs(conn)
-        ev, ev_theme, ev_biz, ev_new, kind_map = _evidence(conn)
+        ev, ev_biz, ev_new, kind_map = _evidence(conn)
         return {
             "user": {"email": email},
-            # 기간 필터 기준일 — 데모 시드와 맞추려고 고정돼 있다(.env 의 OI_TODAY).
-            "today": TODAY,
+            # 기간 필터 기준일 — **매 요청 시점의 실제 날짜(KST)** 다.
+            # 화면 TR_TODAY 의 유일한 출처이고 기간 필터의 시작·종료 양쪽이 이 값을 쓴다.
+            # ★ 모듈 상수(config.TODAY)를 쓰면 서버를 며칠 띄웠을 때 부팅일에 굳는다.
+            "today": today_local(),
             "kinds": _kind_labels(conn),
             "ocs": ocs,
             "ocColor": oc_color,
             "bizColor": _biz_colors(conn),
             "levers": _levers(conn),
-            "themes": _themes(conn),
             "evidence": ev,
-            "evTheme": ev_theme,
             "evBizFallback": ev_biz,
             "evNew": ev_new,
+            # ── 트렌드룸 신규 4키 ──
+            "evOc": _ev_oc(conn),        # 자료 → 계열사 코드 (feed_item_tag)
+            "evKw": _ev_kw(conn),        # 자료 → 동향 키워드 (feed_item_keyword)
+            "evBrief": _ev_brief(conn),  # 자료 → 브리핑 문장 (feed_item.brief, LLM 전용)
+            "kwTrend": _kw_trend(conn),  # 키워드 → 전일 대비 증감 (keyword_daily)
             "kindMap": kind_map,
             "versions": _versions(conn),
             "tasks": _proposals(conn),
-            # 과제 점수·등급이 어떻게 나온 값인지 화면이 설명할 수 있게 함께 내린다.
-            "evalCriteria": eval_criteria(),
             "sources": _sources(conn),
+            # 마지막 파밍 완료 시각(KST). 사이드바 '수집 파이프라인' 과 트렌드룸 헤더가
+            # 쓴다. crawl_source.last_at 은 아무도 갱신하지 않는 시드 값이라 못 쓴다.
+            "crawlAt": _crawl_at(conn),
             "uploads": _uploads(conn),
-            "admins": _admins(conn),
             "instruction": get_setting(conn, "instruction"),
             "state": _user_state(conn, email),
         }
@@ -406,8 +524,8 @@ def bootstrap(email: str) -> Dict[str, Any]:
         conn.close()
 
 
-# ★ 아래 sources()/uploads()/admins()/user_state() 는 커넥션 관리만 감싼 1:1 래퍼다.
-#   화면은 이 데이터를 GET /api/bootstrap 이 부르는 _sources/_uploads/_admins/_user_state
+# ★ 아래 sources()/uploads()/user_state() 는 커넥션 관리만 감싼 1:1 래퍼다.
+#   화면은 이 데이터를 GET /api/bootstrap 이 부르는 _sources/_uploads/_user_state
 #   (커넥션을 받는 쪽)로 받으므로, app/ 안에서 부르는 곳은 없다
 #   (user_state 는 tests/test_discovery_context.py 가 쓴다).
 #   **지우지 마라.** 비용이 0 이고, 관리자 화면을 부분 갱신하는 라우트를 다시 붙일 때
@@ -425,14 +543,6 @@ def uploads() -> List[Dict[str, Any]]:
     conn = get_connection()
     try:
         return _uploads(conn)
-    finally:
-        conn.close()
-
-
-def admins() -> List[Dict[str, str]]:
-    conn = get_connection()
-    try:
-        return _admins(conn)
     finally:
         conn.close()
 
@@ -472,17 +582,42 @@ def proposals_payload() -> Dict[str, Any]:
 
 # ─────────────── 변경 (과제 제안) ───────────────
 
-_NAME_KEY_RE = re.compile(r"[\s·/()\-\[\]]+")
+# 지우는 문자: 공백류 · 구분기호 · 문장부호 · 각종 따옴표/괄호/대시.
+# ★ '#' 는 절대 넣지 마라 — seed._disambiguate_proposal_name_key 가 중복 해소용으로
+#   키 뒤에 '#id' 를 붙인다. 여기서 지우면 그 구분이 사라져 마이그레이션이 무한 반복된다.
+_NAME_KEY_RE = re.compile(r"[\s·・/\\|()\[\]{}<>〈〉《》「」『』"
+                          r"\-‐‑‒–—―~〜!?.,:;'\"“”‘’„‟`´…·]+")
+
+# 정규화 규칙 개정 번호. 규칙을 바꾸면 **반드시 +1** 하라 —
+# seed._recompute_name_key 가 이 값이 DB 에 기록된 값과 다를 때만 전량 재계산한다.
+# (기존 행의 키가 옛 규칙 그대로면 새 규칙으로 만든 키와 안 걸려 중복이 통과한다.)
+NAME_KEY_REV = 2
 
 
 def name_key(name: str) -> str:
-    """중복 차단용 정규화 과제명 — 공백·[·/()- 를 지우고 소문자화.
+    """중복 차단용 정규화 과제명 — 공백·괄호·문장부호를 지우고 소문자화.
 
-    'NCC 정기보수 공기 단축 — 공정 병렬화' → 'ncc정기보수공기단축—공정병렬화'
-    같은 aff_code 안에서 같은 키가 이미 있으면 그 과제를 버린다(저장 경로가 판정).
-    DB UNIQUE 제약이 아닌 이유: 이미 쌓인 행에 중복이 있어 UNIQUE 인덱스 생성이 실패한다.
+    'NCC 정기보수 공기 단축 — 공정 병렬화' → 'ncc정기보수공기단축공정병렬화'
+    같은 aff_code 안에서 같은 키가 이미 있으면 그 과제를 버린다.
+
+    ★ 문장부호를 지우고 NFKC 정규화를 먼저 하는 이유 (실측으로 뚫렸다)
+      예전 규칙은 공백··/()-[] 만 지웠다. 그래서 과제명 **끝에 마침표 하나**만 붙이면
+      키가 달라져 L1(완전일치)과 L3(UNIQUE)를 둘 다 통과했고, 남는 것은 force 로 넘길 수
+      있는 퍼지 판정뿐이라 확인 한 번에 화면상 글자가 똑같은 과제가 만들어졌다
+      (실측: '…적용 검토' 와 '…적용 검토.' 가 나란히 저장됨). 쉼표·물음표·느낌표·
+      따옴표·전각공백도 같은 구멍이었다. NFKC 는 전각/반각·호환문자를 한 표기로 모은다
+      ('ＮＣＣ'→'NCC', '　'→' ', '㈜'→'(株)' 후 괄호 제거).
+
+    ★ (aff_code, name_key) 는 **DB UNIQUE 제약**이다(schema.sql idx_proposal_namekey).
+      예전에는 이미 쌓인 중복 행 때문에 인덱스를 못 만들었는데, seed._disambiguate_
+      proposal_name_key 가 늦게 만들어진 쪽의 키에 '#id' 를 붙여 해소한 뒤 승격했다.
+      즉 파이썬 검사(name_key_exists / find_by_name_key)는 **친절한 사전 안내**이고,
+      마지막 방어는 DB 다 — 동시 job 두 개가 같은 이름을 넣으면 IntegrityError 가 난다.
+
+    ★ 이 함수의 계산식을 바꾸면 **이미 저장된 행의 키는 옛 규칙 그대로**라 새 키와
+      안 걸린다. 반드시 NAME_KEY_REV 를 올려 seed 가 전량 재계산하게 하라.
     """
-    return _NAME_KEY_RE.sub("", (name or "")).lower()
+    return _NAME_KEY_RE.sub("", unicodedata.normalize("NFKC", name or "")).lower()
 
 
 def name_key_exists(conn, aff_code: str, key: str, exclude_id: Optional[int] = None) -> bool:
@@ -495,6 +630,20 @@ def name_key_exists(conn, aff_code: str, key: str, exclude_id: Optional[int] = N
         sql += " AND id <> ?"
         args.append(exclude_id)
     return conn.execute(sql + " LIMIT 1", args).fetchone() is not None
+
+
+def find_by_name_key(conn, aff_code: str, key: str) -> Optional[Any]:
+    """같은 계열사의 동일 과제명 행(id·name·created_at) 또는 None.
+
+    name_key_exists 의 '무엇과 중복인지' 를 알려 주는 버전이다 — 거부 화면이 #id 와
+    과제명을 보여 주려면 bool 로는 부족하다. (idx_proposal_namekey 사용)
+    """
+    if not key:
+        return None
+    return conn.execute(
+        "SELECT id, name, created_at FROM proposal WHERE aff_code = ? AND name_key = ? LIMIT 1",
+        (aff_code, key),
+    ).fetchone()
 
 
 def _next_version(conn):
@@ -597,29 +746,39 @@ def _auto_evaluate(pids: List[int]) -> None:
 
 
 def _fresh_count(conn) -> int:
-    return conn.execute("SELECT COUNT(*) AS c FROM feed_item WHERE is_new = 1").fetchone()["c"]
+    """오늘(KST) 크롤한 자료 건수 — 버전 trigger 문구 '외부 자료 N건 반영' 의 N.
+
+    ★ 이 값은 gen_version.trigger 에 **영구 기록**된다. 저장 플래그(is_new)를 읽으면
+      파밍을 안 돌린 몇 달 뒤에도 같은 화석 숫자가 새 버전에 박힌다.
+    """
+    return conn.execute(
+        "SELECT COUNT(*) AS c FROM feed_item "
+        " WHERE farmed_at IS NOT NULL AND date(farmed_at, ?) = ?",
+        (LOCAL_TZ_SQL, today_local()),
+    ).fetchone()["c"]
 
 
 def _regen_targets(conn, limit: int) -> List[str]:
     """이번 재생성에서 발굴할 계열사 코드.
 
-    우선순위: 새로 들어온 외부 자료(is_new=1)가 많은 계열사 → 그 다음으로 오래 전에
+    우선순위: 새로 들어온 외부 자료(오늘(KST) 크롤분)가 많은 계열사 → 그 다음으로 오래 전에
     과제를 만든 계열사. 자료가 하나도 안 붙은 계열사는 근거 0건이라 어차피 저장되지
     않으므로 대상에서 빠진다(feed_item_tag INNER JOIN).
     """
     rows = conn.execute(
-        # last_pid 를 LEFT JOIN 으로 구하면 행이 곱해져 SUM(f.is_new) 가 계열사 과제수 배로
+        # last_pid 를 LEFT JOIN 으로 구하면 행이 곱해져 SUM(fresh) 이 계열사 과제수 배로
         # 부풀고, 우선순위가 '자료가 새로 많이 들어온 계열사' 가 아니라 '이미 과제가 많은
         # 계열사' 로 뒤집힌다(그러면 대상이 두 곳에 영구 고착된다). 상관 서브쿼리로 분리한다.
         """SELECT t.aff_code AS oc,
-                  SUM(f.is_new) AS fresh,
+                  SUM(CASE WHEN f.farmed_at IS NOT NULL
+                            AND date(f.farmed_at, ?) = ? THEN 1 ELSE 0 END) AS fresh,
                   (SELECT COALESCE(MAX(p.id), 0) FROM proposal p
                     WHERE p.aff_code = t.aff_code) AS last_pid
            FROM feed_item_tag t
            JOIN feed_item f ON f.id = t.feed_id
            GROUP BY t.aff_code
            ORDER BY fresh DESC, last_pid ASC""",
-        (),
+        (LOCAL_TZ_SQL, today_local()),
     ).fetchall()
     return [r["oc"] for r in rows[:max(0, limit)]]
 
@@ -821,8 +980,14 @@ def create_custom(oc: str, lever: str, ev_ids: List[str], plan: str,
     아무것도 안 넘긴 채로 불려서 예전처럼 이름·요약만 조립한 과제가 만들어진다.
     (그때 background 등이 NULL 인 것은 폴백의 정상 동작이다.)
 
-    ★ 중복 검사를 하지 않는다. 현업이 명시적으로 "이걸 만들어라" 라고 지시한 경로라
-      같은 이름이어도 만들어져야 한다(재생성 경로와 다른 점).
+    ★ **중복이면 만들지 않는다(L2 게이트).** 예전에는 "현업이 명시적으로 지시한
+      경로라 같은 이름이어도 만들어져야 한다" 는 근거로 검사를 건너뛰었는데, 그 결과
+      같은 과제가 5번 반복 생성됐다(id 1401~1405). 그 설계 근거는 기각됐다 —
+      되돌리지 마라. 라우트가 이미 사전검사(api/proposals.create_custom)를 하지만
+      이름을 근거·LLM 에서 **파생하는 경로**(name 미지정)는 라우트가 볼 수 없어
+      저장 직전에 한 번 더 본다.
+      거부 시 예외가 아니라 {"id": None, "reason": ...} 을 돌려준다 — 이 함수는
+      jobs.start 안에서 돌아 job 봉투가 상태코드를 소유하기 때문이다.
     """
     from app.pipeline.discovery.lever_map import normalize_lever
 
@@ -856,6 +1021,16 @@ def create_custom(oc: str, lever: str, ev_ids: List[str], plan: str,
             name = f"{base} 적용 검토"
         if not summary:
             summary = (f"{srcs[0][0]} 사례 — {plan}" if srcs else plan) or ""
+
+        # L2 — 이름이 확정된 뒤 저장 직전. 여기서 걸리면 INSERT 도 commit 도 하지 않는다.
+        dup = find_by_name_key(conn, oc, name_key(name))
+        if dup is not None:
+            return {
+                "id": None, "ver": ver["id"],
+                "reason": f"같은 이름의 과제가 이미 있습니다 — #{dup['id']}. 새로 만들지 않았습니다.",
+                "dupId": dup["id"],
+                **proposals_payload(),
+            }
 
         pid = _insert_proposal(
             conn, ver["id"], oc, lever, name, summary, plan, ev_ids, origin,
@@ -922,9 +1097,10 @@ def create_custom_llm(oc: str, lever: str, ev_ids: List[str], plan: str,
                       summary: Optional[str] = None) -> Dict[str, Any]:
     """커스텀 생성(화면 경로) — 발굴 LLM 으로 본문을 채우고 과제 1건을 저장한다.
 
-    ★ 어떤 경우에도 과제를 만든다. LLM 미설정·타임아웃·파싱 실패면 예전 문자열 조립
-      경로(create_custom 인자 없이 호출)로 폴백한다. 커스텀 생성은 현업이 "이걸
-      만들어라" 라고 명시한 행위라, 아무것도 안 만들고 끝나면 안 된다.
+    ★ **중복이면 만들지 않고 사유를 돌려준다**({"id": None, "reason": ...}).
+      LLM 미설정·타임아웃·파싱 실패는 폴백일 뿐이다 — 그때는 예전 문자열 조립
+      경로(create_custom 인자 없이 호출)로 내려가 과제가 만들어진다.
+      즉 '만들어지지 않는' 유일한 사유는 중복이고, 화면은 그 문장을 그대로 보여 준다.
     ★ 사용자가 고른 OC·레버·근거는 **제약**이다. LLM 이 다른 값을 돌려줘도 여기서
       덮어쓴다 — 화면 미리보기에 보여 준 것과 다른 과제가 저장되면 안 되고,
       레버가 바뀌면 화면 LOGIC[lever].calc 가 틀린 금액을 계산한다.
@@ -1154,27 +1330,36 @@ def save_formula(email: str, pid: int, sys_off: bool, text: Optional[str]) -> st
 
 # ─────────────── 변경 (관리자 · 리포팅) ───────────────
 
-def add_admin(mail: str, role: str, note: str) -> None:
-    conn = get_connection()
-    try:
-        conn.execute(
-            "INSERT INTO admin_member(mail, role, note) VALUES (?,?,?) "
-            "ON CONFLICT(mail) DO UPDATE SET role = excluded.role, note = excluded.note",
-            (mail, role, note),
-        )
-        conn.commit()
-    finally:
-        conn.close()
+# 계정을 지울 때 함께 비우는 사용자별 테이블. 전부 user_email 컬럼을 가진다.
+#
+# ★ proposal_feedback_log 는 **일부러 뺐다.** 별점 이력 + 당시 과제 스냅샷(학습 데이터)이라
+#   FK 도 걸지 않았고, 탈퇴해도 남아야 하는 값이다. 여기에 추가하면 축적된 학습 신호가
+#   계정 하나 지울 때마다 날아간다(발굴 프롬프트의 [현업 평가 이력] 블록이 이걸 읽는다).
+#   되살리고 싶다면 익명화(user_email 을 해시로)를 먼저 설계할 것.
+# ★ report_recipient 는 PK 가 (user_email, label) 이라 다른 테이블과 컬럼이 다르지만
+#   삭제 조건은 같다.
+USER_TABLES = [
+    "proposal_feedback", "proposal_input", "proposal_formula",
+    "report_exclude", "report_recipient", "report_setting",
+]
 
 
-def remove_admin(mail: str) -> bool:
-    conn = get_connection()
-    try:
-        cur = conn.execute("DELETE FROM admin_member WHERE mail = ?", (mail,))
-        conn.commit()
-        return cur.rowcount > 0
-    finally:
-        conn.close()
+def purge_user(conn, email: str) -> None:
+    """계정과 그 계정의 개인 데이터를 지운다. **커밋은 호출자가 한다.**
+
+    탈퇴(DELETE /api/auth/me)와 관리자 삭제(DELETE /api/admin/users/{email})가
+    반드시 같은 삭제 범위를 쓰게 하려고 여기에 둔다.
+
+    ★ app_user 만 지우면 안 된다. app_user.email 을 참조하는 FK 가 하나도 없어서
+      (사용자별 테이블은 email 을 그냥 TEXT 로 들고 있다) CASCADE 가 돌지 않고,
+      별점·기준값·산출식·발송설정이 고아 행으로 남는다. 같은 이메일로 계정을 다시
+      만들면 **전임자의 개인 데이터가 그대로 되살아나** 붙는다.
+    ★ 호출자가 BEGIN IMMEDIATE ~ commit 으로 감쌀 것. 중간에 실패하면 계정만 지워지고
+      개인 데이터가 남는 상태가 되므로, 전부 성공하거나 전부 되돌아가야 한다.
+    """
+    for table in USER_TABLES:
+        conn.execute(f"DELETE FROM {table} WHERE user_email = ?", (email,))
+    conn.execute("DELETE FROM app_user WHERE email = ?", (email,))
 
 
 def add_upload(name: str, aff: str, size: str, body: Optional[str] = None,

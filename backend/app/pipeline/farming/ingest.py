@@ -11,15 +11,13 @@ LLM 키가 없거나 호출이 실패하면 naive 요약 + 규칙 분류 + watch
 """
 import json
 from collections import Counter, defaultdict
-from datetime import datetime, timedelta, timezone
+from datetime import datetime, timezone
 from typing import Dict, List, Sequence
 
 from app.db.database import get_connection
-from app.pipeline.farming import classify, entity, llm
+from app.pipeline.farming import classify, entity, keywords, llm
+from app.config import LOCAL_TZ_SQL, today_local
 from app.pipeline.farming.base import RawDoc, source_of
-
-# NEW 배지 유지 기간 — 이 기간이 지난 파밍 자료는 배지를 뗀다.
-NEW_DAYS = 7
 
 
 def _grade_rank(col: str) -> str:
@@ -33,7 +31,9 @@ def _grade_rank(col: str) -> str:
 
 # 보존 규칙 4갈래:
 #   ① 크롤러 사실값        항상 excluded 로 교체 (재크롤이 곧 최신 사실이다)
-#   ② is_new              feed_item.is_new 유지 — 재크롤이 NEW 배지를 되살리면 안 된다
+#   ② is_new              **레거시·미사용 컬럼.** NEW 배지는 store._evidence() 가
+#                         farmed_at 의 KST 날짜로 **읽는 시점에** 판정한다. 이 컬럼을
+#                         읽는 코드는 이제 없다. UPSERT 가 흔들지 않도록만 유지한다.
 #   ③ theme / biz_hint    기존 값 우선. 비어 있을 때만 이번 규칙값을 주입
 #   ④ LLM 산출물          정제에 성공한 경우에만 교체
 #
@@ -49,8 +49,8 @@ INSERT INTO feed_item
     (id, published_on, kind, source, title, summary, url, farmed_at,
      kind_label, theme, biz_hint, is_new,
      publisher, source_label, title_label, metrics, evidence_grade,
-     levers, importance, reason, case_worthy, enriched)
-VALUES (?,?,?,?,?,?,?,?, ?,?,?,1, ?,?,?,?,?, ?,?,?,?,?)
+     levers, importance, reason, brief, case_worthy, enriched)
+VALUES (?,?,?,?,?,?,?,?, ?,?,?,1, ?,?,?,?,?, ?,?,?,?,?,?)
 ON CONFLICT(id) DO UPDATE SET
     -- ① 크롤러 사실값
     published_on   = excluded.published_on,
@@ -78,7 +78,7 @@ ON CONFLICT(id) DO UPDATE SET
     evidence_grade = CASE WHEN {_grade_rank('excluded.evidence_grade')}
                             >= {_grade_rank('feed_item.evidence_grade')}
                           THEN excluded.evidence_grade ELSE feed_item.evidence_grade END,
-    -- ② NEW 배지는 되살리지 않는다
+    -- ② 레거시 컬럼 — 읽는 곳이 없다. 값을 흔들지만 않는다.
     is_new         = feed_item.is_new,
     -- ③ 표시 필수값 — 기존 값이 있으면 지키고, 없을 때만 이번 값으로 채운다
     theme      = CASE WHEN excluded.enriched THEN excluded.theme
@@ -97,14 +97,38 @@ ON CONFLICT(id) DO UPDATE SET
     levers       = CASE WHEN excluded.enriched THEN excluded.levers       ELSE feed_item.levers       END,
     importance   = CASE WHEN excluded.enriched THEN excluded.importance   ELSE feed_item.importance   END,
     reason       = CASE WHEN excluded.enriched THEN excluded.reason       ELSE feed_item.reason       END,
+    -- brief 는 LLM 만 만들 수 있다. --with-docs 0 · --no-llm 재크롤이 이미 확보한
+    -- 브리핑을 빈 값으로 덮으면 트렌드룸 브리핑 카드가 요약 폴백으로 되돌아간다.
+    -- ★ **정제 성공이어도 빈 brief 로는 덮지 않는다.** enriched 만 보면 정제가 성공하고
+    --   모델이 brief 를 빈 문자열로 낸 정상 응답에서 기존 brief 가 NULL 로 사라진다
+    --   (app/db/backfill_brief.py 로 채운 값이 다음 파밍 한 번에 전부 날아간다).
+    --   위 summary 가드와 같은 형태다.
+    brief        = CASE WHEN excluded.brief IS NOT NULL AND excluded.brief <> ''
+                        THEN excluded.brief        ELSE feed_item.brief        END,
     case_worthy  = CASE WHEN excluded.enriched THEN excluded.case_worthy  ELSE feed_item.case_worthy  END,
     enriched     = MAX(excluded.enriched, feed_item.enriched)
 """
 
-# NEW 배지 감쇠 — farmed_at 이 NULL 인 시드 자료는 건드리지 않는다.
-_DECAY_NEW = """
-UPDATE feed_item SET is_new = 0
- WHERE is_new = 1 AND farmed_at IS NOT NULL AND farmed_at < ?
+# 그날치 키워드 등장 건수 스냅샷 (화면 KW_TREND 의 전일 대비 증감 원천).
+# 실행 끝에 1회. INSERT OR REPLACE 라 같은 날 여러 번 돌려도 행이 늘지 않고 최신값으로 덮인다.
+# ★ 자료 건수(COUNT(*))를 센다 — 같은 자료 안의 중복 키워드는 PK 가 이미 막는다.
+# ★ day 축은 **KST** 다(store._evidence 의 NEW 판정과 같은 시계).
+#   substr(farmed_at,1,10) = UTC 날짜로 끊으면 KST 같은 날 두 실행이 다른 day 로 갈라져
+#   헛 차분을 내고, KST 다른 두 날이 같은 UTC day 로 뭉치면 INSERT OR REPLACE 가
+#   전날 기준선을 덮어 kwTrend 가 {} 로 되돌아간다.
+_KW_SNAPSHOT = """
+INSERT OR REPLACE INTO keyword_daily(day, keyword, n)
+SELECT date(f.farmed_at, :tz), k.keyword, COUNT(*)
+  FROM feed_item f
+  JOIN feed_item_keyword k ON k.feed_id = f.id
+ WHERE date(f.farmed_at, :tz) = :day
+ GROUP BY 1, 2
+"""
+
+# 키워드 추출에 쓸 텍스트를 **저장된 행에서 다시 읽는다** (_sync_keywords 주석 참고).
+_KW_TEXT = """
+SELECT COALESCE(NULLIF(title_label, ''), title) AS title, summary, metrics
+  FROM feed_item WHERE id = ?
 """
 
 
@@ -132,7 +156,7 @@ def store(
     use_llm: bool = True,
     enrich_limit: int = 12,
 ) -> dict:
-    """적재 후 {seen, written, tags, enriched, theme_default, by_source} 통계 반환.
+    """적재 후 {seen, written, tags, keywords, enriched, theme_default, by_source} 통계 반환.
 
     theme_default 는 LLM 테마를 못 써서 규칙 폴백으로 떨어진 건수입니다. 이 값이 크면
     본문·요약이 부족하다는 신호입니다(제목만으로는 키워드 규칙이 절반도 못 맞춥니다).
@@ -141,17 +165,17 @@ def store(
     요약표가 crawler 의 확보 통계와 나란히 찍기 위해 씁니다 — 두 통계는 base.source_of
     라는 **같은 기준**으로 소스를 세야 서로 맞습니다.
     """
-    empty_stats = {"seen": 0, "written": 0, "tags": 0, "enriched": 0,
+    empty_stats = {"seen": 0, "written": 0, "tags": 0, "keywords": 0, "enriched": 0,
                    "theme_default": 0, "by_source": {}}
     if not docs:
         return empty_stats
 
     refined = llm.enrich(docs, limit=enrich_limit, use_llm=use_llm)
 
+    # farmed_at 은 **UTC ISO 로 저장한다** — 저장은 UTC 가 정답이고 해석(=오늘인가)만 KST 로 한다.
     now = datetime.now(timezone.utc).isoformat(timespec="seconds")
-    cutoff = (datetime.now(timezone.utc) - timedelta(days=NEW_DAYS)).isoformat(timespec="seconds")
     conn = get_connection()
-    written = tag_count = enriched = theme_default = 0
+    written = tag_count = kw_count = enriched = theme_default = 0
     by_source: Dict[str, Counter] = defaultdict(Counter)
     try:
         allowed_themes = _db_themes(conn)
@@ -191,20 +215,22 @@ def store(
                 ref["org"] or None, ref["headline"] or None,
                 json.dumps(ref["metrics"], ensure_ascii=False), grade,
                 ",".join(ref["levers"]) or None,
-                ref["importance"], ref["reason"] or None,
+                ref["importance"], ref["reason"] or None, ref["brief"] or None,
                 int(ref["case_worthy"]), int(was_enriched),
             ))
             written += 1
             enriched += int(was_enriched)
             tag_count += _sync_tags(conn, doc.feed_id, tags)
+            # ★ _UPSERT 뒤에 부른다 — 추출 원문을 저장된 행에서 다시 읽기 때문이다.
+            kw_count += _sync_keywords(conn, doc.feed_id, ref["keywords"])
 
             src = by_source[source_of(doc)]
             src["written"] += 1
             src["enriched"] += int(was_enriched)
             src[grade] += 1
 
-        # 오래된 NEW 배지 정리 — 루프 밖에서 1회.
-        conn.execute(_DECAY_NEW, (cutoff,))
+        # 오늘치(KST) 키워드 스냅샷 — 루프 밖에서 1회. 내일 실행분과 차분해 화면 KW_TREND 가 된다.
+        conn.execute(_KW_SNAPSHOT, {"tz": LOCAL_TZ_SQL, "day": today_local()})
         conn.commit()
 
         # ★ 등급 집계는 커밋 뒤 DB 에서 다시 읽는다.
@@ -233,9 +259,52 @@ def store(
         conn.close()
     return {
         "seen": len(docs), "written": written, "tags": tag_count,
-        "enriched": enriched, "theme_default": theme_default,
+        "keywords": kw_count, "enriched": enriched, "theme_default": theme_default,
         "by_source": {k: dict(v) for k, v in by_source.items()},
     }
+
+
+def _sync_keywords(conn, feed_id: str, llm_keywords: List[str]) -> int:
+    """동향 키워드를 교체한다 (화면 EV_KW → bootstrap.evKw).
+
+    LLM 이 낸 키워드를 **앞자리에** 두고, 모자란 자리를 사전 추출로 채운다.
+    LLM 이 없거나 실패해도(크레딧 소진·--no-llm) 사전 추출만으로 채워지는 것이 핵심이다 —
+    비면 트렌드룸의 키워드 카드·트리맵 라벨·행 칩·키워드 필터가 한꺼번에 죽는다.
+
+    태그와 같은 이유로 **지우고 다시 넣는다**: KEYWORD_LEXICON 을 고쳤을 때
+    재크롤 한 번으로 갱신되어야 하고, 추가만 하면 옛 키워드가 영원히 남는다.
+
+    ★ 추출 원문은 **이번 실행이 들고 온 값이 아니라 방금 UPSERT 된 행에서 다시 읽는다.**
+      `_UPSERT` 의 보존 가드(summary · title_label · metrics)가 본문 없는 재크롤
+      (`--with-docs 0` · `--no-llm` · 상한 밖 · 확보 실패)로부터 기존 값을 지켜 주는데,
+      키워드만 이번 실행의 빈 ref/naive 요약으로 뽑으면 **지우고 다시 넣기가 그 가드를
+      우회해** 이미 확보한 키워드를 통째로 날린다. 실측: `--no-llm --with-docs 5` 재크롤
+      한 번에 키워드 보유 자료가 **77건 → 43건**(156행 → 89행)으로 무너졌다.
+      저장된 행을 읽으면 같은 입력 → 같은 결과라 재크롤이 멱등해진다.
+    """
+    row = conn.execute(_KW_TEXT, (feed_id,)).fetchone()
+    if row is None:                      # UPSERT 직후라 정상 경로에서는 없을 수 없다
+        return 0
+    try:
+        metrics = json.loads(row["metrics"] or "[]")
+    except ValueError:
+        metrics = []
+    text = keywords.text_of(row["title"] or "", row["summary"] or "", metrics)
+
+    picked: List[str] = []
+    for word in list(llm_keywords or []) + keywords.extract(text):
+        if word and word not in picked:
+            picked.append(word)
+        if len(picked) >= keywords.KEYWORDS_MAX:
+            break
+
+    conn.execute("DELETE FROM feed_item_keyword WHERE feed_id = ?", (feed_id,))
+    for seq, word in enumerate(picked):
+        conn.execute(
+            "INSERT OR IGNORE INTO feed_item_keyword(feed_id, keyword, seq) VALUES (?,?,?)",
+            (feed_id, word, seq),
+        )
+    return len(picked)
 
 
 def _sync_tags(conn, feed_id: str, tags: List[str]) -> int:

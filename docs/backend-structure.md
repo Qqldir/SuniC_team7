@@ -1,8 +1,11 @@
 # O/I Spark 백엔드 구조 — 테이블 · API · CRUD
 
-> 작성 기준: `SuniC_team7` / 브랜치 `roki_backend` / 2026-08-06
-> 엔드포인트 **24개** · 테이블 **30개** + 뷰 1개
-> (감사 후 정리: 41→24. 화면·파이프라인이 안 쓰는 라우트와 빈 테이블 제거. 기능 손실 0)
+> 작성 기준: `SuniC_team7` / 2026-08-07 (트렌드룸 재설계 반영)
+> 엔드포인트 **27개(25 경로)** · 테이블 **32개** + 뷰 1개
+> (감사 후 정리: 41→24 경로. 화면·파이프라인이 안 쓰는 라우트와 빈 테이블 제거. 기능 손실 0.
+>  그 뒤 시세가 1경로(`GET /api/quotes`) · 1테이블(`quote_daily`)을 더했다 = 25 경로 · 32 테이블)
+> 근거 명령: `cd backend && .venv/bin/python -c "from app.main import app; print(sorted(app.openapi()['paths']))"`
+> — `/api/auth/me` 가 GET·DELETE, `/api/admin/users` 가 GET·POST 라 경로 25 · 오퍼레이션 27 이다.
 > 이 문서의 모든 표는 **실행 중인 서버의 OpenAPI 와 소스의 SQL 을 추출해** 만들었습니다(손으로 옮기지 않음).
 > 표에 적힌 행수는 작성 시점의 개발 DB 스냅샷입니다 — 구조를 감잡는 용도이지 고정값이 아닙니다.
 
@@ -51,7 +54,7 @@
 | `lever_alias` | 16 | 레버 표기 변형 → 정식명 | `alias`(정비·TA), `lever`(정비/TA) |
 | `theme` | 7 | 트렌드 테마 | `name`, `color`, `bg`, `head`, `body` |
 | `source_kind` | 9 | 자료 종류 | `key`(disclosure/earnings/…), `label`(공시/실적발표/…) |
-| `app_user` | 3 | 로그인 계정 | `email`(PK), `password_hash`, `is_active` |
+| `app_user` | 3 | 로그인 계정 | `email`(PK), `password_hash`, `is_active`, **`is_admin`**, `created_at` |
 
 > **`affiliate.kb_company`** — `backend/knowledge/<디렉터리>` 이름. SKO·SKES 만 값이 있고 나머지 7개는 NULL.
 > NULL 이면 RAG 가 내부 지식 블록을 통째로 생략한다. 이 값이 없는데 검색을 시도하면 500 이 난다.
@@ -62,8 +65,10 @@
 
 | 테이블 | 행수 | 무엇 | 채우는 주체 |
 |---|---:|---|---|
-| `feed_item` | 14 | **외부 근거 자료**(공시·실적·뉴스) | 파밍 크롤러 + LLM 정제 |
-| `feed_item_tag` | 43 | 자료 ↔ 계열사 | 파밍 엔티티 태깅 |
+| `feed_item` | 90 | **외부 근거 자료**(공시·실적·뉴스) | 파밍 크롤러 + LLM 정제 |
+| `feed_item_tag` | 166 | 자료 ↔ 계열사 (bootstrap `evOc`) | 파밍 엔티티 태깅 |
+| `feed_item_keyword` | 156 | 자료 ↔ 동향 키워드 (bootstrap `evKw`) | 파밍 사전 추출 + LLM |
+| `keyword_daily` | 28 | 키워드 일별 등장 건수 (bootstrap `kwTrend` 의 차분 원천) | 파밍 실행 끝 스냅샷 |
 | `gen_version` | 21 | **생성 버전**(재생성 1회 = 1행) | 재생성 |
 | `proposal` | 68 | **과제 제안** | LLM 발굴 / 후보풀 / 커스텀 / 시드 |
 | `proposal_evidence` | 74 | 과제 ↔ 근거 자료 | 과제 저장 시 |
@@ -71,8 +76,18 @@
 | `proposal_evaluation` | 400 | **AI 평가 결과**(이력 보존) | 평가 실행 |
 | `proposal_evaluation_issue` | 405 | 검증 이슈(경고/차단) | 평가 실행 |
 | `kb_innovation_case` | 8 | 혁신 사례 | 시드만 (입력 API 없음) |
-| `crawl_source` / `upload_file` / `admin_member` / `app_setting` | 12/5/4/3 | 관리자 화면 | 시드 + 관리자 |
+| `crawl_source` / `upload_file` / `app_setting` | 12/5/3 | 관리자 화면 | 시드 + 관리자 |
+| `quote_daily` | 기준일별 누적 | 관심 종목 시세 캐시 (`GET /api/quotes` 3단 폴백의 마지막 층) | `app/market.py` |
 | `job` | 11 | 비동기 작업 상태 | 재생성·LLM 평가 |
+
+> **`crawl_source.last_at` 은 아무도 갱신하지 않는다.** 시드가 넣은 표시용 문자열이라
+> 화면이 그 값을 '마지막 수집' 으로 읽으면 거짓이 된다(실제 수집 시각은 `feed_item.farmed_at`).
+> 그래서 bootstrap 은 `crawlAt` 키를 `MAX(farmed_at)`(KST)에서 따로 만들어 내린다.
+
+> **`admin_member` 는 제거했다.** 화면 표시용 관리자 명단이었는데 재설계된 트렌드룸이
+> 실제 로그인 계정(`app_user`)을 다루는 계정 관리 탭으로 갈아탔다 — 명단 테이블은 소비처가 0 이 됐다.
+> 계정 관리는 `/api/admin/users` 4개 엔드포인트가 `app_user.is_admin` 으로 담당한다(2-5 절).
+> 기존 DB 는 `app/db/seed.py` 의 `_DROPS` 가 시드 실행 때 지운다.
 
 #### `feed_item` 컬럼 (외부 자료 1건)
 
@@ -80,10 +95,14 @@
 원문 그대로            id, published_on, kind→source_kind, source, title, summary, url, farmed_at
 화면 표시용            kind_label(Earnings call), source_label, title_label, publisher,
                       theme→theme, biz_hint, is_new, metrics(JSON), evidence_grade
-LLM 정제 결과          levers, importance(0~100), reason, case_worthy, enriched
+LLM 정제 결과          levers, importance(0~100), reason, brief, case_worthy, enriched
 ```
 > `source`/`title` 은 **원문을 보존**하고, 화면에는 `source_label`/`title_label` 이 있으면 그걸 쓴다.
 > `evidence_grade` = 원문 확보 / 요약문 / 제목만 — "이 요약이 무엇을 보고 만들어졌는가".
+> **`brief`(bootstrap `evBrief`)는 `summary`·`reason` 과 목적이 다르다.** `summary` 는 사실 재진술,
+> `reason` 은 중요도 판단 근거(평가문), `brief` 는 트렌드룸 브리핑 카드에 쓸 1~2문장 해설이다.
+> LLM 만 만들 수 있고, 비면 `store._ev_brief()` 가 **키 자체를 생략**해 화면이 요약으로 폴백한다.
+> 본문 없는 재크롤(`--with-docs 0` / `--no-llm`)이 기존 값을 덮지 않도록 `ingest._UPSERT` 에 보존 가드가 있다.
 
 #### `proposal` 컬럼 (과제 1건)
 
@@ -132,27 +151,67 @@ LLM 정제 결과          levers, importance(0~100), reason, case_worthy, enric
 
 | Method | 경로 | 테이블 CRUD |
 |---|---|---|
-| GET | 🔒 `/api/bootstrap` | `affiliate` `biz_segment` `lever` `theme` `source_kind` `feed_item` `gen_version` `proposal` `proposal_evidence` `proposal_evaluation` `proposal_evaluation_issue` `crawl_source` `upload_file` `admin_member` `app_setting` `proposal_feedback` `proposal_input` `proposal_formula` `report_*` **← 전부 R** |
+| GET | 🔒 `/api/bootstrap` | `affiliate` `biz_segment` `lever` `source_kind` `feed_item` `feed_item_tag` `feed_item_keyword` `keyword_daily` `gen_version` `proposal` `proposal_evidence` `proposal_evaluation` `proposal_evaluation_issue` `crawl_source` `upload_file` `app_setting` `proposal_feedback` `proposal_input` `proposal_formula` `report_*` **← 전부 R** |
 
-**응답 구조** (프론트 변수와 1:1)
+> `theme` 테이블은 **더 이상 bootstrap 이 읽지 않는다** — 페이로드에서 `themes`/`evTheme` 두 키를
+> 뺐기 때문이다. 테이블·`feed_item.theme` 컬럼은 그대로 살아 있고 파밍 분류(`farming/ingest._db_themes`)와
+> 평가가 계속 쓴다. 지운 것은 응답 2키뿐이다.
+
+**응답 구조 — 최상위 22키** (프론트 변수와 1:1. 이름·순서를 바꾸면 화면이 깨진다)
 
 ```jsonc
 {
-  "user": {"email": "..."},
-  "today": "2026-08-06",            // 기간 필터 기준일 (OI_TODAY)
-  "ocs": [...], "ocColor": {...}, "bizColor": {...}, "kinds": [...],
-  "levers": {...}, "themes": {...},
-  "evidence":  { "e1": {src, kind, date, url, title, sum, metrics} },
-  "evTheme": {...}, "evBizFallback": {...}, "evNew": {...}, "kindMap": {...},
-  "versions": [{id, label, trigger}],
+  "user":  {"email": "admin@sk.com"},   // 프론트가 localStorage['oi-user'] 를 이 값으로 맞춘다
+  "today": "2026-08-07",                // 기간 필터 기준일 — **매 요청 시점 KST**(config.today_local()).
+                                        //   OI_TODAY 는 데모 재현용 override 이고 빈 값이 정상이다.
+                                        //   상수가 아니라 함수라 서버를 며칠 띄워도 부팅일에 굳지 않는다.
+  "kinds": ["공시","실적발표","IR·보고서","시황·전문지","협회 자료","뉴스"],  // 실재하는 종류만
+  "ocs": [{code,name,biz}], "ocColor": {...}, "bizColor": {...},
+  "levers": {"정비/TA": {metric, text, fields[]}},   // calc/show 는 프론트 LEVER_CALC 가 합성
+  "evidence":      { "e1": {src, kind, date, url, title, sum, metrics} },
+  "evBizFallback": {"e1": "에너지·화학"},
+  "evNew":         {"e1": 1},                        // **오늘(KST) 크롤분만.** 저장 플래그(is_new)가
+                                                     //   아니라 date(farmed_at,'+9 hours')==today 판정이다.
+                                                     //   farmed_at 은 UTC 저장이라 오프셋 보정이 필수 —
+                                                     //   substr(farmed_at,1,10) 으로 비교하면 KST 새벽
+                                                     //   크롤분이 통째로 빠진다(실측 76건 → 0건).
+  "evOc":          {"e1": ["SKE","SKGC"]},           // feed_item_tag
+  "evKw":          {"e1": ["정기보수","공기 단축"]},   // feed_item_keyword (최대 4)
+  "evBrief":       {"e1": "…1~2문장…"},               // feed_item.brief. 비면 키 자체를 생략
+  "kwTrend":       {"원가 절감": 3, "물류비": -1},     // keyword_daily 최근 2일 차분. 1일뿐이면 {}
+  "kindMap":  {"수시공시 (8-K)": "공시"},
+  "versions": [{id, label, trigger, at}],            // label 은 날짜('2026.08.07'),
+                                                     //   at 은 분 단위 시각('2026.08.07 15:51').
+                                                     //   at 은 state.send.lastAt 과 **같은 표기**여야
+                                                     //   한다 — 발송 대상 필터가 문자열 비교다.
   "tasks":    [ /* 아래 21개 키 */ ],
-  "sources": [...], "uploads": [...], "admins": [...],
-  "instruction": "...", "evalCriteria": "우선순위 = ...",
+  "sources": [...],
+  "crawlAt": "2026.08.07 03:00",                     // MAX(feed_item.farmed_at) 를 KST 로.
+                                                     //   crawl_source.last_at 은 파이프라인이 갱신하지
+                                                     //   않는 표시용 컬럼이라 못 쓴다. 이력이 없으면 ""
+                                                     //   이고 화면은 그 줄을 아예 그리지 않는다.
+  "uploads": [...],
+  "instruction": "...",
   "state": { "fb": {"1240": {"s": 4, "t": "메모"}},   // ← 사용자 별점
              "fields": {...}, "fx": {...}, "sysOff": {...},
              "sendOff": {...}, "send": {...}, "recipients": [...], "channels": {...} }
 }
 ```
+
+> **삭제된 4키**: `themes` · `evTheme` · `admins` · `evalCriteria`. 트렌드룸 재설계로 테마 카드와
+> 관리자 명단 UI 가 사라졌고, 선정 기준은 `GET /api/evaluation/criteria` 가 따로 준다.
+> **신설된 5키**: `evOc` · `evKw` · `evBrief` · `kwTrend`(위 표의 신규 2테이블 + `feed_item.brief`)
+> · `crawlAt`(사이드바 '수집 파이프라인' 의 마지막 수집 시각).
+> `state.fb`/`fields`/`fx`/`sysOff` 의 키는 JSON 직렬화 때문에 **문자열**("1134")이고 `tasks[].id` 는 number 다.
+
+> **시세는 bootstrap 이 아니라 별도 경로입니다** — `GET /api/quotes`.
+> 화면 상단 '관심 종목' 티커가 현재가·등락률을 보여 주며, 값은 `app/market.py` 가 3단 폴백으로
+> 만듭니다: ① 네이버 금융 실시간 체결가(키 불필요, 12종목 즉시) → ② 공공데이터포털
+> 금융위원회_주식시세정보(직전 영업일 종가, 기준일 다음 영업일 13시 이후) → ③ `quote_daily` 캐시.
+> **bootstrap 22키와 분리한 이유**: 시세는 외부 API 호출이라 실패·지연이 잦은데, 한 응답에 묶으면
+> 화면 전체가 그 지연을 기다리고 외부 장애가 로그인 직후 화면을 통째로 막습니다. 갱신 주기도
+> 다릅니다(시세는 `QUOTE_TTL_SEC`, bootstrap 은 화면 진입 1회). 실패해도 예외를 올리지 않아
+> 숫자만 빠지고 종목명·링크는 남습니다.
 
 **`tasks[]` 원소 21개 키** — 이름·순서를 바꾸면 화면이 깨집니다
 
@@ -235,7 +294,19 @@ proposal_evaluation_issue  code(MISSING_FIELD/DUPLICATE/STALE_EVIDENCE/TOO_SHORT
 | PUT | 🔒 `/instruction` | `app_setting` **C·U** |
 | POST | 🔒 `/instruction/reset` | `app_setting` **R U** |
 | POST | 🔒 `/uploads/file` | `upload_file` **C** (multipart. `use_now=true` 면 바로 '검수 완료') |
-| POST / DELETE | 🔒 `/members` `/members/{mail}` | `admin_member` **C·U** / **D** |
+| GET | 🔒👑 `/users` | `app_user` **R** → `{"users":[{email, is_admin, is_active, created_at}]}` |
+| POST | 🔒👑 `/users` | `app_user` **C** — `{email, is_admin}` → `{email, initial_password:"1111"}` |
+| POST | 🔒👑 `/users/{email}/reset-password` | `app_user` **U** → `{ok, email, initial_password:"1111"}` |
+| DELETE | 🔒👑 `/users/{email}` | `app_user` **D** + `store.purge_user()` 로 사용자 상태 6테이블 **D** |
+
+> 👑 = **관리자(`app_user.is_admin=1`)만.** `app/api/deps.py:current_admin` 이 게이트다.
+> 인증이 없으면 **401**, 인증은 됐지만 관리자가 아니면 **403** `{"detail":"관리자 권한이 필요합니다."}` —
+> 화면(`trendroom.html` 계정 관리 탭)이 403 만 특별 취급해 안내 문구를 띄우므로 이 구분을 바꾸면 안 된다.
+> 나머지 실패는 400(이메일 형식 · 본인 삭제 · 마지막 관리자 삭제) / 404(없는 계정) / 409(중복)이고
+> 응답은 전부 `{"detail": "..."}` 다.
+> 비밀번호는 프론트가 보내지 않는다 — 서버가 항상 `1111`(seed_users 기본값)을 쓴다.
+> `instruction` · `instruction/reset` · `uploads/file` 3개에는 👑 게이트를 **일부러 안 씌웠다**(전원 사용).
+> 첫 관리자는 `python -m app.db.seed_users --admin admin@sk.com` 으로 승격한다.
 
 > **업로드 본문이 RAG 에 들어가는 조건**: `status='검수 완료'` **이고** `extracted_at IS NOT NULL`.
 > 검토되지 않은 내부 문서가 자동으로 LLM 프롬프트에 흘러드는 것을 막는 게이트입니다.
@@ -259,12 +330,14 @@ proposal_evaluation_issue  code(MISSING_FIELD/DUPLICATE/STALE_EVIDENCE/TOO_SHORT
 | POST | 🔒 `/api/evaluation/run` | `job` **C** → (백그라운드) | 범위 지정 평가. **LLM 채점을 다시 돌릴 유일한 수단** |
 | GET | 🔒 `/api/evaluation/run/{job_id}` | `job` **R** | |
 | GET | `/api/feed` | `feed_item` `feed_item_tag` **R** | 파밍 품질 점검용(화면 미사용) |
+| GET | `/api/quotes` | `quote_daily` **R U** | 관심 종목 시세. 네이버 금융 → 공공데이터포털 → `quote_daily` 캐시 3단 폴백. **bootstrap 과 분리** — 외부 API 지연·장애가 화면 전체를 막지 않게 |
 
 **감사 후 제거된 것** — 화면·파이프라인·테스트 어디서도 호출하지 않음이 grep 으로 입증된 것만 지웠습니다.
 
 | 제거 | 이유 |
 |---|---|
-| `GET /api/proposals`, `/report/settings`, `/admin/{uploads,sources,members,instruction}` | `/api/bootstrap` 이 같은 데이터를 이미 준다 |
+| `GET /api/proposals`, `/report/settings`, `/admin/{uploads,sources,instruction}` | `/api/bootstrap` 이 같은 데이터를 이미 준다 |
+| `POST`·`DELETE /api/admin/members` (+ `admin_member` 테이블) | 화면 표시용 관리자 명단이 재설계에서 사라졌다. 계정 관리는 `/api/admin/users` 가 담당 |
 | `GET /api/proposals/{pid}/evaluation` | bootstrap 의 `tasks[]` 가 verdict·grade·evalScore·flags·scoredBy 를 준다 |
 | `POST /api/admin/uploads`(JSON) | 본문 없는 유령 행만 만들어 RAG 게이트를 영원히 통과 못 함 |
 | `PUT /api/admin/uploads/{id}/status` | 승인을 **업로드 시 선택**(`use_now`)으로 옮김 |

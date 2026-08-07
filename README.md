@@ -83,21 +83,28 @@ OI_SERVE_FRONTEND=1 uvicorn app.main:app --port 8000
 ```
 
 FastAPI 가 `frontend/dist` 를 함께 서빙해 `http://localhost:8000` 하나로 화면까지 뜹니다.
-프론트를 고쳤으면 `npm run build` 를 다시 돌려야 반영됩니다.
+
+> ⚠ **프론트를 고쳤으면 `npm run build` 를 반드시 다시 돌리세요.** 백엔드가 돌려주는 것은
+> `frontend/public/trendroom.html` 이 아니라 **`frontend/dist/trendroom.html`** 입니다.
+> 재빌드를 빼먹으면 이 모드로 띄운 사람만 옛 화면을 받습니다 — 삭제된 API 를 부르고
+> bootstrap 이 더는 안 내리는 키를 읽어 화면 일부가 빈 채로 뜹니다.
+> 개발 중에는 이 플래그를 켜지 말고 Vite dev 서버(5173)를 쓰세요.
 
 ## 주요 API
 
-엔드포인트는 24개입니다. 전체 스펙은 서버를 띄운 뒤 `http://localhost:8000/docs`,
+엔드포인트는 27개(25 경로)입니다. 전체 스펙은 서버를 띄운 뒤 `http://localhost:8000/docs`,
 경로별 설명과 응답 계약은 `docs/backend-structure.md` 를 보세요.
 
 | 엔드포인트 | 설명 |
 |---|---|
 | `POST /api/auth/login` · `GET /api/auth/me` | 로그인 / 세션 확인 (Bearer 토큰) |
-| `GET /api/bootstrap` | 화면 초기 데이터 일괄 (OC · 레버 · 테마 · 근거자료 · 과제 · 소스 · 권한 · 사용자 상태) |
+| `GET /api/bootstrap` | 화면 초기 데이터 일괄 22키 (OC · 레버 · 근거자료 · 계열사 자료 태그 · 동향 키워드 · 브리핑 · 과제 · 소스 · 마지막 수집 시각 · 사용자 상태) |
+| `GET /api/quotes` | 관심 종목 시세 (네이버 금융 → 공공데이터포털 → `quote_daily` 캐시 3단 폴백). bootstrap 과 분리 — 외부 API 지연이 화면 전체를 막지 않게 |
 | `POST /api/proposals/regenerate` · `/custom` | 과제 재생성 / 커스텀 생성 — **비동기**. 작업 id 를 받아 `GET .../{job_id}` 로 폴링 |
 | `PUT /api/proposals/{id}/feedback` · `/fields` · `/formula` | 별점·메모 · 기준값 · 산출식 저장 (계정별) |
 | `POST /api/evaluation/run` · `GET /api/evaluation/criteria` | 저장된 과제 재평가(비동기) / 선정 기준 |
-| `PUT /api/admin/instruction` · `POST /api/admin/uploads/file` · `/members` | 관리자 화면 (조회는 `/api/bootstrap` 이 담당) |
+| `PUT /api/admin/instruction` · `POST /api/admin/uploads/file` | 관리자 화면 (조회는 `/api/bootstrap` 이 담당) |
+| `GET`·`POST /api/admin/users` · `POST /api/admin/users/{email}/reset-password` · `DELETE /api/admin/users/{email}` | 계정 관리 — **관리자 계정만**. 그 외에는 403 |
 | `PUT /api/report/settings` · `POST /api/report/test` | AI Reporting 설정 |
 | `GET /api/feed` | 파밍 결과 확인 (혁신 사례는 API 없이 시드로만 관리) |
 
