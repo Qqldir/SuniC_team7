@@ -76,7 +76,7 @@ button,input,select,textarea{font-family:inherit;color:inherit}
 .ski-logo b{color:#EA002C}
 .ski-logo i{color:#FF7A00;font-weight:700;font-style:normal}
 @font-face{font-family:'Chillax';src:url('/fonts/Chillax-Semibold.woff2') format('woff2'),url('/fonts/Chillax-Semibold.woff') format('woff');font-weight:600;font-style:normal;font-display:swap}
-.oi-logo{font-family:'Chillax','Pretendard Variable',Arial,sans-serif;font-weight:600;letter-spacing:-.02em;white-space:nowrap;background:linear-gradient(100deg,#9a6ee0,#bd7cb0 52%,#f8b2b2);-webkit-background-clip:text;background-clip:text;color:transparent}
+.oi-logo{font-family:'Chillax','Pretendard Variable',Arial,sans-serif;font-weight:600;letter-spacing:-.02em;white-space:nowrap;background:linear-gradient(100deg,#9a6ee0,#c9a6dd 50%,#f9efec);-webkit-background-clip:text;background-clip:text;color:transparent}
 html[data-theme="light"] .oi-logo{background:linear-gradient(100deg,#2f5d84,#3D7EAE 55%,#5fa0d0);-webkit-background-clip:text;background-clip:text}
 .logout-b{color:var(--t3)}
 .logout-b:hover{background:var(--fill);color:var(--bad)}
@@ -191,7 +191,7 @@ html[data-theme="light"] .oi-logo{background:linear-gradient(100deg,#2f5d84,#3D7
 h1{font-size:21px;font-weight:700;letter-spacing:-.5px}
 h2{font-size:14px;font-weight:700;letter-spacing:-.3px}
 .lede{font-size:12.5px;color:var(--t3);line-height:1.6}
-.page-h{display:flex;align-items:flex-end;justify-content:space-between;gap:20px;flex-wrap:wrap}
+.page-h{display:flex;align-items:center;justify-content:space-between;gap:20px;flex-wrap:wrap;min-height:40px}
 .card{background:var(--panel);border:1px solid var(--line);border-radius:14px;
   box-shadow:0 1px 2px rgba(16,24,40,.04)}
 .card-h{display:flex;align-items:center;gap:10px;padding:14px 17px;border-bottom:1px solid var(--line-soft);flex-wrap:wrap}
@@ -533,9 +533,13 @@ html[data-theme="dark"] .pie svg,html[data-theme="dark"] .cbar,html[data-theme="
 
 /* ═══════ 티커 오른쪽 트렌드룸 버튼 ═══════ */
 .tk-btn{flex:none;display:flex;align-items:center;justify-content:center;padding:0 22px;border:0;
-  background:#0f62fe;cursor:pointer;font-size:12.5px;font-weight:700;color:#fff;
+  background:var(--brand);cursor:pointer;font-size:12.5px;font-weight:700;color:#fff;
   white-space:nowrap;letter-spacing:-.2px;transition:background .12s}
-.tk-btn:hover{background:#0043ce}
+.tk-btn:hover{background:var(--brand-hover)}
+html[data-theme="light"] .tk-btn{background:#0D47A1}
+html[data-theme="light"] .tk-btn:hover{background:#0a3a82}
+html[data-theme="dark"] .tk-btn{background:#403D88}
+html[data-theme="dark"] .tk-btn:hover{background:#4d499e}
 
 /* ═══════ 트렌드룸 ═══════ */
 .tr-hero{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:16px}
@@ -2694,7 +2698,7 @@ function viewMy(){
   const csHtml = myCustom.length ? `<div class="mylist">${myCustom.map(t=>myTaskCard(t)).join('')}</div>`
     : `<div class="my-empty">아직 커스텀 생성한 과제가 없습니다.</div>`;
   return `
-  <div class="page-h"><div><h1>마이페이지</h1></div></div>
+  <div class="page-h"><div class="stack" style="gap:5px"><h1>마이페이지</h1></div></div>
   <div class="card"><div class="card-b">
     <div class="my-acct">
       <div class="my-av">${esc(initial)}</div>
