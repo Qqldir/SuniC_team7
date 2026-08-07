@@ -2634,6 +2634,16 @@ async function adminDelUser(email){
     S.usersMsg=`${email} 삭제됨`; loadAdminUsers();
   }catch(e){ alert('서버 연결 오류'); }
 }
+async function adminSetAdmin(email, makeAdmin){
+  if(!confirm(makeAdmin ? `${email} 에 관리자 권한을 부여할까요?` : `${email} 의 관리자 권한을 해제할까요?`)) return;
+  try{
+    const r=await fetch(`/api/admin/users/${encodeURIComponent(email)}/admin`,{method:'POST',
+      headers:{'Content-Type':'application/json',...admAuth()}, body:JSON.stringify({is_admin:makeAdmin})});
+    const d=await r.json().catch(()=>({}));
+    if(!r.ok){ alert(d.detail||'권한 변경 실패'); return; }
+    loadAdminUsers();
+  }catch(e){ alert('서버 연결 오류'); }
+}
 
 /* ---------- 6. 관리자 ---------- */
 function viewAdmin(){
@@ -2688,8 +2698,8 @@ function viewAdmin(){
           </div>
           <div class="fld"><label class="fld-l">귀속 OC</label>
             <select class="sel" id="upOc"><option>전사</option>${OCS.map(o=>`<option>${esc(o.name)}</option>`).join('')}</select></div>
-          <label class="row-f" style="gap:8px;font-size:12.5px;color:var(--t1)">
-            <input type="checkbox" id="upNow" ${S.upNow?'checked':''}> 바로 사용 (검수 완료로 등록해 생성 프롬프트에 투입)</label>
+          <label class="row-f" style="gap:8px;font-size:12.5px;color:var(--t1);white-space:nowrap">
+            <input type="checkbox" id="upNow" ${S.upNow?'checked':''}>바로 사용 <span class="note" style="font-size:11px">(검수 완료·프롬프트 투입)</span></label>
           ${S.upMsg?`<div class="hint"><span class="dot"></span><span>${esc(S.upMsg)}</span></div>`:''}
           ${S.upErr?`<div class="hint" style="border-color:var(--bad)"><span class="dot" style="background:var(--bad)"></span><span>${esc(S.upErr)}</span></div>`:''}
         </div></div>
@@ -2701,12 +2711,13 @@ function viewAdmin(){
       <div class="card"><div class="card-h"><h2>계정 목록</h2><span class="note num">${S.users.length}명</span>
         <button class="btn sm" style="margin-left:auto" onclick="loadAdminUsers()">↻ 새로고침</button></div>
         ${S.usersErr?`<div class="hint" style="margin:12px 17px"><span class="dot" style="background:var(--bad)"></span><span>${esc(S.usersErr)}</span></div>`:''}
-        <table><thead><tr><th style="min-width:200px">이메일 (로그인 ID)</th><th style="width:84px">권한</th><th style="width:72px">상태</th><th style="width:158px" class="tr"></th></tr></thead>
+        <table><thead><tr><th style="min-width:200px">이메일 (로그인 ID)</th><th style="width:84px">권한</th><th style="width:72px">상태</th><th style="width:250px" class="tr"></th></tr></thead>
         <tbody>${S.users.map(u=>`<tr class="r-hover">
           <td class="mono" style="font-size:12px">${esc(u.email)}</td>
           <td><span class="tag ${u.is_admin?'lv':'nt'}">${u.is_admin?'관리자':'일반'}</span></td>
           <td><span class="tag ${u.is_active?'ok':'wn'}">${u.is_active?'활성':'비활성'}</span></td>
-          <td class="tr"><button class="btn sm" onclick="adminResetPw('${esc(u.email)}')">비번 초기화</button>
+          <td class="tr"><button class="btn sm" onclick="adminSetAdmin('${esc(u.email)}',${u.is_admin?'false':'true'})">${u.is_admin?'권한 해제':'관리자 지정'}</button>
+            <button class="btn sm" onclick="adminResetPw('${esc(u.email)}')">비번 초기화</button>
             <button class="btn sm" onclick="adminDelUser('${esc(u.email)}')">삭제</button></td></tr>`).join('')
           || `<tr><td colspan="4" class="note" style="padding:16px 17px">${S.usersLoaded?'계정이 없습니다.':'불러오는 중…'}</td></tr>`}</tbody></table>
       </div>
