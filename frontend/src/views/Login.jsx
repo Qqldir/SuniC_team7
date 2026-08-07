@@ -241,7 +241,7 @@ const LP_CSS = `
 .lp{--acc:#a855f7;--acc2:#38bdf8;--acc-glow:rgba(168,85,247,.6);
   min-height:100vh;position:relative;overflow-x:hidden;color:#edeaf7;line-height:1.5;
   background:radial-gradient(ellipse at bottom,#140f2b 0%,#07070c 70%);
-  font-family:'Pretendard Variable',Pretendard,-apple-system,'Noto Sans KR',sans-serif}
+  font-family:'paybooc','Pretendard Variable',Pretendard,-apple-system,'Noto Sans KR',sans-serif}
 .lp a{color:inherit;text-decoration:none}
 .lp ::selection{background:#6d3bff;color:#fff}
 .lp-wrap{max-width:1080px;margin:0 auto;padding-left:24px;padding-right:24px}

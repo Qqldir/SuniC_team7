@@ -45,9 +45,14 @@ html[data-theme="dark"] .ctip,html[data-theme="dark"] .ptip{background:#241f38;b
 html{transition:background-color .22s ease}
 body{transition:background-color .22s ease,color .22s ease}
 *{box-sizing:border-box;margin:0;padding:0}
+/* ── 본문 한글 폰트: paybooc (4 weight) ── */
+@font-face{font-family:'paybooc';src:url('/fonts/paybooc-Light.woff2') format('woff2');font-weight:300;font-style:normal;font-display:swap}
+@font-face{font-family:'paybooc';src:url('/fonts/paybooc-Medium.woff2') format('woff2');font-weight:400 500;font-style:normal;font-display:swap}
+@font-face{font-family:'paybooc';src:url('/fonts/paybooc-Bold.woff2') format('woff2');font-weight:600 700;font-style:normal;font-display:swap}
+@font-face{font-family:'paybooc';src:url('/fonts/paybooc-ExtraBold.woff2') format('woff2');font-weight:800 900;font-style:normal;font-display:swap}
 html{background:var(--bg)}
 body{background:var(--bg);color:var(--ink);
-  font-family:"Pretendard Variable",Pretendard,-apple-system,system-ui,"Malgun Gothic",sans-serif;
+  font-family:'paybooc',"Pretendard Variable",Pretendard,-apple-system,system-ui,"Malgun Gothic",sans-serif;
   -webkit-font-smoothing:antialiased;min-width:1160px}
 a{color:var(--brand);text-decoration:none}
 button,input,select,textarea{font-family:inherit;color:inherit}
