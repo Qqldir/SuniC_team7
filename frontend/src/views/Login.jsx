@@ -69,7 +69,7 @@ export default function Login() {
           <a href="#top" className="lp-logo">
             <img className="ski-ci" src="/sk-innovation.png" alt="SK innovation" style={{ height: 26 }} />
             <span>
-              <span className="lp-logo-t">O/I Spark Agent AI</span>
+              <span className="lp-logo-t">OI SPARK Agent AI</span>
             </span>
           </a>
           <nav className="lp-nav">
@@ -83,7 +83,7 @@ export default function Login() {
         {/* 히어로 */}
         <section className="lp-hero lp-wrap">
           <h1 className="lp-h1">흩어진 외부 자료를<br />계열사 맞춤 혁신 과제로</h1>
-          <p className="lp-hero-sub">O/I Spark 에이전트가 여러분의 모든 리서치를 도와드립니다.</p>
+          <p className="lp-hero-sub">OI SPARK 에이전트가 여러분의 모든 리서치를 도와드립니다.</p>
           <div className="lp-cta-row">
             <button className="btn-grad" onClick={openModal}>로그인</button>
             <a className="btn-ghost" href="#work">서비스 개요 보기</a>
@@ -162,7 +162,7 @@ export default function Login() {
         <div className="lp-wrap lp-footer-in">
           <a href="#top" className="lp-logo">
             <img className="ski-ci" src="/sk-innovation.png" alt="SK innovation" style={{ height: 20 }} />
-            <span><span className="lp-logo-t sm">O/I Spark</span></span>
+            <span><span className="lp-logo-t sm">OI SPARK</span></span>
           </a>
           <div className="lp-foot-links">
             <a href="#top">개인정보 처리방침</a>
