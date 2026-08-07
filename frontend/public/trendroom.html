@@ -8,6 +8,9 @@
 <style>
 /* ===== 디자인 시스템 토큰 (유지) ===== */
 :root{
+  --tmb1:#f2f6fe; --tmb2:#e2ecfd; --tmb3:#cbddfb; --tmb4:#abc7f8; --tmb5:#87acf3;
+  --tmt1:#eefaf8; --tmt2:#d7f1ed; --tmt3:#b2e4dc; --tmt4:#87d2c6; --tmt5:#59bdae;
+  --tmp1:#f5f2fe; --tmp2:#e8e1fd; --tmp3:#d5c6fb; --tmp4:#bda7f8; --tmp5:#a184f3;
   --bg:#ebf1f3; --panel:#fff; --panel-sub:#fafbfc;
   --brand:#2f4a57; --brand-hover:#1e3138; --brand-soft:#e9eff2; --brand-tint:#f4f8f9;
   --ink:#101c21; --t1:#3c4149; --t2:#4b5160; --t3:#6b7280; --t4:#9096a2; --t5:#b4b9c3;
@@ -22,6 +25,9 @@
 }
 /* ===== 다크 테마 (랜딩 페이지 색상표 기반: 딥 네이비/퍼플 + 퍼플·블루 액센트) ===== */
 html[data-theme="dark"]{
+  --tmb1:#181a2c; --tmb2:#1c2440; --tmb3:#233158; --tmb4:#2c4079; --tmb5:#37519b;
+  --tmt1:#151f22; --tmt2:#16302f; --tmt3:#1a4541; --tmt4:#1e5c55; --tmt5:#24756b;
+  --tmp1:#1c1830; --tmp2:#241d47; --tmp3:#2f2465; --tmp4:#3d2d87; --tmp5:#4d38ab;
   --bg:#0a0912; --panel:#14121f; --panel-sub:#1a1730;
   --brand:#a855f7; --brand-hover:#9333ea; --brand-soft:#241a3f; --brand-tint:#1d1733;
   --ink:#edeaf7; --t1:#d6d2e8; --t2:#b3aecf; --t3:#8f8ab0; --t4:#6f6a8e; --t5:#544f6e;
@@ -62,7 +68,9 @@ button,input,select,textarea{font-family:inherit;color:inherit}
 .ski-logo{font-family:Arial,'Helvetica Neue',sans-serif;font-weight:800;white-space:nowrap;letter-spacing:-.3px;line-height:1;display:inline-flex;align-items:baseline;gap:5px}
 .ski-logo b{color:#EA002C}
 .ski-logo i{color:#FF7A00;font-weight:700;font-style:normal}
-.oi-logo{font-weight:700;letter-spacing:-.02em;white-space:nowrap;background:linear-gradient(100deg,#f5f3ff,#a855f7 45%,#38bdf8);-webkit-background-clip:text;background-clip:text;color:transparent}
+@font-face{font-family:'Chillax';src:url('/fonts/Chillax-Semibold.woff2') format('woff2'),url('/fonts/Chillax-Semibold.woff') format('woff');font-weight:600;font-style:normal;font-display:swap}
+.oi-logo{font-family:'Chillax','Pretendard Variable',Arial,sans-serif;font-weight:600;letter-spacing:-.02em;white-space:nowrap;background:linear-gradient(100deg,#f5f3ff,#a855f7 45%,#38bdf8);-webkit-background-clip:text;background-clip:text;color:transparent}
+html[data-theme="light"] .oi-logo{background:linear-gradient(100deg,#7c3aed,#2563eb);-webkit-background-clip:text;background-clip:text}
 .logout-b{color:var(--t3)}
 .logout-b:hover{background:var(--fill);color:var(--bad)}
 .logout-b:hover .nav-i{border-color:var(--bad);color:var(--bad)}
@@ -542,6 +550,137 @@ textarea{width:100%;border:1px solid var(--line-mid);border-radius:10px;padding:
 .empty2{padding:44px 17px;display:flex;flex-direction:column;gap:6px;align-items:center}
 @media (max-width:1560px){ .tr2{grid-template-columns:1fr} .tr2-r{position:static;order:-1} }
 
+.fxq{border:1px solid #cfdefb;background:var(--brand-tint);border-radius:10px;padding:11px 12px;
+  margin-bottom:9px;display:flex;flex-direction:column;gap:8px}
+html[data-theme="dark"] .fxq{border-color:var(--line-mid)}
+
+/* ── 다크모드: 평가·피드백/점수 칸 색 보정 (라이트 하드코딩값이 흰색으로 튀는 문제) ── */
+html[data-theme="dark"] .ttbl .mrow > td{background:var(--panel-sub)}
+html[data-theme="dark"] .ttbl tr.trow.on{background:var(--brand-tint)}
+html[data-theme="dark"] .fbrow > td{background:var(--panel-sub)}
+html[data-theme="dark"] .fbtog.has{border-color:#5c4a1e;background:#241d10;color:#fbbf24}
+html[data-theme="dark"] .memo.has{border-color:#33406b;color:var(--edit);background:#161d30}
+html[data-theme="dark"] .memo.rated{border-color:#5c4a1e;color:#fbbf24;background:#241d10}
+/* 빈 별점: 라이트 회색(#dfe3e8)이 다크에서 밝게 튀어 어둡게 */
+html[data-theme="dark"] .star,
+html[data-theme="dark"] .stars:hover .star,
+html[data-theme="dark"] .bst,
+html[data-theme="dark"] .bs:hover .bst{color:#3f3a55}
+html[data-theme="dark"] .star.on,
+html[data-theme="dark"] .bst.on,
+html[data-theme="dark"] .star:hover,html[data-theme="dark"] .star:hover ~ .star,
+html[data-theme="dark"] .bst:hover,html[data-theme="dark"] .bst:hover ~ .bst{color:#f5c463}
+
+.fxq-h{display:flex;align-items:center;gap:7px}
+.fxq-t{font-size:11.5px;font-weight:700;color:var(--ink)}
+.fxq-r{display:flex;align-items:center;gap:7px}
+.fxq-i{flex:1;min-width:0;height:32px}
+.fxq-p{display:flex;flex-wrap:wrap;gap:5px}
+.fxq-c{font-size:10.5px;padding:4px 9px;border:1px solid var(--line-mid);border-radius:99px;
+  background:var(--panel);color:var(--t2);cursor:pointer;white-space:nowrap}
+.fxq-c:hover{border-color:var(--brand);color:var(--brand)}
+.fxq-c:disabled{opacity:.5;cursor:default}
+
+/* ===== 프롬프트 미리보기 렌더링 ===== */
+.pp{max-height:460px;overflow:auto;padding:2px 4px 2px 0}
+.pp-h1{font-size:15px;font-weight:700;letter-spacing:-.3px;line-height:1.45;color:var(--ink);margin:2px 0 6px}
+.pp-h2{font-size:11.5px;font-weight:700;color:var(--brand);letter-spacing:.02em;
+  margin:18px 0 9px;padding-left:9px;border-left:3px solid var(--brand)}
+.pp-h2:first-child{margin-top:2px}
+.pp-p{font-size:12.5px;line-height:1.72;color:var(--t1);margin:0 0 4px}
+.pp-sub{font-size:11.5px;font-weight:700;color:var(--t2);margin:11px 0 5px}
+.pp-div{height:1px;background:var(--line);margin:16px 0}
+.pp-ul{margin:0 0 4px;padding-left:15px;list-style:none}
+.pp-ul li{position:relative;font-size:12.5px;line-height:1.72;color:var(--t1);padding:2px 0}
+.pp-ul li::before{content:'';position:absolute;left:-11px;top:11px;width:4px;height:4px;
+  border-radius:50%;background:var(--t4)}
+.pp-c{border:1px solid var(--line-soft);border-radius:10px;background:var(--panel-sub);
+  padding:11px 13px;margin-bottom:8px}
+.pp-c-m{display:flex;align-items:center;gap:6px;font-size:10.5px;color:var(--t4);
+  margin-bottom:5px;flex-wrap:wrap}
+.pp-c-m .pp-src{font-weight:700;color:var(--ink);font-size:11.5px}
+.pp-dot{color:var(--t5)}
+.pp-c-t{font-size:12.5px;font-weight:600;line-height:1.45;color:var(--ink)}
+.pp-c-b{font-size:11.5px;line-height:1.68;color:var(--t3);margin-top:5px}
+.pp-c-u{display:inline-block;font-size:10.5px;color:var(--brand);margin-top:7px;word-break:break-all}
+.pp-c-u:hover{text-decoration:underline;text-underline-offset:2px}
+.pp-add{border:1.5px dashed var(--line-mid);border-radius:10px;background:var(--brand-tint);
+  padding:12px 14px;margin-top:14px}
+.pp-add-l{font-size:11px;font-weight:700;color:var(--brand);margin-bottom:6px}
+.pp-add-b{font-size:12px;line-height:1.7;color:var(--t1);white-space:pre-wrap}
+.pp-empty .pp-add-b{color:var(--t4)}
+
+/* ===== 트렌드룸 신규 (트리맵·키워드·브리핑) ===== */
+.lg-i{display:flex;align-items:center;gap:5px;font-size:10.5px;color:var(--t3)}
+.lg-d{width:8px;height:8px;border-radius:2px;flex:none}
+.tr-top{display:grid;grid-template-columns:minmax(0,3fr) minmax(0,1fr);gap:16px;align-items:stretch}
+.tr-card{display:flex;flex-direction:column;min-width:0}
+
+/* OC 트리맵 */
+.tmwrap{padding:12px 15px 15px;flex:1;display:flex;min-height:0}
+.tm{position:relative;width:100%;flex:1;min-height:250px;border-radius:9px;overflow:hidden;
+  background:var(--line-faint)}
+.tmc-n{color:var(--t2)}
+.tmg{position:absolute;pointer-events:none;border:2px solid var(--panel);border-radius:4px;z-index:2}
+.tmc{position:absolute;border:1px solid var(--panel);border-radius:4px;cursor:pointer;padding:9px 9px 8px;
+  display:flex;flex-direction:column;align-items:flex-start;justify-content:center;gap:1px;
+  overflow:hidden;color:var(--ink);text-align:left;transition:filter .12s}
+.tm:hover .tmc{opacity:.5}
+.tmc:hover{opacity:1 !important;z-index:5;box-shadow:0 2px 10px rgba(16,24,40,.12)}
+.tmc.sel{outline:2px solid var(--ink);outline-offset:-2px;z-index:4;opacity:1 !important}
+.tmc-n{font-weight:600;line-height:1.2;opacity:.82;white-space:nowrap;overflow:hidden;
+  text-overflow:ellipsis;max-width:100%}
+.tmc-v{font-weight:700;line-height:1;font-variant-numeric:tabular-nums}
+.tmc-k{font-size:10px;opacity:.6;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:100%}
+
+/* 키워드 랭킹 */
+.kwb{padding:7px 13px 11px;display:flex;flex-direction:column;gap:1px;flex:1;justify-content:center}
+.kwr{display:grid;grid-template-columns:minmax(0,1fr) 54px 20px 26px;align-items:center;gap:7px;
+  border:0;background:none;cursor:pointer;padding:5px 6px;border-radius:6px;text-align:left;width:100%}
+.kwr:hover{background:var(--panel-sub)}
+.kwr.on{background:var(--brand-tint)}
+.kwr.on .kwr-n{color:var(--brand);font-weight:700}
+.kwr-n{font-size:11.5px;color:var(--t1);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.kwr-t{height:6px;background:var(--line-soft);border-radius:4px;overflow:hidden;display:block}
+.kwr-t i{display:block;height:100%;background:#0f62fe;border-radius:4px}
+.kwr-v{font-size:11.5px;font-weight:700;text-align:right;font-variant-numeric:tabular-nums}
+.kwr-d{font-size:9.5px;font-weight:600;text-align:right;font-variant-numeric:tabular-nums}
+.kwr-d.up{color:#dc2626}
+.kwr-d.dn{color:#2563eb}
+.kwr-d.fl{color:var(--t5)}
+
+/* 데일리 브리핑 */
+.bf{display:flex;flex-direction:column;gap:0;border-top:1px solid var(--line-soft)}
+.bf-i{display:flex;gap:13px;padding:11px 0;border-bottom:1px solid var(--line-faint);align-items:flex-start}
+.bf-i:last-child{border-bottom:none}
+.bf-d{flex:none;width:38px;font-size:11px;font-weight:700;color:var(--t3);
+  font-variant-numeric:tabular-nums;padding-top:1px}
+.bf-m{flex:1;min-width:0;display:flex;flex-direction:column;gap:3px}
+.bf-t{font-size:12.5px;line-height:1.45;color:var(--ink)}
+.bf-t b{font-weight:700}
+.bf-s{font-size:11.5px;line-height:1.65;color:var(--t3)}
+.bf-a{flex:none;display:flex;flex-direction:column;align-items:flex-end;gap:5px;width:96px}
+
+/* AI 요약 — 전체 폭 */
+.ai-b2{padding:15px 17px 16px;display:flex;flex-direction:column;gap:8px}
+.ai-hl2{font-size:13px;line-height:1.7;color:var(--t2);margin:0}
+@media (max-width:1245px){ .tr-top{grid-template-columns:1fr} }
+
+/* 목록 행 키워드 칩 */
+.kwline{display:flex;flex-wrap:wrap;gap:4px;margin-top:6px}
+.kwmini{font-size:10px;padding:2px 7px;border:1px solid var(--line-mid);border-radius:99px;
+  background:var(--panel);color:var(--t3);cursor:pointer;white-space:nowrap}
+.kwmini:hover{border-color:var(--brand);color:var(--brand)}
+.kwmini.on{background:var(--brand);border-color:var(--brand);color:#fff;font-weight:600}
+
+/* 적용 중 필터 표시 */
+.fbar{display:flex;align-items:center;gap:7px;padding:9px 15px;background:var(--panel-sub);
+  border-bottom:1px solid var(--line-soft);flex-wrap:wrap}
+.fpill{display:inline-flex;align-items:center;gap:5px;font-size:11px;font-weight:600;
+  color:var(--brand);background:var(--brand-soft);border-radius:99px;padding:3px 6px 3px 10px}
+.fpill button{border:0;background:none;color:var(--brand);cursor:pointer;font-size:11px;
+  padding:0 2px;line-height:1}
+
 
 /* ═══════ 과제 평가·피드백 ═══════ */
 .fbtog{display:inline-flex;align-items:center;gap:5px;height:27px;padding:0 9px;border:1px solid var(--line-mid);
@@ -661,74 +800,519 @@ table.ttbl{width:100%;border-collapse:collapse;table-layout:fixed}
 </div>
 
 <script>
-/* ══════════════ 서버 데이터 ══════════════
-   OC·레버·근거자료·과제 제안·소스·권한은 모두 백엔드에서 받는다 (GET /api/bootstrap).
-   여기서는 빈 컨테이너만 선언하고 boot() 가 "제자리에서" 채운다.
-   재할당하지 않는 이유: 아래 코드가 잡고 있는 참조(OC_C = OC_COLOR 등)를 끊지 않기 위해. */
-const OCS = [];          // [{code, name, biz}]
-const OC_COLOR = {};     // code → 색상
-const OC = {};           // code → OC
-const LOGIC = {};        // 레버 → {metric, text, fields, calc, show}
-const LEVERS = [];
-const EV = {};           // 근거 자료 id → {src, kind, date, url, title, sum}
-const VERSIONS = [];     // 생성 버전 (최신 우선)
-const TASKS = [];        // 과제 제안
-const SOURCES = [], UPLOADS = [], ADMINS = [];
-let DEFAULT_INSTRUCTION = '';
-/* 소스 상태 → 배지 색 (표시 규칙이라 화면이 갖는다) */
-const SRC_ST = {'정상':'ok','지연':'wn','계정 필요':'bd'};
+/* ══════════════ OC (계열사) ══════════════ */
+const OCS = [
+  {code:'SKE',   name:'SK에너지',             biz:'에너지·화학'},
+  {code:'SKGC',  name:'SK지오센트릭',         biz:'에너지·화학'},
+  {code:'SKEN',  name:'SK엔무브',             biz:'에너지·화학'},
+  {code:'SKIPC', name:'SK인천석유화학',       biz:'에너지·화학'},
+  {code:'SKTI',  name:'SK트레이딩인터내셔널', biz:'에너지·화학'},
+  {code:'SKEO',  name:'SK어스온',             biz:'에너지·화학'},
+  {code:'SKO',   name:'SK온',                 biz:'배터리·소재'},
+  {code:'SKIET', name:'SK아이이테크놀로지',   biz:'배터리·소재'},
+  {code:'SKES',  name:'SK E&S',               biz:'LNG·전력'},
+];
+/* OC 색상 — 사업부문별 램프 (에너지·화학 블루 / 배터리·소재 틸 / LNG·전력 퍼플) */
+const OC_COLOR = {
+  SKE:'#0043ce', SKGC:'#0f62fe', SKEN:'#4589ff', SKIPC:'#78a9ff',
+  SKTI:'#a6c8ff', SKEO:'#d0e2ff',
+  SKO:'#007d79', SKIET:'#3ddbd9',
+  SKES:'#8a3ffc',
+};
+const OC = {}; OCS.forEach(o => OC[o.code] = o);
 
-const N = v => (v===''||v==null||isNaN(Number(String(v).replace(/,/g,'')))) ? 0 : Number(String(v).replace(/,/g,''));
-
-/* ══════════════ 레버별 기대효과 계산 ══════════════
-   관리지표·산출식 문구·입력 항목은 서버(lever 테이블)에서 내려오고,
-   입력값으로 숫자를 실제 계산하고 표기하는 부분만 화면이 갖는다. */
-const LEVER_CALC = {
+/* ══════════════ 레버별 기대효과 Logic 템플릿 ══════════════
+   산출식과 필요 기준값 항목만 시스템이 제시하고, 값은 현업이 입력 */
+const LOGIC = {
   '정비/TA':{
+    metric:'TA 공기(일)',
+    text:'(기준 TA일수 − 개선 후 TA일수) × 일 고정비 − 투자비',
+    fields:[
+      {k:'y',  l:'기준 연도',      u:'',        ph:'2025', hint:'어느 해를 기준으로 잡는지에 따라 결과가 크게 달라집니다'},
+      {k:'a',  l:'기준 TA일수',    u:'일',      ph:'예: 21'},
+      {k:'b',  l:'일 고정비',      u:'억원/일', ph:'예: 1.8'},
+      {k:'c',  l:'개선 목표 단축', u:'일',      ph:'예: 2'},
+      {k:'x',  l:'투자비',         u:'억원',    ph:'산정 필요'},
+    ],
     calc:f => (f.b!==''&&f.c!=='') ? Number(f.c)*Number(f.b) - N(f.x) : null,
     show:f => `${f.c}일 × ${f.b}억 − 투자비 ${N(f.x)}억`,
   },
   '에너지비':{
+    metric:'에너지 원단위',
+    text:'기준 원단위 × 절감율 × 연 생산량 × 단가 − 투자비',
+    fields:[
+      {k:'y', l:'기준 연도',   u:'',       ph:'2025', hint:'요금 인상 전·후 어느 시점을 기준으로 볼지 확정 필요'},
+      {k:'a', l:'기준 원단위', u:'kWh/t',  ph:'예: 320'},
+      {k:'b', l:'절감 목표',   u:'%',      ph:'예: 4'},
+      {k:'c', l:'연 생산량',   u:'만t',    ph:'예: 180'},
+      {k:'d', l:'전력 단가',   u:'원/kWh', ph:'예: 165'},
+      {k:'x', l:'투자비',      u:'억원',   ph:'산정 필요'},
+    ],
     calc:f => (f.a!==''&&f.b!==''&&f.c!==''&&f.d!=='')
       ? Number(f.a)*Number(f.b)/100*Number(f.c)*10000*Number(f.d)/1e8 - N(f.x) : null,
     show:f => `${f.a}kWh/t × ${f.b}% × ${f.c}만t × ${f.d}원 − 투자비 ${N(f.x)}억`,
   },
   '물류비':{
+    metric:'단위 물류비',
+    text:'기준 물류비 × 단가 인하율 − 협상 비용',
+    fields:[
+      {k:'y', l:'기준 연도',   u:'',    ph:'2025'},
+      {k:'a', l:'기준 물류비', u:'억원',ph:'예: 310'},
+      {k:'b', l:'인하 목표',   u:'%',   ph:'예: 7'},
+      {k:'x', l:'협상 비용',   u:'억원',ph:'산정 필요'},
+    ],
     calc:f => (f.a!==''&&f.b!=='') ? Number(f.a)*Number(f.b)/100 - N(f.x) : null,
     show:f => `${f.a}억 × ${f.b}% − 협상비용 ${N(f.x)}억`,
   },
   '수율':{
+    metric:'공정 수율(%)',
+    text:'기준 생산액 × (목표 수율 − 기준 수율) − 투자비',
+    fields:[
+      {k:'y', l:'기준 연도',   u:'',    ph:'2025'},
+      {k:'a', l:'기준 생산액', u:'억원',ph:'예: 1,850'},
+      {k:'b', l:'기준 수율',   u:'%',   ph:'예: 94.2'},
+      {k:'c', l:'목표 수율',   u:'%',   ph:'예: 96.0'},
+      {k:'x', l:'투자비',      u:'억원',ph:'산정 필요'},
+    ],
     calc:f => (f.a!==''&&f.b!==''&&f.c!=='')
       ? N(f.a)*(Number(f.c)-Number(f.b))/100 - N(f.x) : null,
     show:f => `${f.a}억 × (${f.c}% − ${f.b}%) − 투자비 ${N(f.x)}억`,
   },
   '구매':{
+    metric:'구매 단가 인하율',
+    text:'기준 구매액 × 단가 인하율 − 전환 비용',
+    fields:[
+      {k:'y', l:'기준 연도',      u:'',    ph:'2025'},
+      {k:'a', l:'기준 구매액',    u:'억원',ph:'예: 240'},
+      {k:'b', l:'단가 인하 목표', u:'%',   ph:'예: 5'},
+      {k:'x', l:'전환 비용',      u:'억원',ph:'산정 필요'},
+    ],
     calc:f => (f.a!==''&&f.b!=='') ? Number(f.a)*Number(f.b)/100 - N(f.x) : null,
     show:f => `${f.a}억 × ${f.b}% − 전환비용 ${N(f.x)}억`,
   },
   '간접비':{
+    metric:'매출 대비 판관비율',
+    text:'대상 항목 기준액 × 절감율 − 정리 비용',
+    fields:[
+      {k:'y', l:'기준 연도',        u:'',    ph:'2025'},
+      {k:'a', l:'대상 항목 기준액', u:'억원',ph:'예: 58'},
+      {k:'b', l:'절감 목표',        u:'%',   ph:'예: 12'},
+      {k:'x', l:'정리 비용',        u:'억원',ph:'산정 필요'},
+    ],
     calc:f => (f.a!==''&&f.b!=='') ? Number(f.a)*Number(f.b)/100 - N(f.x) : null,
     show:f => `${f.a}억 × ${f.b}% − 정리비용 ${N(f.x)}억`,
   },
   '운전자본':{
+    metric:'재고자산 회전일수',
+    text:'(기준 회전일수 − 목표 회전일수) × 일 매출원가 × 조달금리 − 투자비',
+    fields:[
+      {k:'y', l:'기준 연도',     u:'',       ph:'2025'},
+      {k:'a', l:'기준 회전일수', u:'일',     ph:'예: 62'},
+      {k:'b', l:'목표 회전일수', u:'일',     ph:'예: 54'},
+      {k:'c', l:'일 매출원가',   u:'억원/일',ph:'예: 42'},
+      {k:'d', l:'조달금리',      u:'%',      ph:'예: 4.2'},
+      {k:'x', l:'투자비',        u:'억원',   ph:'산정 필요'},
+    ],
     calc:f => (f.a!==''&&f.b!==''&&f.c!==''&&f.d!=='')
       ? (Number(f.a)-Number(f.b))*Number(f.c)*Number(f.d)/100 - N(f.x) : null,
     show:f => `(${f.a}일 − ${f.b}일) × ${f.c}억 × ${f.d}% − 투자비 ${N(f.x)}억`,
   },
 };
-/* 서버에 새 레버가 추가됐는데 계산식이 아직 없을 때 — 화면은 뜨고 금액만 비워 둔다 */
-const NO_CALC = {calc:()=>null, show:()=>''};
-
+const LEVERS = Object.keys(LOGIC);
+const N = v => (v===''||v==null||isNaN(Number(String(v).replace(/,/g,'')))) ? 0 : Number(String(v).replace(/,/g,''));
 const stampNow = () => {
-  const d=new Date(), p=n=>String(n).padStart(2,'0');
-  return `${d.getFullYear()}. ${p(d.getMonth()+1)}. ${p(d.getDate())} ${p(d.getHours())}:${p(d.getMinutes())}`;
+  const d=new Date();
+  return `2026. 07. 30 ${String(d.getHours()).padStart(2,'0')}:${String(d.getMinutes()).padStart(2,'0')}`;
 };
+/* 자연어 지시로 산출식 재구성 — 데모는 규칙 기반, 실서비스는 LLM 호출 */
+const FX_PRESETS = [
+  {label:'투자비 빼고 총 효과만', run:b=>b.replace(/\s*[−-]\s*[^−-]*(?:투자비|비용)\s*$/,'')},
+  {label:'투자 회수기간으로', run:b=>b.replace(/\s*[−-]\s*([^−-]*(?:투자비|비용))\s*$/,'') + ' ÷ 투자비 × 12 (개월)'},
+  {label:'인건비 절감분 추가', run:b=>b + ' + 인건비 절감분'},
+  {label:'3년 누적 기준', run:b=>'(' + b + ') × 3년'},
+];
+function fxFromPrompt(base, s){
+  const q = (s||'').trim();
+  const hit = FX_PRESETS.find(p=>p.label===q);
+  if (hit) return hit.run(base);
+  if (/회수\s*기간|회수기간/.test(q))            return FX_PRESETS[1].run(base);
+  if (/(투자비|비용).*(빼|제외|없이)/.test(q))     return FX_PRESETS[0].run(base);
+  if (/(3\s*년|삼\s*년|누적)/.test(q))           return FX_PRESETS[3].run(base);
+  if (/월\s*단위|월별/.test(q))                  return '(' + base + ') ÷ 12';
+  const add = q.match(/([가-힣A-Za-z][가-힣A-Za-z\s]{0,10}?)\s*(?:도|를|을|만)?\s*(?:추가|반영|더해|포함)/);
+  if (add) return base + ' + ' + add[1].trim();
+  const sub = q.match(/([가-힣A-Za-z][가-힣A-Za-z\s]{0,10}?)\s*(?:도|를|을|만)?\s*(?:빼|제외|차감)/);
+  if (sub) return base + ' − ' + sub[1].trim();
+  return base + ' × 조정 계수';
+}
+function runFxPrompt(instr){
+  const q = (instr||'').trim();
+  if(!q) return;
+  const t = curTask();
+  S.fxAskText = q; S.fxBusy = true; render();
+  setTimeout(()=>{
+    const base = fxText(t);
+    S.fx[t.id] = {text: fxFromPrompt(base, q), at: stampNow(), by: q};
+    S.sysOff[t.id] = true;
+    S.fxBusy = false; S.fxAsk = null; S.fxAskText = '';
+    render();
+  }, 700);
+}
+
 /* 산출식 상태 — 시스템 제안(ON, 기본) / 사용자 수식(OFF) */
 const sysOn  = t => S.sysOff[t.id] !== true;
 const userFx = t => S.fx[t.id];                       // {text, at}
 function fxText(t){
   return sysOn(t) ? LOGIC[t.lever].text : (userFx(t)?.text || LOGIC[t.lever].text);
 }
+
+
+/* ══════════════ 벤치마크 (경쟁사명 노출 유지) ══════════════ */
+const EV = {
+ e1:{src:'미쓰이화학', kind:'결산설명회', date:'2026.07.17', url:'https://jp.mitsuichemicals.com/en/ir/',
+  title:'정기보수(TA) 공정 표준화·병렬화로 공기 단축',
+  sum:'FY2025 결산설명회 질의응답에서 TA 공정을 표준 작업 단위로 분해하고 상호 독립적인 공정을 병렬 배치해 평균 공기를 기존 대비 단축했다고 설명. 단축분은 가동일 확보로 이어져 고정비 흡수에 기여했다고 밝힘. 안전·품질 검증 절차는 축소하지 않고 사전 준비 단계를 앞당기는 방식을 택했다고 언급.'},
+ e2:{src:'Valero', kind:'Earnings call', date:'2026.06.27', url:'https://www.investorvalero.com/',
+  title:'정제마진 약세 구간 오펙스 절감 프로그램 진척',
+  sum:'2분기 실적발표 콜에서 정기보수 최적화와 에너지 효율 개선을 축으로 한 오펙스 절감 프로그램의 진척을 공개. 애널리스트 질의에서 절감분 중 상당 부분이 유틸리티 원단위 개선에서 발생했다고 답변. 배럴당 운영비 목표를 제시하며 추가 여력이 남아 있다고 설명.'},
+ e3:{src:'Dow', kind:'10-Q 공시', date:'2026.07.18', url:'https://investors.dow.com/',
+  title:'연 10억 달러 규모 비용절감 프로그램 영역별 진척',
+  sum:'분기 공시에서 물류·구매·정비 영역별 절감 실적과 잔여 목표를 구분해 기재. 구매 부문은 공통 소모품·MRO 품목을 지역 단위에서 글로벌 단위로 통합 조달하는 방식으로 단가를 인하했다고 설명. 규격 표준화를 통해 관리 품목 수를 축소한 효과도 함께 언급.'},
+ e4:{src:'CATL', kind:'전문지 (SNE Research)', date:'2026.07.14', url:'https://www.sneresearch.com/',
+  title:'머신비전 기반 전수검사 전환으로 셀 수율 개선',
+  sum:'샘플링 검사에서 머신비전 전수검사로 전환해 불량 유출을 줄이면서 검사 인원을 동시에 축소한 사례. 초기에는 불량 유형 상위 공정에만 시범 적용한 뒤 검출률을 기존 방식과 비교 검증하는 단계를 거쳤다고 보도. 설비 투자 회수에는 시간이 소요됐으나 재작업 공수 절감 효과가 병행됐다고 분석.'},
+ e5:{src:'ENEOS', kind:'중기경영계획', date:'2026.05.30', url:'https://www.hd.eneos.co.jp/english/ir/',
+  title:'설비별 고장 이력 기반 정비 주기 재설계',
+  sum:'중기경영계획 자료에서 설비별 고장 이력과 정비비를 매칭해 과잉 정비 구간과 과소 정비 구간을 구분하고 주기를 재설정한 내용을 공개. 과잉 구간의 주기를 연장하고 과소 구간을 보강해 전체 정비비를 줄이면서 비계획 정지도 함께 감소시켰다고 설명. 주기 연장 구간은 상태 감시 계측을 추가해 신뢰성을 확보.'},
+ e6:{src:'해운 시황 (Argus)', kind:'시황 리포트', date:'2026.07.09', url:'https://www.argusmedia.com/',
+  title:'컨테이너 해상운임 지수 하락세 지속',
+  sum:'주간 시황 리포트에서 주요 항로 운임 지수의 하락세가 이어지고 있다고 분석. 장기 운송계약 갱신 시점이 임박한 화주에게 재협상 여지가 확대되는 구간이라고 평가. 다만 하반기 반등 가능성을 배제할 수 없어 계약 기간 설정에 유의가 필요하다는 견해도 함께 제시.'},
+ e7:{src:'아사히카세이', kind:'IR 자료', date:'2026.07.06', url:'https://www.asahi-kasei.co.jp/asahi/en/ir/',
+  title:'저가동 분리막 라인 통합 운영으로 수익성 개선',
+  sum:'IR 자료에서 가동률이 낮은 분리막 생산 라인을 통합 운영해 단위 고정비를 낮춘 사례를 소개. 라인별 생산 품목을 재배치하고 전환 횟수를 줄여 가동률을 끌어올린 방식. 통합 과정에서 일부 품목의 납기 대응력이 저하되는 문제가 있어 안전재고 기준을 별도로 조정했다고 부연.'},
+ e8:{src:'LyondellBasell', kind:'Earnings call', date:'2026.07.11', url:'https://investors.lyondellbasell.com/',
+  title:'간접비 구조 점검 및 지원 기능 통합',
+  sum:'실적발표 콜에서 다운사이클 대응으로 간접비 구조를 점검하고 중복된 지원 기능을 통합한 내용을 설명. 사무공간과 출력·통신 등 공통 서비스 계약을 재검토해 유휴 자산을 정리했다고 언급. 절감 규모보다 구조 자체를 단순화하는 데 초점을 뒀다고 밝힘.'},
+ e9:{src:'대한석유협회', kind:'협회 자료', date:'2026.07.01', url:'https://www.petroleum.or.kr/',
+  title:'석화 콤비나트 경쟁력 방안 — 단지 내 설비 공동활용 논의',
+  sum:'업계 공동 검토 자료에서 콤비나트 단지 내 유틸리티와 물류 설비의 공동활용이 의제로 다뤄짐. 인접사 간 스팀·질소 등 유휴 용량을 상호 활용해 고정비를 분담하는 구조를 검토. 실행에는 계약·정산 구조 합의가 선행되어야 하며 상당한 기간이 소요된다는 점도 지적.'},
+ e10:{src:'Cheniere', kind:'IR 자료', date:'2026.06.29', url:'https://lngir.cheniere.com/',
+  title:'LNG 터미널 운영비 효율화 지표 공개',
+  sum:'IR 자료에서 터미널 단위 운영비 지표와 개선 추이를 공개. 정비 계획을 선적 스케줄과 연동해 비가동 시간을 줄인 방식이 주요 개선 요인으로 제시됨. 장기계약 구조상 물량 변동이 제한적인 조건에서 운영비 관리가 수익성의 핵심 변수라고 설명.'},
+ e11:{src:'롯데케미칼', kind:'수시공시', date:'2026.07.21', url:'https://dart.fss.or.kr/',
+  title:'여수 NCC 일부 라인 가동 조정 결정',
+  sum:'수요 부진에 따른 가동률 조정을 공시. 가동 조정 구간에서 고정비 흡수 구조가 변화하며 단위 원가 경쟁이 심화될 것으로 예상된다고 기재. 조정 기간 중 정기보수 일정을 앞당겨 비가동 시간을 겹치게 배치하는 방안을 병행한다고 설명.'},
+ e12:{src:'BASF', kind:'Annual report', date:'2026.03.28', url:'https://www.basf.com/global/en/investors',
+  title:'재고 회전 개선 중심의 운전자본 관리 강화',
+  sum:'연차보고서에서 다운사이클 구간의 운전자본 관리를 별도 항목으로 기술. 제품별 수요 변동성에 따라 안전재고 기준을 차등 적용하고 장기체화 재고를 분리 관리해 회전일수를 단축했다고 설명. 금리 상승 구간에서 재고 감축의 재무 효과가 확대됐다는 분석을 함께 제시.'},
+ e13:{src:'ExxonMobil', kind:'Earnings call', date:'2026.05.02', url:'https://investor.exxonmobil.com/',
+  title:'E&P 생산 단가 관리 및 운영비 구조 개선',
+  sum:'실적발표 콜에서 광구별 생산 단가를 분해해 관리하는 체계를 설명. 운영비 중 통제 가능 항목과 불가 항목을 구분하고 통제 가능 항목에 목표를 부여하는 방식. 유가 하락 구간에서도 단위 생산비를 방어할 수 있었던 요인으로 제시.'},
+ e14:{src:'GS칼텍스', kind:'수시공시', date:'2026.07.03', url:'https://dart.fss.or.kr/',
+  title:'자가발전·유틸리티 설비 투자 결정 공시',
+  sum:'전력비 부담에 대응하기 위한 자가발전 및 유틸리티 설비 투자를 공시. 에너지 자립도를 높여 단위 원가를 개선하는 목적이라고 기재. 투자 회수 기간과 전력 요금 전망을 함께 검토했다고 설명.'},
+};
+
+/* ══════════════ 생성 버전 (재생성 시 누적) ══════════════ */
+let VERSIONS = [
+  {id:'g12', label:'2026.07.29', trigger:'외부 자료 64건 갱신'},
+  {id:'g11', label:'2026.07.24', trigger:'외부 자료 22건 갱신'},
+  {id:'g10', label:'2026.07.22', trigger:'외부 자료 41건 갱신'},
+  {id:'g9',  label:'2026.07.20', trigger:'외부 자료 17건 갱신'},
+  {id:'g8',  label:'2026.07.15', trigger:'외부 자료 38건 갱신'},
+  {id:'g7',  label:'2026.07.13', trigger:'외부 자료 14건 갱신'},
+  {id:'g6',  label:'2026.07.09', trigger:'외부 자료 29건 갱신'},
+  {id:'g5',  label:'2026.07.06', trigger:'외부 자료 19건 갱신'},
+  {id:'g4',  label:'2026.07.01', trigger:'외부 자료 33건 갱신'},
+  {id:'g3',  label:'2026.06.26', trigger:'외부 자료 21건 갱신'},
+  {id:'g2',  label:'2026.06.22', trigger:'외부 자료 12건 갱신'},
+  {id:'g1',  label:'2026.06.17', trigger:'초기 생성'},
+];
+
+/* ══════════════ 과제 (L1 후보) ══════════════ */
+let TASKS = [
+ // ── g12 (2026.07.29) ──
+ {id:1240, ver:'g12', oc:'SKGC', lever:'정비/TA', ev:['e1','e11'],
+  name:'NCC 정기보수 공기 단축 — 공정 병렬화 적용 검토',
+  sum:'미쓰이화학 TA 표준화 사례를 여수 NCC에 적용, 공정별 소요일 분해 후 병렬 가능 구간 식별',
+  plan:'직전 3회 TA의 공정별 소요일을 분해해 상호 독립 공정을 식별하고, 파일럿 1개 라인에 병렬 배치를 시범 적용한다.'},
+ {id:1239, ver:'g12', oc:'SKE', lever:'에너지비', ev:['e2','e14'],
+  name:'전력 다소비 공정 요금제·피크 관리 최적화',
+  sum:'Valero 오펙스 절감 프로그램의 유틸리티 원단위 개선 방식을 울산 CLX에 적용',
+  plan:'공정별 부하 프로파일을 분석해 피크 시간대 부하를 이전하고 요금제 재선택을 검토한다.'},
+ {id:1238, ver:'g12', oc:'SKGC', lever:'구매', ev:['e3'],
+  name:'공통 소모품·MRO 통합 조달 및 규격 표준화',
+  sum:'Dow 구매 통합 프로그램 방식으로 OC 공통 품목을 통합 입찰 전환',
+  plan:'OC 공통 소모품·MRO 품목을 식별해 통합 입찰 후보로 전환하고 규격 표준화로 관리 품목 수를 축소한다.'},
+ {id:1237, ver:'g12', oc:'SKO', lever:'수율', ev:['e4'],
+  name:'머신비전 전수검사 전환으로 셀 수율 개선',
+  sum:'CATL 검사 자동화 사례 — 불량 유형 상위 공정 시범 적용 후 검출률 비교 검증',
+  plan:'불량 유형 상위 3개 공정에 머신비전 전수검사를 시범 적용하고 검출률을 기존 방식과 비교한다.'},
+ {id:1236, ver:'g12', oc:'SKE', lever:'정비/TA', ev:['e5'],
+  name:'설비별 고장 이력 기반 정비 주기 재설계',
+  sum:'ENEOS 정비 주기 재설계 사례 — 과잉·과소 정비 구간 구분 후 주기 재설정',
+  plan:'설비별 고장 이력과 정비비를 매칭해 과잉·과소 정비 구간을 구분하고, 주기 연장 구간에는 상태 감시 계측을 추가한다.'},
+ {id:1235, ver:'g12', oc:'SKTI', lever:'물류비', ev:['e6'],
+  name:'장기 운송계약 재협상 타이밍 및 계약기간 재설계',
+  sum:'해상운임 지수 하락 구간 — 만료 임박 계약 우선 선별해 재협상 순서 산정',
+  plan:'만료 임박 계약을 우선 선별해 시황 지표 기준으로 재협상 순서를 산정하고, 반등 리스크를 고려해 계약 기간을 분산한다.'},
+ {id:1234, ver:'g12', oc:'SKIET', lever:'수율', ev:['e7'],
+  name:'저가동 분리막 라인 통합 운영 검토',
+  sum:'아사히카세이 라인 통합 사례 — 품목 재배치로 전환 횟수 축소, 안전재고 기준 별도 조정',
+  plan:'라인별 생산 품목을 재배치해 전환 횟수를 줄이고, 통합에 따른 납기 대응력 저하를 안전재고 기준 조정으로 보완한다.'},
+ {id:1233, ver:'g12', oc:'SKEN', lever:'간접비', ev:['e8'],
+  name:'공통 서비스 계약 재검토 및 유휴 자산 정리',
+  sum:'LyondellBasell 간접비 구조 점검 사례 — 중복 지원 기능 통합, 공통 서비스 계약 재검토',
+  plan:'중복된 지원 기능과 공통 서비스 계약을 항목별로 점검하고 유휴 자산을 식별해 정리한다.'},
+ {id:1232, ver:'g12', oc:'SKIPC', lever:'에너지비', ev:['e9'],
+  name:'단지 내 유틸리티 공동활용 타당성 검토',
+  sum:'대한석유협회 콤비나트 경쟁력 방안 — 인접사 간 스팀·질소 유휴 용량 상호 활용',
+  plan:'단지 내 스팀·질소 설비의 유휴 용량을 조사해 공동활용 후보 2건을 선정하고 계약·정산 구조를 사전 검토한다.'},
+ {id:1231, ver:'g12', oc:'SKES', lever:'정비/TA', ev:['e10'],
+  name:'터미널 정비 계획과 선적 스케줄 연동',
+  sum:'Cheniere 터미널 운영비 효율화 사례 — 정비·선적 연동으로 비가동 시간 축소',
+  plan:'정비 계획을 선적 스케줄과 연동해 비가동 시간을 줄이고, 단위 운영비 지표를 월 단위로 관리한다.'},
+
+ // ── g10 (2026.07.22) ──
+ {id:1216, ver:'g10', oc:'SKGC', lever:'운전자본', ev:['e12'],
+  name:'장기체화 재고 분리 관리 및 안전재고 차등화',
+  sum:'BASF 운전자본 관리 사례 — 수요 변동성별 안전재고 차등, 장기체화 재고 분리',
+  plan:'제품별 수요 변동성을 산출해 안전재고 기준을 차등 적용하고, 장기체화 재고를 별도 관리 대상으로 분리한다.'},
+ {id:1215, ver:'g10', oc:'SKEO', lever:'간접비', ev:['e13'],
+  name:'광구별 생산 단가 분해 및 통제 가능 항목 목표 부여',
+  sum:'ExxonMobil E&P 운영비 구조 개선 — 통제 가능·불가 항목 구분 후 목표 부여',
+  plan:'광구별 운영비를 통제 가능 항목과 불가 항목으로 분해하고, 통제 가능 항목에만 절감 목표를 부여한다.'},
+ {id:1214, ver:'g10', oc:'SKEN', lever:'물류비', ev:['e6','e3'],
+  name:'윤활기유 수출 물류 적재율 개선',
+  sum:'Dow 물류 절감 방식 + 운임 하락 구간 — 적재율 개선으로 운송 횟수 감축',
+  plan:'출하 단위와 선적 스케줄을 조정해 적재율을 높이고, 운송 횟수 감축분을 계약 물량 재협상에 반영한다.'},
+ {id:1213, ver:'g10', oc:'SKO', lever:'에너지비', ev:['e2'],
+  name:'드라이룸 항온항습 부하 최적화',
+  sum:'Valero 유틸리티 원단위 개선 방식을 드라이룸 설비에 적용',
+  plan:'드라이룸 구역별 노점 관리 기준을 재설정하고, 생산 계획에 맞춰 항온항습 부하를 시간대별로 조정한다.'},
+ {id:1212, ver:'g10', oc:'SKE', lever:'구매', ev:['e3'],
+  name:'촉매·화학품 구매 통합 및 장기계약 조건 재검토',
+  sum:'Dow 통합 조달 사례 — 지역 단위 구매를 통합해 단가 인하',
+  plan:'촉매·화학품 품목을 OC 단위로 통합해 입찰하고, 장기계약의 가격 연동 조건을 재검토한다.'},
+ {id:1211, ver:'g10', oc:'SKIPC', lever:'정비/TA', ev:['e11','e5'],
+  name:'가동 조정 구간과 정기보수 일정 중첩 배치',
+  sum:'롯데케미칼 가동 조정 공시 — 조정 기간과 TA를 겹쳐 비가동 시간 통합',
+  plan:'가동률 조정이 예정된 구간에 정기보수를 앞당겨 배치해 비가동 시간을 통합한다.'},
+
+ // ── g8 (2026.07.15) ──
+ {id:1205, ver:'g8', oc:'SKGC', lever:'에너지비', ev:['e9'],
+  name:'스팀 네트워크 압력 등급 재배분',
+  sum:'단지 내 유틸리티 공동활용 논의 — 압력 등급별 수요 재배분으로 감압 손실 축소',
+  plan:'공정별 스팀 수요를 압력 등급으로 재분류하고 고압 스팀의 감압 사용 구간을 축소한다.'},
+ {id:1204, ver:'g8', oc:'SKIET', lever:'구매', ev:['e3'],
+  name:'분리막 원단·코팅재 공급사 이원화',
+  sum:'Dow 구매 전략 — 공급사 집중도 완화와 단가 협상력 확보 병행',
+  plan:'주요 원자재의 공급사를 이원화해 협상력을 확보하고, 물량 배분 기준을 사전에 정한다.'},
+ {id:1203, ver:'g8', oc:'SKE', lever:'물류비', ev:['e6'],
+  name:'제품 출하 육상운송 단가 재협상',
+  sum:'운임 하락 구간 — 육상운송 장기계약 만료 시점 기준 재협상',
+  plan:'만료 임박 육상운송 계약을 선별해 시황 기준으로 단가를 재협상한다.'},
+ {id:1202, ver:'g8', oc:'SKEN', lever:'수율', ev:['e7'],
+  name:'윤활기유 수율 편차 축소 — 원료 품질 변동 보정',
+  sum:'아사히카세이 라인 운영 사례 — 원료 품질 변동에 따른 수율 편차 사전 보정',
+  plan:'원료 품질 지표와 수율 편차의 상관을 분석해 투입 조건을 사전 보정하는 기준을 만든다.'},
+ {id:1201, ver:'g8', oc:'SKES', lever:'간접비', ev:['e8'],
+  name:'터미널 운영 지원 기능 통합',
+  sum:'LyondellBasell 지원 기능 통합 사례 — 중복 기능 정리로 간접비 축소',
+  plan:'터미널별로 중복 운영되는 지원 기능을 식별해 통합 운영 후보를 선정한다.'},
+
+ // ── g11 (2026.07.24) ──
+ {id:1224, ver:'g11', oc:'SKGC', lever:'물류비', ev:['e6','e3'],
+  name:'원료 수입 물류 계약 통합 및 하역 조건 재협상',
+  sum:'Dow 물류 절감 방식 + 운임 하락 구간 — 품목별 개별 계약을 통합해 협상력 확보',
+  plan:'품목별로 나뉜 수입 물류 계약을 통합 발주로 전환하고 하역·보관 조건을 함께 재협상한다.'},
+ {id:1223, ver:'g11', oc:'SKO', lever:'구매', ev:['e3'],
+  name:'양극재 부자재 통합 구매 전환',
+  sum:'Dow 통합 조달 사례 — 공장별 개별 구매를 통합해 단가 인하',
+  plan:'공장별로 개별 구매하던 부자재 품목을 통합 입찰로 전환하고 규격을 표준화한다.'},
+ {id:1222, ver:'g11', oc:'SKE', lever:'운전자본', ev:['e12'],
+  name:'원유·제품 재고 보유일수 축소',
+  sum:'BASF 운전자본 관리 — 금리 상승 구간의 재고 감축 재무효과 확대',
+  plan:'유종별 조달 리드타임을 재산정해 안전재고 기준을 낮추고 장기체화 물량을 분리 관리한다.'},
+
+ // ── g9 (2026.07.20) ──
+ {id:1209, ver:'g9', oc:'SKIET', lever:'간접비', ev:['e8'],
+  name:'해외 법인 지원 기능 통합 운영',
+  sum:'LyondellBasell 지원 기능 통합 — 법인별 중복 기능 정리',
+  plan:'폴란드·중국 법인의 중복 지원 기능을 식별해 통합 운영 후보를 선정한다.'},
+ {id:1208, ver:'g9', oc:'SKES', lever:'물류비', ev:['e10'],
+  name:'선적 스케줄 최적화로 용선비 절감',
+  sum:'Cheniere 터미널 운영 사례 — 선적 대기 시간 축소로 용선 비용 절감',
+  plan:'선적 스케줄과 터미널 처리 능력을 연동해 대기 시간을 줄이고 용선 계약 조건을 재검토한다.'},
+
+ // ── g7 (2026.07.13) ──
+ {id:1198, ver:'g7', oc:'SKGC', lever:'수율', ev:['e11'],
+  name:'저부하 운전 구간 수율 방어 조건 도출',
+  sum:'롯데케미칼 가동 조정 공시 — 저부하 운전 시 수율 저하 최소화 조건 탐색',
+  plan:'저부하 운전 구간의 운전 변수와 수율 관계를 분석해 방어 운전 조건을 도출한다.'},
+ {id:1197, ver:'g7', oc:'SKEN', lever:'정비/TA', ev:['e5'],
+  name:'윤활기유 설비 상태기반 정비 전환',
+  sum:'ENEOS 정비 주기 재설계 — 시간기반에서 상태기반 정비로 전환',
+  plan:'주요 회전기기에 상태 감시 계측을 추가하고 시간기반 정비를 상태기반으로 단계 전환한다.'},
+ {id:1196, ver:'g7', oc:'SKTI', lever:'운전자본', ev:['e12'],
+  name:'트레이딩 재고 보유일수 축소',
+  sum:'BASF 운전자본 관리 — 거래 유형별 재고 보유 기준 차등화',
+  plan:'거래 유형별 회전 속도를 산출해 보유 기준을 차등 적용하고 저회전 물량을 우선 처리한다.'},
+
+ // ── g6 (2026.07.09) ──
+ {id:1188, ver:'g6', oc:'SKE', lever:'에너지비', ev:['e14'],
+  name:'자가발전 설비 가동 조건 재설정',
+  sum:'GS칼텍스 자가발전 투자 공시 — 계통 전력과 자가발전의 경제성 분기점 재산정',
+  plan:'전력 단가와 연료비를 비교해 자가발전 가동 경제성 분기점을 재산정하고 운전 기준을 갱신한다.'},
+ {id:1187, ver:'g6', oc:'SKIPC', lever:'구매', ev:['e3'],
+  name:'첨가제·화학품 구매 통합',
+  sum:'Dow 통합 조달 — 소량 다품종 화학품을 통합 계약으로 전환',
+  plan:'소량 다품종으로 개별 구매하던 화학품을 통합 계약 대상으로 묶어 입찰한다.'},
+ {id:1186, ver:'g6', oc:'SKO', lever:'간접비', ev:['e8'],
+  name:'신규 라인 램프업 지원 조직 운영 재설계',
+  sum:'LyondellBasell 지원 기능 통합 — 램프업 종료 라인의 지원 인력 재배치',
+  plan:'램프업이 종료된 라인의 지원 인력을 정상 운영 체제로 전환하고 중복 기능을 정리한다.'},
+ {id:1185, ver:'g6', oc:'SKGC', lever:'정비/TA', ev:['e1','e5'],
+  name:'촉매 교체 주기와 정기보수 일정 동기화',
+  sum:'미쓰이화학 TA 표준화 + ENEOS 주기 재설계 — 교체·보수 일정 통합',
+  plan:'촉매 교체 주기와 정기보수 일정을 하나의 계획으로 통합해 비가동 횟수를 줄인다.'},
+
+ // ── g5 (2026.07.06) ──
+ {id:1178, ver:'g5', oc:'SKEO', lever:'물류비', ev:['e13'],
+  name:'해상 광구 보급선 운항 스케줄 최적화',
+  sum:'ExxonMobil E&P 운영비 구조 개선 — 통제 가능 항목 중 보급 물류 우선 개선',
+  plan:'보급 물량과 운항 주기를 재산정해 운항 횟수를 줄이고 통합 배차 기준을 만든다.'},
+ {id:1177, ver:'g5', oc:'SKIET', lever:'에너지비', ev:['e7'],
+  name:'코팅 건조 공정 폐열 회수',
+  sum:'아사히카세이 분리막 라인 운영 — 건조 공정 열원 효율 개선',
+  plan:'건조 공정 배기 폐열을 예열 단계로 회수하는 구조를 검토하고 회수율을 시범 측정한다.'},
+
+ // ── g4 (2026.07.01) ──
+ {id:1168, ver:'g4', oc:'SKGC', lever:'간접비', ev:['e8'],
+  name:'연구개발 공통 장비 공동 사용 체계 구축',
+  sum:'LyondellBasell 유휴 자산 정리 — 저활용 분석 장비 공동 사용 전환',
+  plan:'조직별로 보유한 분석 장비의 활용률을 조사해 저활용 장비를 공동 사용 대상으로 전환한다.'},
+ {id:1167, ver:'g4', oc:'SKE', lever:'수율', ev:['e2'],
+  name:'정제 수율 편차 축소 — 운전 조건 표준화',
+  sum:'Valero 오펙스 절감 — 운전 조건 표준화로 수율 편차 축소',
+  plan:'교대조별 운전 조건 차이를 분석해 표준 운전 범위를 설정하고 이탈 시 알림 기준을 만든다.'},
+ {id:1166, ver:'g4', oc:'SKEN', lever:'구매', ev:['e3'],
+  name:'윤활유 첨가제 규격 표준화',
+  sum:'Dow 규격 표준화 — 관리 품목 수 축소로 단가·재고 동시 개선',
+  plan:'제품군별 첨가제 규격을 통합해 관리 품목 수를 줄이고 통합 물량으로 단가를 재협상한다.'},
+ {id:1165, ver:'g4', oc:'SKES', lever:'운전자본', ev:['e12'],
+  name:'LNG 재고 보유 기준 재설정',
+  sum:'BASF 운전자본 관리 — 수요 변동성 기반 재고 기준 차등화',
+  plan:'계절별 수요 변동성과 조달 리드타임을 반영해 재고 보유 기준을 재설정한다.'},
+
+ // ── g3 (2026.06.26) ──
+ {id:1156, ver:'g3', oc:'SKO', lever:'물류비', ev:['e6'],
+  name:'셀 완제품 수출 물류 적재율 개선',
+  sum:'운임 하락 구간 — 적재율 개선으로 운송 횟수 감축 후 계약 재협상',
+  plan:'포장 단위와 선적 스케줄을 조정해 적재율을 높이고 감축분을 계약 물량에 반영한다.'},
+ {id:1155, ver:'g3', oc:'SKIPC', lever:'간접비', ev:['e8'],
+  name:'사무 지원 서비스 계약 통합',
+  sum:'LyondellBasell 공통 서비스 계약 재검토 — 출력·통신·청소 계약 통합',
+  plan:'개별 발주된 사무 지원 서비스 계약을 통합 발주로 전환하고 미사용 항목을 정리한다.'},
+ {id:1154, ver:'g3', oc:'SKTI', lever:'구매', ev:['e3'],
+  name:'용선 브로커 수수료 구조 재협상',
+  sum:'Dow 구매 통합 — 거래 규모 기반 수수료 구조 재설계',
+  plan:'연간 용선 거래 규모를 근거로 브로커 수수료를 정률에서 단계 정률로 재협상한다.'},
+
+ // ── g2 (2026.06.22) ──
+ {id:1146, ver:'g2', oc:'SKGC', lever:'운전자본', ev:['e12'],
+  name:'재생원료 조달 재고 기준 설정',
+  sum:'BASF 운전자본 관리 — 신규 원료의 조달 변동성 반영한 재고 기준 수립',
+  plan:'재생원료 공급 변동성을 측정해 안전재고 기준을 신설하고 과다 보유를 방지한다.'},
+ {id:1145, ver:'g2', oc:'SKE', lever:'정비/TA', ev:['e5'],
+  name:'회전기기 예방정비 주기 조정',
+  sum:'ENEOS 정비 주기 재설계 — 고장 이력 기반 예방정비 주기 차등화',
+  plan:'회전기기별 고장 이력을 분석해 예방정비 주기를 차등 적용한다.'},
+
+ // ── g1 (2026.06.17) ──
+ {id:1136, ver:'g1', oc:'SKEN', lever:'에너지비', ev:['e2'],
+  name:'기유 가열 공정 에너지 회수',
+  sum:'Valero 유틸리티 원단위 개선 — 가열 공정 배열 회수로 원단위 개선',
+  plan:'가열 공정 배출 열을 원료 예열에 회수하는 구조를 검토하고 회수 가능량을 측정한다.'},
+ {id:1135, ver:'g1', oc:'SKIET', lever:'물류비', ev:['e6'],
+  name:'원단 수입 운송 계약 재검토',
+  sum:'운임 하락 구간 — 만료 임박 수입 운송 계약 우선 재협상',
+  plan:'만료 임박 수입 운송 계약을 선별해 시황 기준으로 단가와 계약 기간을 재협상한다.'},
+ {id:1134, ver:'g1', oc:'SKEO', lever:'간접비', ev:['e13'],
+  name:'광구 운영 지원 인력 배치 재설계',
+  sum:'ExxonMobil 운영비 구조 개선 — 통제 가능 항목 중 지원 인력 배치 최적화',
+  plan:'광구별 운영 단계에 맞춰 지원 인력 배치 기준을 재설계하고 중복 배치를 정리한다.'},
+];
+
+/* 재생성 시 추가되는 후보 풀 */
+const POOL = [
+ {oc:'SKGC', lever:'정비/TA', ev:['e5','e1'],
+  name:'촉매 교체 주기와 정기보수 일정 동기화',
+  sum:'ENEOS 정비 주기 재설계 + 미쓰이화학 TA 표준화 — 교체·보수 일정 통합',
+  plan:'촉매 교체 주기와 정기보수 일정을 하나의 계획으로 통합해 비가동 횟수를 줄인다.'},
+ {oc:'SKO', lever:'운전자본', ev:['e12'],
+  name:'셀 재공품 재고 회전 개선',
+  sum:'BASF 운전자본 관리 — 공정 간 재공품 대기 시간 축소로 회전일수 단축',
+  plan:'공정 간 재공품 대기 시간을 측정해 병목 구간을 식별하고 투입 계획을 재조정한다.'},
+ {oc:'SKTI', lever:'간접비', ev:['e8'],
+  name:'트레이딩 지원 시스템 계약 통합',
+  sum:'LyondellBasell 공통 서비스 계약 재검토 — 중복 시스템 라이선스 정리',
+  plan:'거점별로 개별 계약된 지원 시스템을 통합 계약으로 전환하고 미사용 라이선스를 정리한다.'},
+ {oc:'SKIPC', lever:'수율', ev:['e11'],
+  name:'가동률 조정 구간 수율 방어 운전 조건 도출',
+  sum:'롯데케미칼 가동 조정 공시 — 저부하 운전 시 수율 저하 최소화 조건 탐색',
+  plan:'저부하 운전 구간의 운전 변수와 수율 관계를 분석해 방어 운전 조건을 도출한다.'},
+];
+
+/* ══════════════ 소스 / 업로드 / 권한 ══════════════ */
+const SOURCES = [
+  {name:'각사 IR · Earnings presentation', url:'투자자 페이지 (URL 지정형)', type:'고정 URL', paid:false, last:'오늘 08:00', cnt:412, fresh:9, st:'정상'},
+  {name:'대한석유협회', url:'petroleum.or.kr', type:'고정 URL', paid:false, last:'오늘 08:00', cnt:186, fresh:2, st:'정상'},
+  {name:'한국무역협회', url:'kita.net', type:'고정 URL', paid:false, last:'오늘 08:00', cnt:204, fresh:1, st:'정상'},
+  {name:'SNE Research', url:'sneresearch.com', type:'고정 URL', paid:true, last:'오늘 07:40', cnt:97, fresh:3, st:'정상'},
+  {name:'DART 공시 (국내 peer)', url:'dart.fss.or.kr — OpenAPI', type:'고정 URL', paid:false, last:'오늘 08:00', cnt:531, fresh:7, st:'정상'},
+  {name:'키워드 검색 — cost reduction 외 27건', url:'검색 언어 EN·KO / 지역 전세계 / 상위 20건', type:'키워드', paid:false, last:'오늘 08:00', cnt:1284, fresh:38, st:'정상'},
+  {name:'ICIS', url:'icis.com', type:'고정 URL', paid:true, last:'—', cnt:0, fresh:0, st:'계정 필요'},
+  {name:'Argus', url:'argusmedia.com', type:'고정 URL', paid:true, last:'7월 26일', cnt:64, fresh:0, st:'지연'},
+  {name:'Chemical Week', url:'chemweek.com', type:'고정 URL', paid:true, last:'—', cnt:0, fresh:0, st:'계정 필요'},
+  {name:'S&P Global Commodity Insights', url:'spglobal.com/commodityinsights', type:'고정 URL', paid:true, last:'—', cnt:0, fresh:0, st:'계정 필요'},
+  {name:'BloombergNEF', url:'about.bnef.com', type:'고정 URL', paid:true, last:'—', cnt:0, fresh:0, st:'계정 필요'},
+  {name:'Hydrocarbon Processing', url:'hydrocarbonprocessing.com', type:'고정 URL', paid:true, last:'7월 24일', cnt:38, fresh:0, st:'지연'},
+];
+const SRC_ST = {'정상':'ok','지연':'wn','계정 필요':'bd'};
+
+let UPLOADS = [
+  {name:'울산CLX_설비별_에너지사용량_2026H1.csv', oc:'SK에너지',   size:'4,182행', at:'오늘 08:52', st:'검수 대기'},
+  {name:'2026_GC_사업계획_요약.pdf',              oc:'SK지오센트릭', size:'42p',    at:'오늘 09:20', st:'검수 완료'},
+  {name:'2025_OI_과제기록_전체.csv',              oc:'전사',        size:'1,204행', at:'어제 17:41', st:'검수 완료'},
+];
+let ADMINS = [
+  {mail:'jin.k@sk.com',    role:'관리자',   note:'O/I추진단'},
+  {mail:'oi-admin@sk.com', role:'관리자',   note:'공용 계정'},
+  {mail:'gc-innov@sk.com', role:'조회 전용',note:'SK지오센트릭 혁신팀'},
+];
+
+const DEFAULT_INSTRUCTION = `<role>
+SK이노베이션 O/I추진단의 과제 발굴 애널리스트.
+외부 벤치마킹 사례를 각 OC에 적용 가능한 L1 과제 후보로 전환한다.
+</role>
+
+<priority>
+확장 투자형이 아니라 비용·효율·수익성 개선 과제를 우선한다.
+레버: 정비/TA, 에너지비, 물류비, 수율, 구매, 간접비, 운전자본
+</priority>
+
+<output>
+과제명 / 요약 / 대상 OC / 레버 / 적용 방안 /
+관리지표 / 기대효과 Logic(산출식) / 벤치마크
+</output>
+
+<constraints>
+- 기대효과 금액을 임의로 산정하지 않는다.
+  산출식과 필요 기준값 항목만 제시하고 값은 비워 둔다.
+- 근거는 실제 수집된 문서만 인용한다. 출처 없는 주장 금지.
+- 동일 사례를 여러 OC에 적용할 경우 각각을 별건으로 제안한다.
+</constraints>`;
 
 /* ══════════════ 상태 ══════════════ */
 let S = {
@@ -742,11 +1326,13 @@ let S = {
   per:10,            // 페이지당 건수
   fb:{},             // 평가·피드백 {id:{s,t}}
   memoOpen:null,     // 열린 피드백 패널 (하나만)
+  users:[], usersLoaded:false, usersErr:'', usersMsg:'',   // 관리자 계정 관리
   sel:{},            // 스크리닝 체크박스
   trBiz:'전체',       // 트렌드룸 분야 필터
   trPeriod:'1m',     // 트렌드룸 기간 프리셋
   trFrom:'2026-06-30', trTo:'2026-07-30',
   trTheme:null, trQ:'', trKind:'전체', trSort:'date',
+  trKw:null, trOc:null, trSrc:'전체',
   trNew:false, trUnl:false, trMethod:false, trGenAt:'오늘 08:12',
   calOpen:false,
   calYM:'2026-07',   // 캘린더 표시 월
@@ -755,21 +1341,34 @@ let S = {
   fx:{},            // 사용자 수식 {taskId:{text,at}}
   sysOff:{},        // 시스템 제안 토글 OFF 여부
   fxDraft:null,     // 수식 편집 중인 과제 id
+  fxAsk:null, fxAskText:'', fxBusy:false,
   fxCopied:false,
   regenerating:false,
-  upNow:false,      // 내부 자료 업로드 시 '바로 사용'(= 검수 완료) 여부
-  cg:{step:0, oc:null, ev:null, lever:null, plan:null, done:false},
-  cgBusy:false,    // 커스텀 생성 진행 중(LLM 발굴 — 1분 안팎)
+  cg:{step:0, oc:null, ev:null, lever:null, plan:null, name:'', sum:'', err:'', saving:false, done:false},
   ex:{oc:'SKGC', days:30, research:'', editing:false, text:null, copied:false},
   admTab:'prompt',
   instruction:DEFAULT_INSTRUCTION,
-  evalCriteria:'',   // 평가 기준 안내 문구 (서버가 내려준다)
   instrSaved:true,
   send:{ freq:'매일', time:'08:00', lastAt:'2026.07.24 08:00' },
   sendOff:{},        // 발송 제외 과제 id (기본은 전체 포함)
   recipients:['O/I추진단 (jin.k@sk.com)','SKGC 혁신팀 (gc-innov@sk.com)'],
   channels:{outlook:true, teams:true},
 };
+
+// 검색창·프롬프트 편집 등은 브라우저 메모리(S)에만 두어, 같은 세션 안에서 화면을
+// 옮겨 다녀도(=새로고침 없이) 입력이 유지된다. 새로고침하면 저장하지 않은 내용은
+// 버리고 마지막으로 "저장"한 값으로 돌아간다 — 생성 인스트럭션만 저장 버튼이 있으므로
+// 그 값만 localStorage 에 실제로 저장해 새로고침에도 남긴다.
+const SAVED_INSTRUCTION_KEY = 'oi-saved-instruction';
+function loadSavedInstruction(){
+  try{ const v = localStorage.getItem(SAVED_INSTRUCTION_KEY); return v===null ? DEFAULT_INSTRUCTION : v; }
+  catch(e){ return DEFAULT_INSTRUCTION; }
+}
+function persistSavedInstruction(v){
+  try{ localStorage.setItem(SAVED_INSTRUCTION_KEY, v); }catch(e){}
+}
+S.instruction = loadSavedInstruction();
+S.instrSaved = true;
 
 const NAV = [
   {g:'발굴', items:[{k:'list',label:'과제 제안',icon:'≡'},{k:'custom',label:'커스텀 생성',icon:'+'}]},
@@ -795,7 +1394,7 @@ function ocBreakdown(vid){
 }
 function timeline(){
   let run=0;
-  return VERSIONS.slice().reverse().map(v=>{ const n=verCount(v.id); run+=n; return {...v,n,cum:run}; });
+  return VERSIONS.slice().reverse().filter(v=>v.id!=='saved').map(v=>{ const n=verCount(v.id); run+=n; return {...v,n,cum:run}; });
 }
 function chartWindow(){
   const tl=timeline();
@@ -808,7 +1407,7 @@ function ticks(max){
 }
 /* 월 목록 (최신 우선) */
 function months(){
-  const s=new Set(VERSIONS.map(v=>v.label.slice(0,7)));
+  const s=new Set(VERSIONS.filter(v=>v.id!=='saved').map(v=>v.label.slice(0,7)));
   return [...s].sort().reverse();
 }
 /* 백분율 최대잉여법 — 합계 100% 보장 */
@@ -897,13 +1496,10 @@ function renderCal(){
   const first = new Date(Y, M-1, 1);
   const days  = new Date(Y, M, 0).getDate();
   const lead  = first.getDay();
-  // 생성일 맵 — label 은 실제 생성일이라 하루에 여러 번 재생성하면 **겹친다**.
-  // 그래서 날짜당 버전을 배열로 모은다. 한 칸에 그날 생성분을 합쳐 보여 주고,
-  // 누르면 그날의 최신 버전을 고른다(VERSIONS 가 최신순이라 [0] 이 최신).
-  // 개별 버전은 위 '생성일 그래프'의 막대(data-ver)에서 하나씩 고를 수 있다.
+  // 생성일 맵
   const map = {};
   VERSIONS.forEach(v => { const [y,m,d] = v.label.split('.').map(Number);
-    if (y===Y && m===M) (map[d] = map[d] || []).push(v); });
+    if (y===Y && m===M) map[d] = v; });
   // 이동 가능 범위
   const labels = VERSIONS.map(v => v.label).sort();
   const minYM = labels[0].slice(0,7).replace('.','-');
@@ -913,13 +1509,11 @@ function renderCal(){
   let cells = '';
   for (let i=0;i<lead;i++) cells += '<span class="cal-d"></span>';
   for (let d=1;d<=days;d++){
-    const vs = map[d];
-    if (vs){
-      const sel = vs.some(v => S.ver===v.id);
-      const n = vs.reduce((a,v) => a+verCount(v.id), 0);
-      cells += `<button class="cal-d has ${sel?'sel':''}" data-cal-d="${vs[0].id}"
-        title="${vs.length>1?`이 날 생성 ${vs.length}회 · 합계 ${n}건`:`${n}건`}">
-        <span>${d}</span><span class="cal-n">${n}</span></button>`;
+    const v = map[d];
+    if (v){
+      const sel = S.ver===v.id;
+      cells += `<button class="cal-d has ${sel?'sel':''}" data-cal-d="${v.id}">
+        <span>${d}</span><span class="cal-n">${verCount(v.id)}</span></button>`;
     } else {
       cells += `<span class="cal-d">${d}</span>`;
     }
@@ -1095,7 +1689,7 @@ function viewList(){
     return head+`<tr class="trow ${ck?'on':''}">
       <td><button class="ck ${ck?'on':''}" data-ck="${t.id}">✓</button></td>
       <td style="cursor:pointer" data-open="${t.id}">
-        <div class="tt">${esc(t.name)}${t.grade?` <span class="tag ${t.grade==='A'?'ok':(t.grade==='B'?'nt':'wn')}">${esc(t.grade)} ${esc(t.evalScore)}</span>`:''}${t.verdict==='차단'?` <span class="tag bd">검증 미통과</span>`:''}</div><div class="ts">${t.origin==='AI생성'?'<span class="tag lv">AI</span> ':''}${esc(t.sum)}</div></td>
+        <div class="tt">${esc(t.name)}</div><div class="ts">${esc(t.sum)}</div></td>
       <td><span class="tag oc">${esc(OC[t.oc].name)}</span></td>
       <td><span class="tag lv">${esc(t.lever)}</span></td>
       <td><span class="note">${t.ev.map(e=>esc(EV[e].src)).join(', ')}</span></td>
@@ -1141,7 +1735,8 @@ function viewList(){
         ${OCS.map(o=>`<option value="${o.code}" ${o.code===S.oc?'selected':''}>${o.name}</option>`).join('')}
       </select>
       <span class="ctl-sep"></span>
-      <input class="inp" id="q" placeholder="과제명 · 벤치마크 회사 검색" value="${esc(S.q)}" style="width:200px">
+      <input class="inp" id="q" placeholder="과제명 · 벤치마크 회사 검색" value="${esc(S.q)}" style="width:200px"
+        autocomplete="off" data-lpignore="true" data-1p-ignore>
       <div style="margin-left:auto" class="row-f">
         <button class="btn" id="regen" ${S.regenerating?'disabled':''}>${S.regenerating?'생성 중…':'↻ 재생성'}</button>
         <button class="btn" id="csv">CSV 내려받기</button>
@@ -1177,7 +1772,7 @@ function viewList(){
 /* ---------- 2. 과제 상세 ---------- */
 function viewDetail(){
   const t = curTask(), v = fOf(t), L = LOGIC[t.lever], ver = verOf(t.ver);
-  const on = sysOn(t), uf = userFx(t), drafting = S.fxDraft === t.id;
+  const on = sysOn(t), uf = userFx(t), drafting = S.fxDraft === t.id, asking = S.fxAsk === t.id;
   return `
   <div class="row-f" style="font-size:12px;color:var(--t4)">
     <a href="#" data-nav="list">과제 제안</a><span>/</span>
@@ -1190,16 +1785,9 @@ function viewDetail(){
       <div class="row-f">
         <span class="tag oc">${esc(OC[t.oc].name)}</span>
         <span class="tag lv">${esc(t.lever)}</span>
-        ${t.verdict?`<span class="tag ${t.grade==='A'?'ok':(t.grade==='B'?'nt':'wn')}">${esc(t.verdict)} · ${esc(t.grade)} ${esc(t.evalScore)}점</span>`:''}
       </div>
       <h1 style="font-size:23px;line-height:1.35">${esc(t.name)}</h1>
       <p class="lede">${esc(t.plan)}</p>
-      ${t.bg?`<p class="note" style="line-height:1.7">${esc(t.bg)}</p>`:''}
-      ${t.verdict?`<div class="stack" style="gap:6px">
-        <div class="note">${esc(S.evalCriteria)}</div>
-        ${(t.flags||[]).map(f=>`<div class="hint"><span class="dot" style="background:var(--${f.sev==='차단'?'bad':'warn'})"></span><span><strong>${esc(f.sev)}</strong> ${esc(f.msg)}</span></div>`).join('')}
-        <span class="note">채점 방식 ${esc(t.scoredBy)}</span>
-      </div>`:''}
     </div>
   </div>
 
@@ -1215,12 +1803,26 @@ function viewDetail(){
       <div class="card-b stack" style="gap:14px">
         <div>
           <div class="fx-head">
-            <span class="fld-l">산출식${on?'':` <span class="fx-mark">· ${esc(uf?.at||'')} 사용자 수정</span>`}</span>
+            <span class="fld-l">산출식${on?'':` <span class="fx-mark">· ${esc(uf?.at||'')} ${uf?.by?'프롬프트 수정':'사용자 수정'}</span>`}</span>
             <div style="margin-left:auto" class="row-f" style="gap:4px">
               <button class="icb" id="fxCopy" title="산출식 복사">${S.fxCopied?'✓':'⧉'}</button>
-              <button class="icb ${drafting?'act':''}" id="fxEditBtn" title="산출식 수정">✎</button>
+              <button class="icb ${asking?'act':''}" id="fxAskBtn" title="프롬프트로 수정">
+                <svg width="13" height="13" viewBox="0 0 16 16" fill="currentColor"><path d="M8 1.6l1.25 3.15L12.4 6l-3.15 1.25L8 10.4 6.75 7.25 3.6 6l3.15-1.25L8 1.6zM12.6 9.6l.65 1.65 1.65.65-1.65.65-.65 1.65-.65-1.65-1.65-.65 1.65-.65.65-1.65z"/></svg>
+              </button>
+              <button class="icb ${drafting?'act':''}" id="fxEditBtn" title="직접 수정">✎</button>
             </div>
           </div>
+          ${asking?`<div class="fxq">
+            <div class="fxq-h"><span class="ai-mk">AI</span><span class="fxq-t">자연어로 산출식을 바꿔보세요</span></div>
+            <div class="fxq-r">
+              <input class="inp fxq-i" id="fxAskI" value="${esc(S.fxAskText)}" ${S.fxBusy?'disabled':''}
+                placeholder="예) 투자비는 빼고 총 효과만 보여줘">
+              <button class="btn sm pri" id="fxAskGo" ${S.fxBusy?'disabled':''}>${S.fxBusy?'생성 중…':'적용'}</button>
+              <button class="mclose" id="fxAskX" title="닫기">✕</button>
+            </div>
+            <div class="fxq-p">${FX_PRESETS.map(p=>
+              `<button class="fxq-c" data-fxp="${esc(p.label)}" ${S.fxBusy?'disabled':''}>${esc(p.label)}</button>`).join('')}</div>
+          </div>`:''}
           ${drafting
             ? `<div class="stack" style="gap:8px">
                  <textarea id="fxInput" class="fx-input" spellcheck="false">${esc(fxText(t))}</textarea>
@@ -1254,7 +1856,7 @@ function viewDetail(){
         <div class="hr"></div>
         <div class="row-f" style="justify-content:space-between">
           <span class="fld-l">관리지표</span>
-          <span style="font-size:12.5px;font-weight:600">${esc(t.kpi||L.metric)}</span>
+          <span style="font-size:12.5px;font-weight:600">${esc(L.metric)}</span>
         </div>
       </div>
     </div>
@@ -1270,11 +1872,9 @@ function viewDetail(){
           <span class="ev-n">${String(i+1).padStart(2,'0')}</span>
           <div style="min-width:0">
             <div class="ev-t">${esc(e.src)} · ${esc(e.title)}</div>
-            <div class="ev-s">${e.sum ? esc(e.sum)
-              : '<span style="color:var(--t4)">원문 미확보 — 제목만 수집된 자료입니다.</span>'}</div>
+            <div class="ev-s">${esc(e.sum)}</div>
             <div class="ev-m"><span>${esc(e.kind)}</span><span>·</span><span>${esc(e.date)}</span>
               <a class="ev-l" href="${esc(e.url)}" target="_blank" rel="noopener">원문 보기 ↗</a></div>
-            ${(e.metrics||[]).length?`<div class="ev-m">${e.metrics.map(m=>`<span><b style="color:var(--t2)">${esc(m.label)}</b> ${esc(m.value)}${m.period?` · ${esc(m.period)}`:''}</span>`).join('')}</div>`:''}
           </div>
         </div>`;
       }).join('')}
@@ -1293,6 +1893,59 @@ function resultInner(t){
       ? `<span class="result-v pending">산정 대기</span><span class="note">기준값을 입력하면 자동 계산됩니다</span>`
       : `<span class="result-v num">${net>=0?'+':''}${f1(net)}억<span style="font-size:12px;font-weight:600;color:var(--t3);letter-spacing:0"> / 년</span></span>
          <span class="note mono">${esc(LOGIC[t.lever].show(f))}</span>`);
+}
+
+/* ---------- 커스텀 과제 DB 저장/로드 ---------- */
+function ensureSavedVersion(){
+  if(!VERSIONS.some(v=>v.id==='saved'))
+    VERSIONS.unshift({id:'saved', label:'커스텀 저장', trigger:'사용자가 직접 만든 과제'});
+}
+function dbTaskToMock(d){
+  return {
+    id:d.id, ver:'saved',
+    oc:(OC[d.aff]?d.aff:'SKGC'),
+    lever:(LOGIC[d.category]?d.category:LEVERS[0]),
+    name:d.title, sum:d.background||d.plan||'', plan:d.plan||'',
+    ev:(d.evidence||[]).filter(k=>EV[k]),
+  };
+}
+async function saveCustomTask(){
+  const c=S.cg;
+  c.name=(document.getElementById('cgName')?.value||'').trim();
+  c.sum=(document.getElementById('cgSum')?.value||'').trim();
+  c.err='';
+  if(!c.name){ c.err='과제명을 입력하세요.'; return render(); }
+  const L=c.lever?LOGIC[c.lever]:null;
+  const payload={
+    createdAt: new Date().toISOString().slice(0,10),
+    aff:c.oc, title:c.name, category:c.lever||'', background:c.sum, plan:c.plan||'',
+    kpiName:L?L.metric:'-', kpiFormula:L?L.text:'-',
+    evidence:c.ev?[c.ev]:[], status:'검토중', origin:'커스텀',
+  };
+  c.saving=true; render();
+  try{
+    const r=await fetch('/api/tasks',{method:'POST',headers:{'Content-Type':'application/json',Authorization:'Bearer '+(localStorage.getItem('oi-token')||'')},body:JSON.stringify(payload)});
+    if(!r.ok) throw 0;
+    const d=await r.json();
+    ensureSavedVersion();
+    TASKS.unshift(dbTaskToMock(d.task));
+    c.saving=false; c.done=true; render();
+  }catch(e){
+    c.saving=false; c.err='DB 저장에 실패했습니다. 백엔드(8000) 실행을 확인하세요.'; render();
+  }
+}
+async function loadSavedTasks(){
+  try{
+    const r=await fetch('/api/tasks',{headers:{Authorization:'Bearer '+(localStorage.getItem('oi-token')||'')}});
+    if(!r.ok) return;
+    const d=await r.json();
+    const saved=(d.tasks||[]).filter(t=>t.origin==='커스텀');
+    if(!saved.length) return;
+    ensureSavedVersion();
+    const have=new Set(TASKS.map(t=>String(t.id)));
+    saved.forEach(t=>{ if(!have.has(String(t.id))) TASKS.unshift(dbTaskToMock(t)); });
+    render();
+  }catch(e){}
 }
 
 /* ---------- 3. 커스텀 생성 ---------- */
@@ -1328,12 +1981,16 @@ function viewCustom(){
         <div class="row-f" style="gap:7px"><input class="inp" id="cgFree" placeholder="적용 방향을 직접 작성">
         <button class="btn sm" id="cgFreeGo">확인</button></div></div></div>`;
   } else {
-    panel = `<div class="stack" style="gap:14px"><div class="fld-l">아래 내용으로 과제를 만듭니다</div>
+    panel = `<div class="stack" style="gap:12px">
+      <div class="fld"><label class="fld-l">과제명 <span style="color:var(--bad)">*</span></label>
+        <input class="inp" id="cgName" value="${esc(c.name||'')}" placeholder="예: NCC 정기보수 공기 단축 — 공정 병렬화 적용"
+          autocomplete="off" data-lpignore="true" data-1p-ignore></div>
+      <div class="fld"><label class="fld-l">요약 · 배경 <span class="note">(선택)</span></label>
+        <textarea id="cgSum" style="height:76px" placeholder="과제 배경·핵심 내용을 직접 작성하세요">${esc(c.sum||'')}</textarea></div>
       <div class="hint"><span class="dot"></span>
         <span>기대효과 금액은 시스템이 산정하지 않습니다. 산출식과 필요 기준값 항목만 생성되고, 값은 상세 화면에서 현업이 입력합니다.</span></div>
-      <div class="hint"><span class="dot"></span>
-        <span>고른 OC·근거·레버·적용 방향을 조건으로 AI가 배경·리스크·기대효과·KPI까지 작성합니다. <strong>1분 안팎</strong> 걸립니다.</span></div>
-      <button class="btn pri" id="cgGo" style="align-self:flex-start" ${S.cgBusy?'disabled':''}>${S.cgBusy?'생성 중…':'과제 생성'}</button></div>`;
+      ${c.err?`<div class="hint" style="border-color:var(--bad)"><span class="dot" style="background:var(--bad)"></span><span>${esc(c.err)}</span></div>`:''}
+      <button class="btn pri" id="cgGo" style="align-self:flex-start" ${c.saving?'disabled':''}>${c.saving?'저장 중…':'과제 생성 · DB 저장'}</button></div>`;
   }
 
   return `
@@ -1390,6 +2047,72 @@ function buildPrompt(){
 S.ex.research || '(미입력)',
   ].join('\n');
 }
+/* 조립된 프롬프트를 읽기 좋은 형태로 렌더링 (복사·내보내기는 마크다운 원문 유지) */
+function promptHtml(txt){
+  const L = txt.split('\n');
+  const out = [];
+  let i = 0, bul = [], par = [];
+  const flushBul = () => { if(bul.length){ out.push(`<ul class="pp-ul">${bul.map(b=>`<li>${esc(b)}</li>`).join('')}</ul>`); bul=[]; } };
+  const flushPar = () => { if(par.length){ out.push(`<div class="pp-p">${esc(par.join(' '))}</div>`); par=[]; } };
+  const flush = () => { flushPar(); flushBul(); };
+
+  while(i < L.length){
+    const raw = L[i], t = raw.trim();
+    if(t === ''){ flush(); i++; continue; }
+    if(t === '---'){ flush(); out.push('<div class="pp-div"></div>'); i++; continue; }
+    if(t.startsWith('# ')){ flush(); out.push(`<div class="pp-h1">${esc(t.slice(2))}</div>`); i++; continue; }
+    if(t.startsWith('## ')){ flush(); out.push(`<div class="pp-h2">${esc(t.slice(3))}</div>`); i++; continue; }
+
+    // 추가 자료 블록 — 이후 내용을 점선 박스에 담음
+    if(t.startsWith('[▼')){
+      flush();
+      const label = t.replace(/^\[▼\s*/,'').replace(/\]$/,'');
+      i++;
+      const rest = [];
+      while(i < L.length){ rest.push(L[i]); i++; }
+      const body = rest.join('\n').trim();
+      const empty = (body === '' || body === '(미입력)');
+      out.push(`<div class="pp-add ${empty?'pp-empty':''}">
+        <div class="pp-add-l">${esc(label)}</div>
+        <div class="pp-add-b">${empty?'아직 입력된 자료가 없습니다':esc(body).replace(/\n/g,'<br>')}</div>
+      </div>`);
+      continue;
+    }
+
+    // 벤치마크 사례 — "- [날짜 · 매체 · 유형] 제목" + 들여쓴 본문/출처
+    const m = t.match(/^- \[(.+?)\]\s*(.*)$/);
+    if(m){
+      flush();
+      const meta = m[1].split('·').map(s=>s.trim()).filter(Boolean);
+      const title = m[2];
+      let body = '', url = '';
+      i++;
+      while(i < L.length && /^\s{2,}\S/.test(L[i])){
+        const s = L[i].trim();
+        if(s.startsWith('출처:')) url = s.slice(3).trim();
+        else body += (body ? ' ' : '') + s;
+        i++;
+      }
+      out.push(`<div class="pp-c">
+        <div class="pp-c-m">${meta.map((x,k)=>`<span class="${k===1?'pp-src':''}">${esc(x)}</span>`).join('<span class="pp-dot">·</span>')}</div>
+        <div class="pp-c-t">${esc(title)}</div>
+        ${body?`<div class="pp-c-b">${esc(body)}</div>`:''}
+        ${url?`<a class="pp-c-u" href="${esc(url)}" target="_blank" rel="noopener">${esc(url)} ↗</a>`:''}
+      </div>`);
+      continue;
+    }
+
+    if(t.startsWith('- ')){ flushPar(); bul.push(t.slice(2)); i++; continue; }
+    if(/^[가-힣A-Za-z ]{1,8}:$/.test(t)){ flush(); out.push(`<div class="pp-sub">${esc(t)}</div>`); i++; continue; }
+
+    flushBul();
+    par.push(t);
+    i++;
+  }
+  flush();
+  return out.join('');
+}
+
 function viewExport(){
   const text = S.ex.text!==null ? S.ex.text : buildPrompt();
   return `
@@ -1407,11 +2130,11 @@ function viewExport(){
   <div class="grid-a">
     <div class="card">
       <div class="card-h"><h2>조립된 프롬프트</h2>
-        <span class="note" style="margin-left:auto">${text.length.toLocaleString()}자 · 약 ${Math.round(text.length/1.6).toLocaleString()} 토큰</span></div>
+        <span class="note" style="margin-left:auto">${S.ex.editing?'마크다운 원문 · ':''}${text.length.toLocaleString()}자 · 약 ${Math.round(text.length/1.6).toLocaleString()} 토큰</span></div>
       <div class="card-b">
         ${S.ex.editing
-          ? `<textarea id="exText" style="height:420px">${esc(text)}</textarea>`
-          : `<div class="mono" style="font-size:11.5px;line-height:1.85;white-space:pre-wrap;max-height:420px;overflow:auto;color:var(--t1)">${esc(text)}</div>`}
+          ? `<textarea id="exText" style="height:460px">${esc(text)}</textarea>`
+          : `<div class="pp">${promptHtml(text)}</div>`}
       </div>
     </div>
     <div class="col">
@@ -1565,27 +2288,205 @@ function viewReport(){
    기간·분야 단위 AI 동향 요약 + 상위 테마 + 자료 목록.
    요약은 기간/분야 선택에만 반응하고, 아래 목록 필터와는 분리됩니다. */
 
-const BIZ_C = {};    // 사업분야 → 색상 (서버 biz_segment)
+const BIZ_C = {'에너지·화학':'#0043ce','배터리·소재':'#007d79','LNG·전력':'#8a3ffc'};
 
-/* 테마 축 = 과제 레버 체계. 서버 theme 테이블에서 받는다. */
-const TH2 = {};      // 테마명 → {c, bg, head, body}
+/* 테마 축 = 과제 레버 체계 (고정) */
+const TH2 = {
+  '정비·설비 신뢰성': {c:'#0043ce', bg:'#eaf0fd',
+    head:'정비를 "줄이는" 게 아니라 "다시 배치"하는 흐름',
+    body:'공기 단축·주기 재설계 모두 안전·품질 절차를 축소하지 않고 순서와 간격을 바꿔 고정비를 흡수하는 접근입니다. 주기를 연장한 구간에는 상태 감시 계측을 추가하는 전제가 반복해서 등장합니다.'},
+  '에너지·유틸리티': {c:'#0f62fe', bg:'#eaf1fe',
+    head:'전력비를 단가가 아니라 구조로 대응',
+    body:'요금제·피크 관리에서 자가발전, 단지 내 공동활용까지 대응 축이 사외로 확장되고 있습니다. 공통적으로 투자 회수 기간이 의사결정의 핵심 변수로 언급됩니다.'},
+  '구매·조달': {c:'#4589ff', bg:'#edf3ff',
+    head:'지역 단위 조달을 글로벌 단위로 통합',
+    body:'공통 소모품·MRO를 통합 입찰로 전환하고, 규격 표준화로 관리 품목 수 자체를 줄이는 2단 접근이 공통 패턴입니다.'},
+  '공정 수율·품질': {c:'#007d79', bg:'#e6f4f3',
+    head:'검사 자동화가 품질과 인원을 동시에 건드림',
+    body:'전수검사 전환은 불량 유형 상위 공정에 먼저 적용한 뒤 검출률을 기존 방식과 비교 검증하는 순서를 밟습니다. 설비 투자 회수는 재작업 공수 절감과 함께 계산됩니다.'},
+  '물류·계약': {c:'#8a3ffc', bg:'#f1eafe',
+    head:'운임 하락 구간에 열린 재협상 창',
+    body:'지수 하락세가 이어지며 만료 임박 계약의 협상력이 커지는 구간입니다. 다만 반등 가능성 때문에 계약 기간을 분산하라는 견해가 함께 제시됩니다.'},
+  '간접비·원가구조': {c:'#2f4a57', bg:'#e9eff2',
+    head:'절감액보다 구조 단순화를 목표로 제시',
+    body:'중복 지원 기능 통합, 통제 가능·불가 항목 분리 등 금액 목표보다 관리 체계 자체를 바꾸는 서술이 늘고 있습니다.'},
+  '가동률·운전자본': {c:'#a56a00', bg:'#faf3e4',
+    head:'다운사이클 대응이 가동 조정과 재고로 이동',
+    body:'가동 조정 구간에 정비 일정을 겹쳐 비가동 시간을 압축하거나, 안전재고를 차등 적용해 회전일수를 줄이는 사례가 동시에 나타납니다.'},
+};
 
-/* 자료 → 테마 배정 (LLM 배정 결과를 feed_item.theme 에 저장해 둔 값) */
-const EV_TH = {};        // 자료 id → 테마명
-const EV_BIZ_FB = {};    // 참조 과제가 없을 때 쓸 사업분야
-const EV_NEW = {};       // 새로 들어온 자료 표시
+/* 자료 → 테마 배정 (LLM 배정 결과를 저장해 둔 값) */
+const EV_TH = {
+  e1:'정비·설비 신뢰성', e2:'에너지·유틸리티', e3:'구매·조달', e4:'공정 수율·품질',
+  e5:'정비·설비 신뢰성', e6:'물류·계약', e7:'공정 수율·품질', e8:'간접비·원가구조',
+  e9:'에너지·유틸리티', e10:'정비·설비 신뢰성', e11:'가동률·운전자본', e12:'가동률·운전자본',
+  e13:'간접비·원가구조', e14:'에너지·유틸리티',
+};
+const EV_BIZ_FB = {
+  e1:'에너지·화학', e2:'에너지·화학', e3:'에너지·화학', e4:'배터리·소재', e5:'에너지·화학',
+  e6:'에너지·화학', e7:'배터리·소재', e8:'에너지·화학', e9:'에너지·화학', e10:'LNG·전력',
+  e11:'에너지·화학', e12:'에너지·화학', e13:'에너지·화학', e14:'에너지·화학',
+};
+const EV_NEW = {e1:1, e3:1, e4:1, e6:1, e8:1, e11:1};
+const TM_HUE = {'에너지·화학':'b','배터리·소재':'t','LNG·전력':'p'};
+/* 자료별 브리핑 — 무슨 일이 있었고 우리에게 무슨 의미인지 */
+const EV_BRIEF = {
+  e1:'안전·품질 검증은 그대로 두고 공정 순서만 병렬로 바꿔 공기를 줄였습니다. 정비 계획 재설계의 직접 근거입니다.',
+  e2:'절감분 상당액이 유틸리티 원단위 개선에서 나왔다고 답변했습니다. 배럴당 운영비 목표에 아직 여력이 남아 있다는 언급도 있었습니다.',
+  e3:'구매를 지역 단위에서 글로벌 단위로 통합하고 규격 표준화로 관리 품목 수까지 줄였습니다. 공통 MRO에 바로 대입할 수 있는 방식입니다.',
+  e4:'샘플링에서 전수검사로 전환해 불량 유출과 검사 인원을 동시에 줄였습니다. 상위 공정에 먼저 적용하고 검출률을 비교 검증하는 순서를 밟았습니다.',
+  e5:'고장 이력과 정비비를 매칭해 과잉·과소 구간을 나눠 주기를 재설정했습니다. 연장 구간에는 상태 감시 계측을 함께 붙였습니다.',
+  e6:'주요 항로 운임 지수 하락이 이어지며 만료 임박 계약의 재협상 여지가 커졌습니다. 다만 반등 가능성 때문에 계약 기간 분산을 권합니다.',
+  e7:'저가동 라인을 통합해 단위 고정비를 낮췄습니다. 납기 대응력 저하는 안전재고 기준을 따로 조정해 보완했습니다.',
+  e8:'중복 지원 기능을 통합하고 공통 서비스 계약을 재검토했습니다. 절감 규모보다 구조 단순화에 초점을 뒀다고 밝혔습니다.',
+  e9:'단지 내 스팀·질소 유휴 용량을 인접사와 상호 활용하는 안이 의제로 올랐습니다. 계약·정산 구조 합의가 선행 조건입니다.',
+  e10:'정비 계획을 선적 스케줄과 연동해 비가동 시간을 줄였습니다. 물량 변동이 제한적인 장기계약 구조에서 운영비가 수익성의 핵심 변수라고 설명합니다.',
+  e11:'수요 부진으로 가동률을 조정하며 단위 원가 경쟁이 심화될 것으로 봤습니다. 조정 기간에 정기보수를 앞당겨 비가동을 겹치는 방안을 병행합니다.',
+  e12:'수요 변동성에 따라 안전재고를 차등 적용하고 장기체화 재고를 분리 관리했습니다. 금리 상승 구간에서 재고 감축의 재무 효과가 커졌다는 분석입니다.',
+  e13:'운영비를 통제 가능·불가 항목으로 나누고 통제 가능 항목에만 목표를 부여했습니다. 유가 하락 구간에서도 단위 생산비를 방어한 요인으로 제시됩니다.',
+  e14:'전력비 부담에 대응해 자가발전·유틸리티 설비 투자를 결정했습니다. 투자 회수 기간과 요금 전망을 함께 검토했다고 기재했습니다.',
+};
+/* 분야별 브리핑 리드 문장 */
+const BRIEF_LEAD = {
+  '전체':'비용 항목을 개별로 깎기보다 운영 순서와 계약 구조를 다시 짜는 쪽으로 흐름이 모이고 있습니다.',
+  '에너지·화학':'정비 일정과 유틸리티 운영을 재배치해 고정비를 흡수하려는 움직임이 이어지고 있습니다.',
+  '배터리·소재':'검사 자동화와 라인 통합으로 수율과 고정비를 동시에 건드리는 접근이 확산되고 있습니다.',
+  'LNG·전력':'터미널 운영비를 스케줄 연동으로 압축하는 방식이 수익성 관리의 축으로 제시되고 있습니다.',
+};
+/* 자료별 추출 키워드 — 형태소 분석 후 빈도·중요도 가중 (빅카인즈 방식 참고) */
+const EV_KW = {
+  e1:['정기보수','공기 단축','고정비','원가 절감'],
+  e2:['오펙스 절감','유틸리티','원단위','원가 절감'],
+  e3:['원가 절감','통합 조달','MRO','물류비'],
+  e4:['수율','전수검사','자동화','원가 절감'],
+  e5:['정비 주기','고장 이력','상태 감시','비계획 정지'],
+  e6:['해상운임','장기계약','재협상','물류비'],
+  e7:['라인 통합','가동률','분리막','안전재고'],
+  e8:['간접비','기능 통합','원가 절감','유휴 자산'],
+  e9:['공동활용','유틸리티','콤비나트','고정비'],
+  e10:['터미널 운영비','정비 계획','비가동','LNG'],
+  e11:['가동 조정','수요 부진','고정비','정기보수'],
+  e12:['운전자본','재고 회전','안전재고','조달금리'],
+  e13:['생산 단가','운영비','통제 가능','E&P'],
+  e14:['자가발전','전력비','에너지 자립','설비 투자'],
+};
+/* 자료 → 관련 OC (과제 인용 + 사업 특성 기반) */
+const EV_OC = {
+  e1:['SKGC','SKE'], e2:['SKE','SKIPC'], e3:['SKGC','SKE','SKO'], e4:['SKO','SKIET'],
+  e5:['SKE','SKIPC'], e6:['SKTI','SKEN'], e7:['SKIET','SKO'], e8:['SKEN','SKTI'],
+  e9:['SKIPC','SKGC'], e10:['SKES'], e11:['SKGC','SKIPC'], e12:['SKGC','SKO'],
+  e13:['SKEO'], e14:['SKE','SKES'],
+};
+/* 어제 수집분 대비 언급 증감 (데모 값) */
+const KW_TREND = {
+  '원가 절감':+3,'정기보수':+2,'고정비':0,'물류비':-1,
+  '공기 단축':+1,'통합 조달':0,'MRO':+1,'수율':0,'전수검사':+1,'자동화':+1,
+  '해상운임':-1,'장기계약':0,'재협상':+1,'간접비':-1,'기능 통합':+1,
+  '유휴 자산':+1,'가동 조정':+1,'수요 부진':+1,
+};
+/* OC별 수집 현황 — 히트맵 집계 */
+function ocMatrix(scope){
+  const m = {}; OCS.forEach(o => m[o.code] = {n:0, kws:{}, srcs:new Set()});
+  scope.forEach(k => {
+    (EV_OC[k]||[]).forEach(c => {
+      if(!m[c]) return;
+      if(S.trBiz!=='전체' && OC[c].biz!==S.trBiz) return;
+      m[c].n++;
+      (EV_KW[k]||[]).forEach(w => { m[c].kws[w] = (m[c].kws[w]||0)+1; });
+      m[c].srcs.add(EV[k].src);
+    });
+  });
+  const max = Math.max(1, ...OCS.map(o=>m[o.code].n));
+  return {m, max};
+}
+const hexA = (hex, a) => {
+  const n = parseInt(hex.slice(1), 16);
+  return `rgba(${(n>>16)&255},${(n>>8)&255},${n&255},${a.toFixed(2)})`;
+};
+/* 스쿼리파이드 트리맵 — 값에 비례해 사각형 배치 (Finviz 방식) */
+function squarify(items, X, Y, W, H){
+  const list = items.filter(i=>i.v>0).sort((a,b)=>b.v-a.v);
+  if(!list.length) return [];
+  const total = list.reduce((s,i)=>s+i.v,0);
+  const scale = (W*H)/total;
+  const q = list.map(i=>({...i, a:i.v*scale}));
+  const out = [];
+  let x=X, y=Y, w=W, h=H, row=[], i=0;
 
-/* 자료명(Earnings call) → 종류 필터 카테고리(실적발표) */
-const KIND_MAP = {};
-/* 종류·분야 필터 항목 — 서버가 가진 자료 종류/사업부문에서 boot() 가 채운다 */
-const TR_KINDS = ['전체'];
-const TR_BIZS  = ['전체'];
+  const worst = (r, len) => {
+    if(!r.length) return Infinity;
+    const s = r.reduce((a,b)=>a+b.a,0);
+    const mx = Math.max(...r.map(z=>z.a)), mn = Math.min(...r.map(z=>z.a));
+    return Math.max((len*len*mx)/(s*s), (s*s)/(len*len*mn));
+  };
+  const flush = () => {
+    const s = row.reduce((a,b)=>a+b.a,0);
+    if(w >= h){
+      const rw = s/h; let oy = y;
+      row.forEach(r=>{ const rh=r.a/rw; out.push({...r, x, y:oy, w:rw, h:rh}); oy+=rh; });
+      x += rw; w -= rw;
+    } else {
+      const rh = s/w; let ox = x;
+      row.forEach(r=>{ const rw2=r.a/rh; out.push({...r, x:ox, y, w:rw2, h:rh}); ox+=rw2; });
+      y += rh; h -= rh;
+    }
+    row = [];
+  };
+  while(i < q.length){
+    const len = Math.min(w,h);
+    if(!row.length || worst(row,len) >= worst(row.concat([q[i]]),len)){ row.push(q[i]); i++; }
+    else flush();
+  }
+  if(row.length) flush();
+  return out;
+}
+/* OC 트리맵 — 사업부문 2단 배치 */
+function ocTreemap(HM){
+  const W = 1000, H = 330;
+  const bizList = ['에너지·화학','배터리·소재','LNG·전력']
+    .filter(bz => S.trBiz==='전체' || bz===S.trBiz)
+    .map(bz=>({
+    k:bz, v:OCS.filter(o=>o.biz===bz).reduce((s,o)=>s+HM.m[o.code].n,0)
+  }));
+  const outer = squarify(bizList, 0, 0, W, H);
+  const cells = [];
+  outer.forEach(g=>{
+    const list = OCS.filter(o=>o.biz===g.k).map(o=>({k:o.code, v:HM.m[o.code].n}));
+    squarify(list, g.x, g.y, g.w, g.h).forEach(c=>cells.push({...c, biz:g.k}));
+  });
+  return {cells, groups:outer, W, H};
+}
+
+/* 기간 기준 키워드 집계 — AI 요약 문장용 */
+function kwScope(scope){
+  const c = {};
+  scope.forEach(k => (EV_KW[k]||[]).forEach(w => { c[w]=(c[w]||0)+1; }));
+  return Object.keys(c).map(w=>({w, n:c[w]})).sort((a,b)=> b.n-a.n || a.w.localeCompare(b.w));
+}
+/* 오늘 수집분 키워드 빈도 — 기간 필터와 무관하게 당일 기준 */
+function kwToday(){
+  const todays = Object.keys(EV).filter(k=>EV_NEW[k]);
+  const c = {};
+  todays.forEach(k => (EV_KW[k]||[]).forEach(w => { c[w]=(c[w]||0)+1; }));
+  const rows = Object.keys(c).map(w=>({w, n:c[w], d:KW_TREND[w]||0}))
+    .sort((a,b)=> b.n-a.n || a.w.localeCompare(b.w));
+  return {rows, max: rows.length?rows[0].n:1, n: todays.length};
+}
+
+const KIND_MAP = {
+  '결산설명회':'실적발표', 'Earnings call':'실적발표',
+  '10-Q 공시':'공시', '수시공시':'공시',
+  '전문지 (SNE Research)':'시황·전문지', '시황 리포트':'시황·전문지',
+  '중기경영계획':'IR·보고서', 'IR 자료':'IR·보고서', 'Annual report':'IR·보고서',
+  '협회 자료':'협회 자료',
+};
+const TR_KINDS = ['전체','공시','실적발표','IR·보고서','시황·전문지','협회 자료'];
+const TR_BIZS  = ['전체','에너지·화학','배터리·소재','LNG·전력'];
 const TR_PERIODS = [
   {k:'7d', l:'최근 1주', d:7}, {k:'1m', l:'최근 1개월', d:30}, {k:'3m', l:'최근 3개월', d:91},
   {k:'6m', l:'최근 6개월', d:182}, {k:'all', l:'전체', d:9999}, {k:'custom', l:'직접 설정', d:0},
 ];
-/* 기간 필터의 기준일 — 서버 설정(OI_TODAY)을 따른다. boot() 가 덮어쓴다. */
-let TR_TODAY = new Date();
+const TR_TODAY = new Date(2026, 6, 30);
 
 function evRefs(k){ return TASKS.filter(t=>t.ev.includes(k)); }
 function evOCs(k){ return [...new Set(evRefs(k).map(t=>t.oc))]; }
@@ -1603,8 +2504,7 @@ function trRange(){
   if (S.trPeriod==='custom')
     return [new Date(S.trFrom+'T00:00:00'), new Date(S.trTo+'T23:59:59')];
   const p = TR_PERIODS.find(x=>x.k===S.trPeriod) || TR_PERIODS[1];
-  const end = new Date(TR_TODAY); end.setHours(23,59,0,0);
-  return [trShift(TR_TODAY, p.d), end];
+  return [trShift(TR_TODAY, p.d), new Date(2026,6,30,23,59)];
 }
 /* 기간 + 분야까지만 적용한 집합 — AI 요약·상위 테마의 모집단 */
 function trScope(){
@@ -1624,45 +2524,28 @@ function viewTrend(){
   const scopeSpan = S.trPeriod==='all' ? `수집 전 기간 · ~${trDot(t)}` : `${trDot(f)} – ${trDot(t)}`;
   const bizLabel = S.trBiz==='전체' ? '전 분야' : S.trBiz;
 
-  /* ── 테마 집계 ── */
-  const cnt={}; scope.forEach(k=>{ const th=EV_TH[k]; cnt[th]=(cnt[th]||0)+1; });
-  const ranked = Object.keys(cnt).sort((a,b)=> cnt[b]-cnt[a] || a.localeCompare(b));
-  const maxC = ranked.length ? cnt[ranked[0]] : 1;
+  const HM = ocMatrix(scope);
+  const TM = ocTreemap(HM);
+  const KW = kwToday();
+  const srcList = ['전체', ...[...new Set(Object.keys(EV).map(k=>EV[k].src))].sort()];
 
-  /* ── 요약 헤드라인 ── */
-  let headline = '선택한 기간에 수집된 자료가 없습니다. 기간을 넓혀 보세요.';
-  if (ranked.length===1)
-    headline = `${bizLabel} 자료 ${scope.length}건은 모두 ${ranked[0]} 축에 모였습니다.`;
-  else if (ranked.length>1)
-    headline = `${bizLabel} 자료 ${scope.length}건이 ${ranked.length}개 테마에 걸쳐 있고, `
-      + `${ranked[0]}(${cnt[ranked[0]]}건)과 ${ranked[1]}(${cnt[ranked[1]]}건)에 언급이 집중됐습니다. `
-      + `공통 논조는 비용 항목을 개별로 깎기보다 운영 순서·계약 구조를 다시 짜는 쪽입니다.`;
-
-  const bullets = ranked.slice(0,3).map(th=>{
-    const T=TH2[th];
-    const srcs = scope.filter(k=>EV_TH[k]===th).slice(0,3).map(k=>EV[k].src).join(' · ');
-    return `<div class="ai-i">
-      <span style="background:${T.c}"></span>
-      <div class="ai-i-b">
-        <div class="row-f" style="gap:8px">
-          <button class="ai-tag" style="background:${T.c}" data-tr="theme:${esc(th)}">${esc(th)}</button>
-          <span style="font-size:11px;font-weight:600;color:var(--t3)" class="num">자료 ${cnt[th]}건</span>
-          <span style="font-size:11px;color:var(--t5)">${esc(srcs)}</span>
-        </div>
-        <div class="ai-h">${esc(T.head)}</div>
-        <div class="ai-p">${esc(T.body)}</div>
-      </div></div>`;
-  }).join('');
+  /* ── 데일리 브리핑 — 최근 주요 소식 ── */
+  const lead = BRIEF_LEAD[S.trBiz] || BRIEF_LEAD['전체'];
+  const briefRows = scope.slice()
+    .sort((a,b)=> (trPd(EV[b].date)-trPd(EV[a].date)) || (evRefs(b).length-evRefs(a).length))
+    .slice(0,3);
 
   /* ── 목록 필터 ── */
   const q = (S.trQ||'').trim().toLowerCase();
   let rows = scope.filter(k=>{
-    const e=EV[k];
-    if (S.trTheme && EV_TH[k]!==S.trTheme) return false;
+    const e = EV[k];
+    if (S.trKw && !(EV_KW[k]||[]).includes(S.trKw)) return false;
+    if (S.trOc && !(EV_OC[k]||[]).includes(S.trOc)) return false;
+    if (S.trSrc!=='전체' && e.src!==S.trSrc) return false;
     if (S.trKind!=='전체' && evKind(k)!==S.trKind) return false;
     if (S.trNew && !EV_NEW[k]) return false;
     if (S.trUnl && evRefs(k).length>0) return false;
-    if (q && !(e.title+e.sum+e.src).toLowerCase().includes(q)) return false;
+    if (q && !(e.title+e.sum+e.src+(EV_KW[k]||[]).join(' ')).toLowerCase().includes(q)) return false;
     return true;
   });
   rows.sort((a,b)=> S.trSort==='cite'
@@ -1683,32 +2566,32 @@ function viewTrend(){
   });
 
   const rowHtml = k=>{
-      const e=EV[k], th=EV_TH[k], T=TH2[th], bz=evBiz(k)[0], n=evRefs(k).length;
-      return `<div class="tr2-row">
-        <div class="tr2-d">
-          <span class="tr2-dd">${esc(trMD(trPd(e.date)))}</span>
-          ${EV_NEW[k]?'<span class="nb">NEW</span>':''}
+    const e=EV[k], bz=evBiz(k)[0], n=evRefs(k).length;
+    return `<div class="tr2-row">
+      <div class="tr2-d">
+        <span class="tr2-dd">${esc(trMD(trPd(e.date)))}</span>
+        ${EV_NEW[k]?'<span class="nb">NEW</span>':''}
+      </div>
+      <div class="tr2-m">
+        <div class="row-f" style="gap:7px">
+          <span class="bizdot" style="background:${BIZ_C[bz]||'var(--c2)'}"></span>
+          <span style="font-size:11.5px;font-weight:700">${esc(e.src)}</span>
+          <span style="font-size:11px;color:var(--t5)">·</span>
+          <span style="font-size:11px;color:var(--t3)">${esc(evKind(k))}</span>
+          ${(EV_OC[k]||[]).slice(0,2).map(c=>`<span class="tag oc">${esc(OC[c].name)}</span>`).join('')}
         </div>
-        <div class="tr2-m">
-          <div class="row-f" style="gap:7px">
-            <span class="bizdot" style="background:${BIZ_C[bz]||'var(--c2)'}"></span>
-            <span style="font-size:11.5px;font-weight:700">${esc(e.src)}</span>
-            <span style="font-size:11px;color:var(--t5)">·</span>
-            <span style="font-size:11px;color:var(--t3)">${esc(evKind(k))}</span>
-            <span class="thtag" style="background:${T.bg};color:${T.c}">${esc(th)}</span>
-          </div>
-          <div class="tr2-t">${esc(e.title)}</div>
-          <div class="tr2-s">${e.sum ? esc(e.sum)
-            : '<span style="color:var(--t4)">원문 미확보</span>'}</div>
-        </div>
-        <div class="tr2-a">
-          <button class="citep" style="background:${n?'var(--brand-soft)':'#fdf4e7'};color:${n?'var(--brand)':'#a06a08'}"
-            ${n?`data-cite="${k}"`:''}>${n?`인용 과제 ${n}건`:'미연결'}</button>
-          <a class="tr-lk" href="${esc(e.url)}" target="_blank" rel="noopener">원문 ↗</a>
-        </div>
-      </div>`;
+        <div class="tr2-t">${esc(e.title)}</div>
+        <div class="tr2-s">${esc(e.sum)}</div>
+        <div class="kwline">${(EV_KW[k]||[]).map(w=>
+          `<button class="kwmini ${S.trKw===w?'on':''}" data-tr="kw:${esc(w)}">${esc(w)}</button>`).join('')}</div>
+      </div>
+      <div class="tr2-a">
+        <button class="citep" style="background:${n?'var(--brand-soft)':'#fdf4e7'};color:${n?'var(--brand)':'#a06a08'}"
+          ${n?`data-cite="${k}"`:''}>${n?`인용 과제 ${n}건`:'미연결'}</button>
+        <a class="tr-lk" href="${esc(e.url)}" target="_blank" rel="noopener">원문 ↗</a>
+      </div>
+    </div>`;
   };
-  /* 인용 많은 순 정렬에서는 주차 그룹을 접고 단일 목록으로 — 두 순서는 양립 불가 */
   const groupHtml = S.trSort==='cite'
     ? rows.map(rowHtml).join('')
     : groups.map(g=>`
@@ -1716,15 +2599,13 @@ function viewTrend(){
       <span class="g-s" style="margin-left:auto">${g.rows.length}건</span></div>
     ${g.rows.map(rowHtml).join('')}`).join('');
 
-  const newN = scope.filter(k=>EV_NEW[k]).length;
-  const unlN = scope.filter(k=>evRefs(k).length===0).length;
-  const hasF = !!(S.trTheme || q || S.trKind!=='전체' || S.trNew || S.trUnl);
+  const hasF = !!(S.trKw || S.trOc || q || S.trKind!=='전체' || S.trSrc!=='전체');
 
   return `
   <div class="page-h">
     <div class="stack" style="gap:5px">
       <h1>트렌드룸</h1>
-      <p class="lede">수집된 외부 자료를 기간·분야 단위로 요약해 산업 동향으로 보여줍니다. 여기 실린 자료들은 과제 생성의 근거로 사용됩니다.</p>
+      <p class="lede">수집된 외부 자료를 OC·키워드 단위로 정리해 산업 동향으로 보여줍니다. 여기 실린 자료들은 과제 생성의 근거로 사용됩니다.</p>
     </div>
     <div class="row-f">
       <span class="note">수집 ${Object.keys(EV).length}건 · 오늘 08:00 갱신</span>
@@ -1732,95 +2613,128 @@ function viewTrend(){
     </div>
   </div>
 
-  <div class="tr2">
-    <div class="tr2-l">
-
-      <div class="card">
-        <div class="card-h">
-          <h2 style="white-space:nowrap">상위 테마</h2>
-          <span class="note">선택한 기간 내 자료를 테마 축에 배정한 결과 · 클릭하면 아래 목록이 좁혀집니다</span>
-          <button class="btn sm" style="margin-left:auto" data-tr="method:x">테마 선정 기준 ${S.trMethod?'▴':'▾'}</button>
+  <div class="tr-top">
+    <div class="card tr-card">
+      <div class="card-h">
+        <h2 style="white-space:nowrap">OC별 수집 현황</h2>
+        <div style="margin-left:auto" class="row-f" style="gap:10px">
+          ${['에너지·화학','배터리·소재','LNG·전력'].filter(bz=>S.trBiz==='전체'||bz===S.trBiz).map(bz=>
+            `<span class="lg-i"><span class="lg-d" style="background:${BIZ_C[bz]}"></span>${esc(bz)}</span>`).join('')}
+          ${S.trOc?`<button class="btn sm" data-tr="oc:${S.trOc}">${esc(OC[S.trOc].name)} 해제</button>`:''}
         </div>
-        <div class="thg">
-          ${ranked.length? ranked.map(th=>{
-            const T=TH2[th], on=S.trTheme===th;
-            return `<button class="thc" data-tr="theme:${esc(th)}"
-              style="${on?`background:${T.bg};border-color:${T.c}`:''}">
-              <span class="thc-t">
-                <span class="thc-n" style="${on?`color:${T.c}`:''}">${esc(th)}</span>
-                <span class="thc-c" style="color:${T.c}">${cnt[th]}</span>
-              </span>
-              <span class="thc-bar"><i style="background:${T.c};width:${Math.round(cnt[th]/maxC*100)}%"></i></span>
+      </div>
+      <div class="tmwrap">
+        <div class="tm">
+          ${TM.groups.map(g=>`<div class="tmg" style="left:${(g.x/TM.W*100).toFixed(3)}%;top:${(g.y/TM.H*100).toFixed(3)}%;
+            width:${(g.w/TM.W*100).toFixed(3)}%;height:${(g.h/TM.H*100).toFixed(3)}%"></div>`).join('')}
+          ${TM.cells.map(c=>{
+            const o = OC[c.k], d = HM.m[c.k], on = S.trOc===c.k;
+            const gmax = Math.max(1, ...OCS.map(x=>HM.m[x.code].n));
+            const step = Math.max(1, Math.ceil(d.n/gmax*5));
+            const top = Object.keys(d.kws).sort((x,y)=>d.kws[y]-d.kws[x])[0] || '';
+            const wpc = c.w/TM.W*100, hpc = c.h/TM.H*100;
+            const big = wpc>14 && hpc>32, mid = wpc>9 && hpc>22;
+            return `<button class="tmc ${on?'sel':''}" data-tr="oc:${c.k}"
+              title="${esc(o.name)} · 자료 ${d.n}건${top?' · 최다 키워드 '+esc(top):''}"
+              style="left:${(c.x/TM.W*100).toFixed(3)}%;top:${(c.y/TM.H*100).toFixed(3)}%;
+                width:${wpc.toFixed(3)}%;height:${hpc.toFixed(3)}%;
+                background:var(--tm${TM_HUE[c.biz]}${step})">
+              <span class="tmc-n" style="${big?'font-size:12px':(mid?'font-size:11px':'font-size:10px')}">${esc(o.name.replace('SK',''))}</span>
+              <span class="tmc-v" style="${big?'font-size:23px':(mid?'font-size:17px':'font-size:13px')}">${d.n}</span>
+              ${big&&top?`<span class="tmc-k">${esc(top)}</span>`:''}
             </button>`;
-          }).join('') : '<span class="note">해당 기간에 자료가 없습니다.</span>'}
-        </div>
-        ${S.trMethod?`<div class="method">
-          <b>테마는 이렇게 정해집니다</b>
-          <p>① <strong>고정 축</strong> — 과제 레버 체계(정비·에너지·구매·수율·물류·간접비·운전자본)를 그대로 테마 축으로 씁니다. 축이 고정이라 기간을 바꿔도 증감 비교가 가능합니다.<br>
-          ② <strong>배정</strong> — LLM이 자료 1건을 축 1개에 배정하고, 배정 근거 문장을 함께 남깁니다.<br>
-          ③ <strong>미배정 처리</strong> — 배정 확신도가 낮은 자료는 축에 넣지 않고 '미배정 풀'로 보냅니다. 이때 <strong>"이 자료의 핵심 동인" 한 문장</strong>을 함께 생성해 둡니다.<br>
-          ④ <strong>신규 테마 승격</strong> — 미배정 자료끼리 그 동인 문장의 유사도로 묶고, <strong>같은 묶음이 3건 이상</strong>이 되면 LLM이 이름·정의·기존 축과의 경계를 제안해 관리자 승인 대기열에 올립니다. 승인 시 과거 자료까지 재배정합니다.<br>
-          ⑤ <strong>접힘</strong> — 어디에도 묶이지 않은 잔여 자료와 기간 내 1건뿐인 테마는 '기타'로 묶습니다.</p>
-        </div>`:''}
-      </div>
-
-      <div class="card">
-        <div class="ctlbar" style="border-radius:14px 14px 0 0">
-          <input class="inp" id="trQ" style="width:230px" placeholder="제목·요약·출처 검색" value="${esc(S.trQ||'')}">
-          <select class="sel" id="trKind">
-            ${TR_KINDS.map(k=>`<option ${S.trKind===k?'selected':''}>${esc(k==='전체'?'자료 종류 전체':k)}</option>`).join('')}
-          </select>
-          <select class="sel" id="trSort">
-            <option value="date" ${S.trSort==='date'?'selected':''}>최신순</option>
-            <option value="cite" ${S.trSort==='cite'?'selected':''}>인용 많은 순</option>
-          </select>
-          <span class="ctl-sep"></span>
-          <button class="chip ${S.trNew?'on':''}" data-tr="new:x">신규 ${newN}</button>
-          <button class="chip ${S.trUnl?'on':''}" data-tr="unl:x">미연결 ${unlN}</button>
-          ${hasF?`<button class="chip" data-tr="clear:x" style="border:0;text-decoration:underline;text-underline-offset:3px">필터 해제</button>`:''}
-          <span class="note num" style="margin-left:auto">${rows.length}건 표시</span>
-        </div>
-        ${rows.length? groupHtml : `<div class="empty2">
-          <span style="font-size:14px;font-weight:700">조건에 맞는 자료가 없습니다</span>
-          <span class="note">기간을 넓히거나 필터를 해제해 보세요.</span></div>`}
-      </div>
-
-    </div>
-
-    <div class="tr2-r">
-      <div class="card">
-        <div class="card-h" style="padding:13px 15px">
-          <span class="ai-mk">AI</span>
-          <h2>동향 요약</h2>
-          <span class="note" style="font-size:11px">${esc(pLabel)} · ${scopeSpan} · ${esc(bizLabel)}</span>
-          <button class="btn sm" style="margin-left:auto" data-tr="regen:x">↻ 다시 생성</button>
-        </div>
-        <div class="ai-ctl">
-          <div class="ai-row">
-            <span class="ai-k">분야</span>
-            ${TR_BIZS.map(x=>`<button class="chip ${S.trBiz===x?'on':''}" data-tr="biz:${esc(x)}">${esc(x)}</button>`).join('')}
-          </div>
-          <div class="ai-row">
-            <span class="ai-k">기간</span>
-            ${TR_PERIODS.map(p=>`<button class="chip ${S.trPeriod===p.k?'on':''}" data-tr="period:${p.k}">${esc(p.l)}</button>`).join('')}
-          </div>
-          ${S.trPeriod==='custom'?`<div class="ai-row">
-            <span class="ai-k"></span>
-            <input type="date" class="dinp" id="trFrom" value="${esc(S.trFrom)}">
-            <span class="note">–</span>
-            <input type="date" class="dinp" id="trTo" value="${esc(S.trTo)}">
-          </div>`:''}
-        </div>
-        <div class="ai-b" id="aiBody">
-          <p class="ai-hl">${esc(headline)}</p>
-          <div class="stack" style="gap:10px">${bullets}</div>
-          <div class="stack" style="gap:3px">
-            <span class="ai-f">근거 ${scope.length}건 · 출처 ${new Set(scope.map(k=>EV[k].src)).size}곳 · ${esc(S.trGenAt)} 생성</span>
-            <span class="ai-f" style="color:var(--t5)">요약은 기간·분야 선택에만 반응합니다 (왼쪽 검색·필터와 무관)</span>
-          </div>
+          }).join('')}
         </div>
       </div>
     </div>
+
+    <div class="card tr-card">
+      <div class="card-h">
+        <h2 style="white-space:nowrap">오늘 언급된 키워드</h2>
+        <span class="note" style="margin-left:auto;font-size:11px">수집 ${KW.n}건</span>
+      </div>
+      <div class="kwb">
+        ${KW.rows.length? KW.rows.slice(0,11).map(x=>{
+          const on = S.trKw===x.w;
+          const dc = x.d>0?'up':(x.d<0?'dn':'fl');
+          return `<button class="kwr ${on?'on':''}" data-tr="kw:${esc(x.w)}">
+            <span class="kwr-n">${esc(x.w)}</span>
+            <span class="kwr-t"><i style="width:${Math.round(x.n/KW.max*100)}%"></i></span>
+            <span class="kwr-v">${x.n}</span>
+            <span class="kwr-d ${dc}">${x.d>0?'▲'+x.d:(x.d<0?'▼'+Math.abs(x.d):'–')}</span>
+          </button>`;
+        }).join('') : '<span class="note" style="padding:12px 15px;display:block">오늘 수집된 자료가 없습니다.</span>'}
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-h" style="padding:13px 17px">
+      <span class="ai-mk">AI</span>
+      <h2>데일리 브리핑</h2>
+      <div style="margin-left:auto" class="row-f" style="gap:7px">
+        <select class="sel" id="trBizSel">
+          ${TR_BIZS.map(x=>`<option ${S.trBiz===x?'selected':''}>${esc(x==='전체'?'전 분야':x)}</option>`).join('')}
+        </select>
+        <select class="sel" id="trPdSel">
+          ${TR_PERIODS.map(p=>`<option value="${p.k}" ${S.trPeriod===p.k?'selected':''}>${esc(p.l)}</option>`).join('')}
+        </select>
+        ${S.trPeriod==='custom'?`
+          <input type="date" class="dinp" id="trFrom" value="${esc(S.trFrom)}">
+          <span class="note">–</span>
+          <input type="date" class="dinp" id="trTo" value="${esc(S.trTo)}">`:''}
+        <button class="btn sm" data-tr="regen:x">↻ 다시 생성</button>
+      </div>
+    </div>
+    <div class="ai-b2" id="aiBody">
+      ${briefRows.length? `
+        <p class="ai-hl2">${esc(lead)}</p>
+        <div class="bf">
+          ${briefRows.map(k=>{
+            const e=EV[k], n=evRefs(k).length;
+            return `<div class="bf-i">
+              <span class="bf-d">${esc(trMD(trPd(e.date)))}</span>
+              <div class="bf-m">
+                <div class="bf-t"><b>${esc(e.src)}</b> · ${esc(e.title)}</div>
+                <div class="bf-s">${esc(EV_BRIEF[k]||e.sum)}</div>
+              </div>
+              <div class="bf-a">
+                ${n?`<button class="citep" style="background:var(--brand-soft);color:var(--brand)" data-cite="${k}">인용 과제 ${n}건</button>`:''}
+                <a class="tr-lk" href="${esc(e.url)}" target="_blank" rel="noopener">원문 ↗</a>
+              </div>
+            </div>`;
+          }).join('')}
+        </div>`
+        : `<p class="ai-hl2">선택한 기간에 수집된 자료가 없습니다. 기간을 넓혀 보세요.</p>`}
+      <span class="ai-f">${scopeSpan} · ${esc(S.trGenAt)} 생성</span>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="ctlbar" style="border-radius:14px 14px 0 0">
+      <input class="inp" id="trQ" style="width:190px" placeholder="제목·요약·키워드 검색" value="${esc(S.trQ||'')}"
+        autocomplete="off" data-lpignore="true" data-1p-ignore>
+      <select class="sel" id="trSrc">
+        ${srcList.map(s=>`<option ${S.trSrc===s?'selected':''}>${esc(s==='전체'?'출처 전체':s)}</option>`).join('')}
+      </select>
+      <select class="sel" id="trKind">
+        ${TR_KINDS.map(k=>`<option ${S.trKind===k?'selected':''}>${esc(k==='전체'?'종류 전체':k)}</option>`).join('')}
+      </select>
+      <select class="sel" id="trSort">
+        <option value="date" ${S.trSort==='date'?'selected':''}>최신순</option>
+        <option value="cite" ${S.trSort==='cite'?'selected':''}>인용 많은 순</option>
+      </select>
+      ${hasF?`<button class="chip" data-tr="clear:x" style="border:0;text-decoration:underline;text-underline-offset:3px">필터 해제</button>`:''}
+      <span class="note num" style="margin-left:auto">${rows.length}건 표시</span>
+    </div>
+    ${(S.trKw||S.trOc)?`<div class="fbar">
+      <span class="note">적용 중</span>
+      ${S.trOc?`<span class="fpill">${esc(OC[S.trOc].name)}<button data-tr="oc:${S.trOc}">✕</button></span>`:''}
+      ${S.trKw?`<span class="fpill">${esc(S.trKw)}<button data-tr="kw:${esc(S.trKw)}">✕</button></span>`:''}
+    </div>`:''}
+    ${rows.length? groupHtml : `<div class="empty2">
+      <span style="font-size:14px;font-weight:700">조건에 맞는 자료가 없습니다</span>
+      <span class="note">기간을 넓히거나 필터를 해제해 보세요.</span></div>`}
   </div>
   `;
 }
@@ -1839,15 +2753,19 @@ document.addEventListener('click', e=>{
   if(k==='biz'){ S.trBiz=v; render(); return trBump(); }
   if(k==='period'){ S.trPeriod=v; render(); return trBump(); }
   if(k==='regen'){ return trBump(); }
-  if(k==='theme'){ S.trTheme = (S.trTheme===v?null:v); return render(); }
-  if(k==='method'){ S.trMethod=!S.trMethod; return render(); }
+  if(k==='kw'){ S.trKw = (S.trKw===v?null:v); return render(); }
+  if(k==='oc'){ S.trOc = (S.trOc===v?null:v); return render(); }
   if(k==='new'){ S.trNew=!S.trNew; return render(); }
   if(k==='unl'){ S.trUnl=!S.trUnl; return render(); }
-  if(k==='clear'){ S.trTheme=null; S.trQ=''; S.trKind='전체'; S.trNew=false; S.trUnl=false; return render(); }
+  if(k==='clear'){ S.trKw=null; S.trOc=null; S.trQ=''; S.trKind='전체'; S.trSrc='전체'; S.trNew=false; S.trUnl=false; return render(); }
 });
 document.addEventListener('change', e=>{
   const el=e.target;
-  if(el.id==='trKind'){ S.trKind = el.value==='자료 종류 전체' ? '전체' : el.value; return render(); }
+  if(el.id==='fxAskI'){ S.fxAskText=el.value; return; }
+  if(el.id==='trBizSel'){ S.trBiz = el.value==='전 분야'?'전체':el.value; render(); return trBump(); }
+  if(el.id==='trPdSel'){ S.trPeriod = el.value; render(); return trBump(); }
+  if(el.id==='trSrc'){ S.trSrc = el.value==='출처 전체'?'전체':el.value; return render(); }
+  if(el.id==='trKind'){ S.trKind = el.value==='종류 전체' ? '전체' : el.value; return render(); }
   if(el.id==='trSort'){ S.trSort=el.value; return render(); }
   if(el.id==='trFrom'){ S.trFrom=el.value; render(); return trBump(); }
   if(el.id==='trTo'){ S.trTo=el.value; render(); return trBump(); }
@@ -1887,9 +2805,53 @@ document.addEventListener('mousemove',e=>{ if(!PT||PT.style.display==='none')ret
   const s=e.target.closest?.('.psl'); if(s) ptMove(e); else ptHide(); });
 document.addEventListener('mouseout',e=>{ if(e.target.closest?.('.psl')) ptHide(); });
 
+/* ---------- 계정 관리 (관리자 API 연동) ---------- */
+function admAuth(){ return { Authorization:'Bearer '+(localStorage.getItem('oi-token')||'') }; }
+async function loadAdminUsers(){
+  S.usersErr='';
+  try{
+    const r=await fetch('/api/admin/users',{headers:admAuth()});
+    if(r.status===403){ S.usersErr='관리자 권한이 있는 계정만 사용자 관리를 사용할 수 있습니다.'; S.users=[]; }
+    else if(!r.ok){ S.usersErr='목록을 불러오지 못했습니다.'; S.users=[]; }
+    else { const d=await r.json(); S.users=d.users||[]; }
+  }catch(e){ S.usersErr='백엔드에 연결할 수 없습니다. 서버(8000)가 실행 중인지 확인하세요.'; S.users=[]; }
+  S.usersLoaded=true; render();
+}
+async function adminAddUser(){
+  const email=(document.getElementById('nuEmail')?.value||'').trim();
+  const isAdm=!!document.getElementById('nuAdmin')?.checked;
+  S.usersMsg='';
+  if(!email){ S.usersErr='이메일을 입력하세요.'; return render(); }
+  try{
+    const r=await fetch('/api/admin/users',{method:'POST',headers:{'Content-Type':'application/json',...admAuth()},body:JSON.stringify({email,is_admin:isAdm})});
+    const d=await r.json().catch(()=>({}));
+    if(!r.ok){ S.usersErr=d.detail||'추가에 실패했습니다.'; return render(); }
+    S.usersErr=''; S.usersMsg=`${d.email} 추가됨 · 초기 비밀번호 ${d.initial_password}`;
+    return loadAdminUsers();
+  }catch(e){ S.usersErr='서버 연결 오류'; return render(); }
+}
+async function adminResetPw(email){
+  if(!confirm(`${email} 의 비밀번호를 1111 로 초기화할까요?`)) return;
+  try{
+    const r=await fetch(`/api/admin/users/${encodeURIComponent(email)}/reset-password`,{method:'POST',headers:admAuth()});
+    const d=await r.json().catch(()=>({}));
+    if(!r.ok){ alert(d.detail||'초기화 실패'); return; }
+    alert(`${email} 의 비밀번호가 1111 로 초기화되었습니다.`);
+  }catch(e){ alert('서버 연결 오류'); }
+}
+async function adminDelUser(email){
+  if(!confirm(`${email} 계정을 삭제할까요? 되돌릴 수 없습니다.`)) return;
+  try{
+    const r=await fetch(`/api/admin/users/${encodeURIComponent(email)}`,{method:'DELETE',headers:admAuth()});
+    const d=await r.json().catch(()=>({}));
+    if(!r.ok){ alert(d.detail||'삭제 실패'); return; }
+    S.usersMsg=`${email} 삭제됨`; loadAdminUsers();
+  }catch(e){ alert('서버 연결 오류'); }
+}
+
 /* ---------- 6. 관리자 ---------- */
 function viewAdmin(){
-  const tabs=[['prompt','생성 인스트럭션'],['sources','크롤링 소스'],['uploads','내부 자료'],['perm','권한']];
+  const tabs=[['prompt','생성 인스트럭션'],['sources','크롤링 소스'],['uploads','내부 자료'],['users','계정 관리']];
   let body='';
   if (S.admTab==='prompt'){
     body=`<div class="card">
@@ -1945,38 +2907,41 @@ function viewAdmin(){
           </div>
           <div class="fld"><label class="fld-l">귀속 OC</label>
             <select class="sel" id="upOc"><option>전사</option>${OCS.map(o=>`<option>${o.name}</option>`).join('')}</select></div>
-          <label class="fld-l" style="display:flex;align-items:center;gap:7px;cursor:pointer">
-            <input type="checkbox" id="upNow" ${S.upNow?'checked':''}>바로 사용 (과제 발굴에 즉시 반영)</label>
-          <span class="note">체크하면 업로드 즉시 '검수 완료'가 되어 발굴 프롬프트에 들어갑니다. 체크하지 않으면 목록에만 남습니다.</span>
           <span class="note">기존 과제 기록 DB를 올리면 중복 과제 검출에 사용됩니다.</span>
         </div></div>
     </div>`;
   }
-  if (S.admTab==='perm'){
+  if (S.admTab==='users'){
+    if(!S.usersLoaded){ setTimeout(loadAdminUsers,0); }
     body=`<div class="grid-a">
-      <div class="card"><div class="card-h"><h2>권한</h2><span class="note">${ADMINS.length}명</span></div>
-        <table><thead><tr><th style="min-width:220px">Outlook 메일</th><th style="width:110px">권한</th><th style="width:170px">비고</th><th style="width:70px" class="tr"></th></tr></thead>
-        <tbody>${ADMINS.map((a,i)=>`<tr class="r-hover">
-          <td class="mono" style="font-size:12px">${esc(a.mail)}</td>
-          <td><span class="tag ${a.role==='관리자'?'lv':'nt'}">${esc(a.role)}</span></td>
-          <td class="note">${esc(a.note)}</td>
-          <td class="tr"><button class="btn sm" data-rm-adm="${i}">삭제</button></td></tr>`).join('')}</tbody></table>
+      <div class="card"><div class="card-h"><h2>계정 목록</h2><span class="note num">${S.users.length}명</span>
+        <button class="btn sm" style="margin-left:auto" onclick="loadAdminUsers()">↻ 새로고침</button></div>
+        ${S.usersErr?`<div class="hint" style="margin:12px 17px"><span class="dot" style="background:var(--bad)"></span><span>${esc(S.usersErr)}</span></div>`:''}
+        <table><thead><tr><th style="min-width:200px">이메일 (로그인 ID)</th><th style="width:84px">권한</th><th style="width:72px">상태</th><th style="width:158px" class="tr"></th></tr></thead>
+        <tbody>${S.users.map(u=>`<tr class="r-hover">
+          <td class="mono" style="font-size:12px">${esc(u.email)}</td>
+          <td><span class="tag ${u.is_admin?'lv':'nt'}">${u.is_admin?'관리자':'일반'}</span></td>
+          <td><span class="tag ${u.is_active?'ok':'wn'}">${u.is_active?'활성':'비활성'}</span></td>
+          <td class="tr"><button class="btn sm" onclick="adminResetPw('${esc(u.email)}')">비번 초기화</button>
+            <button class="btn sm" onclick="adminDelUser('${esc(u.email)}')">삭제</button></td></tr>`).join('')
+          || `<tr><td colspan="4" class="note" style="padding:16px 17px">${S.usersLoaded?'계정이 없습니다.':'불러오는 중…'}</td></tr>`}</tbody></table>
       </div>
-      <div class="card"><div class="card-h"><h2>권한 추가</h2></div>
+      <div class="card"><div class="card-h"><h2>계정 추가</h2></div>
         <div class="card-b stack" style="gap:11px">
+          ${S.usersMsg?`<div class="hint" style="background:var(--ok-bg);border-color:var(--ok)"><span>${esc(S.usersMsg)}</span></div>`:''}
           <div class="fld"><label class="fld-l">Outlook 메일 주소</label>
-            <input class="inp" id="admIn" placeholder="name@sk.com">
-            <span class="fld-h">사내 HR 명부와 연계되지 않아 이름 검색은 지원하지 않습니다.</span></div>
-          <div class="fld"><label class="fld-l">권한</label>
-            <select class="sel" id="admRole"><option>관리자</option><option>조회 전용</option></select></div>
-          <button class="btn pri" id="admAdd">추가</button>
+            <input class="inp" id="nuEmail" placeholder="name@sk.com">
+            <span class="fld-h">이 주소가 로그인 ID가 됩니다.</span></div>
+          <label class="row-f" style="gap:8px;font-size:12.5px;color:var(--t1)"><input type="checkbox" id="nuAdmin"> 관리자 권한 부여</label>
+          <button class="btn pri" onclick="adminAddUser()">추가 (초기 비밀번호 1111)</button>
+          <span class="note">추가된 계정은 초기 비밀번호 <strong>1111</strong> 로 생성됩니다. 사용자가 첫 로그인 후 직접 변경할 수 있습니다.</span>
         </div></div>
     </div>`;
   }
   return `
   <div class="page-h"><div class="stack" style="gap:5px">
     <h1>관리자</h1>
-    <p class="lede">생성 인스트럭션, 크롤링 소스, 내부 자료, 권한을 관리합니다.</p>
+    <p class="lede">생성 인스트럭션, 크롤링 소스, 내부 자료, 로그인 계정을 관리합니다.</p>
   </div></div>
   <div class="tabs">${tabs.map(([k,l])=>`<button class="tab ${S.admTab===k?'on':''}" data-atab="${k}">${esc(l)}</button>`).join('')}</div>
   ${body}`;
@@ -1989,13 +2954,27 @@ function render(){
   document.getElementById('main').innerHTML = (VIEWS[S.screen]||viewList)();
 }
 
+// 앱 내 화면 전환을 브라우저 히스토리에 쌓아, 뒤로가기가 로그인 화면이 아니라
+// 직전에 보던 화면(예: 커스텀 생성 → 과제 제안)으로 돌아가게 한다.
+function navigate(screen, extra){
+  S.screen = screen;
+  if (extra) Object.assign(S, extra);
+  history.pushState({screen:S.screen, curId:S.curId}, '', '#'+screen);
+  render();
+}
+window.addEventListener('popstate', e=>{
+  const st = e.state || {screen:'list', curId:S.curId};
+  S.screen = st.screen; S.curId = st.curId;
+  render();
+});
+
 /* ══════════════ 동작 ══════════════ */
 function download(name,text,mime){
   const blob=new Blob(['\uFEFF'+text],{type:(mime||'text/plain')+';charset=utf-8'});
   const a=document.createElement('a'); a.href=URL.createObjectURL(blob); a.download=name; a.click();
   setTimeout(()=>URL.revokeObjectURL(a.href),1000);
 }
-const CSV_COLS=['과제ID','생성일','OC','과제명','레버','요약','적용방안','관리지표','기대효과 Logic','순 기대효과(억)','벤치마크','원문 URL','과제 점수','피드백','배경','리스크','기대효과','KPI','KPI 산출식','상태','출처','점수','판정'];
+const CSV_COLS=['과제ID','생성일','OC','과제명','레버','요약','적용방안','관리지표','기대효과 Logic','순 기대효과(억)','벤치마크','원문 URL','과제 점수','피드백'];
 function exportCsv(){
   const q=v=>'"'+String(v==null?'':v).replace(/\r?\n/g,' / ').replace(/"/g,'""')+'"';
   const rows=filtered().map(t=>{
@@ -2004,69 +2983,52 @@ function exportCsv(){
       LOGIC[t.lever].metric, fxText(t), net===null?(sysOn(t)?'산정 대기':'사용자 수식'):f1(net),
       t.ev.map(e=>`${EV[e].src}(${EV[e].date})`).join('; '),
       t.ev.map(e=>EV[e].url).join('; '),
-      fbOf(t.id).s || '', fbOf(t.id).t || '',
-      t.bg||'', t.risk||'', t.eff||'', t.kpi||'', t.kpiFx||'', t.status||'', t.origin||'',
-      t.evalScore==null?'':t.evalScore, t.verdict||''].map(q).join(',');
+      fbOf(t.id).s || '', fbOf(t.id).t || ''].map(q).join(',');
   });
   download(`OI_Spark_과제_${(S.ver==='전체'?'전체':verOf(S.ver).label).replace(/\./g,'')}.csv`,
     CSV_COLS.map(q).join(',')+'\n'+rows.join('\n'),'text/csv');
 }
-/* 재생성은 비동기다 — 서버가 작업 id 를 즉시 주고, 여기서 끝날 때까지 폴링한다.
-   LLM 발굴은 계열사 1곳당 1분 내외라 한 번의 HTTP 응답으로는 못 받는다
-   (nginx 기본 60초·Cloudflare 100초에서 끊긴다). */
-const REGEN_POLL_MS = 2000;
-const REGEN_MAX_MS  = 10 * 60 * 1000;
-
-async function regenerate(){
+let poolIdx=0, nextId=1250, genNo=0;
+function regenerate(){
   S.regenerating=true; render();
-  try{
-    let d = await api('/api/proposals/regenerate', {method:'POST'});
-    if(d.job){
-      const t0 = Date.now();
-      while(d.status === 'running'){
-        if(Date.now() - t0 > REGEN_MAX_MS) throw new Error('생성이 너무 오래 걸립니다.');
-        await new Promise(r => setTimeout(r, REGEN_POLL_MS));
-        d = await api('/api/proposals/regenerate/' + encodeURIComponent(d.job));
-      }
-      if(d.status === 'failed') throw new Error(d.error || '생성에 실패했습니다.');
-    }
-    applyProposals(d);
-    /* 재생성 횟수에는 제한이 없고 중복만 걸러진다. 새로 저장된 과제가 하나도 없으면
-       서버가 ver=null 과 함께 사유(reason)를 준다 — 조용히 넘기면 사용자는 버튼이
-       고장난 줄 알고 계속 누른다. 반드시 사유를 보여 준다. */
-    if(d.ver){ S.ver=d.ver; S.page=1; S.cOff=0; S.calOpen=false; }
-    else if(d.reason){ alert(d.reason); }
-  }catch(e){ alert('재생성에 실패했습니다. '+e.message); }
-  finally{ S.regenerating=false; render(); }
+  setTimeout(()=>{
+    const add = POOL.slice(poolIdx, poolIdx+2);
+    poolIdx = (poolIdx+2) % (POOL.length||1);
+    genNo++;
+    const vid='n'+genNo;
+    const d=new Date(2026, 6, 30+genNo);          // 07.31 → 08.01 …
+    const label=`${d.getFullYear()}.${String(d.getMonth()+1).padStart(2,'0')}.${String(d.getDate()).padStart(2,'0')}`;
+    VERSIONS.unshift({id:vid, label, trigger:`외부 자료 ${18+Math.floor(Math.random()*30)}건 갱신`});
+    add.forEach(p=>TASKS.unshift(Object.assign({}, p, {id:nextId++, ver:vid})));
+    S.regenerating=false; S.ver=vid; S.page=1; S.cOff=0; S.calOpen=false; render();
+  },1200);
 }
 
 document.addEventListener('click', e=>{
-  const el=e.target.closest('[data-nav],[data-open],[data-lv],[data-ver],[data-pg],[data-atab],[data-tn],[data-ch],[data-ex-d],[data-dl],[data-rm-rc],[data-rm-adm],[data-cg-oc],[data-cg-ev],[data-cg-lv],[data-cg-plan],[data-cal-d],[data-cal-m],[data-cnav],[data-sendtog],[data-freq],[data-monav],[data-slice],[data-memo],[data-star],[data-msave],[data-ck],[data-ckall],[data-goto],[data-tr],[data-cite],button');
+  const el=e.target.closest('[data-nav],[data-open],[data-lv],[data-ver],[data-pg],[data-atab],[data-tn],[data-ch],[data-ex-d],[data-dl],[data-rm-rc],[data-rm-adm],[data-cg-oc],[data-cg-ev],[data-cg-lv],[data-cg-plan],[data-cal-d],[data-cal-m],[data-cnav],[data-fxp],[data-sendtog],[data-freq],[data-monav],[data-slice],[data-memo],[data-star],[data-msave],[data-ck],[data-ckall],[data-goto],[data-tr],[data-cite],button');
   // 캘린더 외부 클릭 시 닫기
   if(S.calOpen && !e.target.closest('#cal') && el && el.id!=='calBtn'){ S.calOpen=false; }
   if(S.calOpen && !el){ S.calOpen=false; return render(); }
   if(!el) return;
   const d=el.dataset;
-  if(d.nav){e.preventDefault(); S.screen=d.nav; return render();}
-  if(d.open){S.curId=Number(d.open); S.screen='detail'; return render();}
+  if(d.fxp){ return runFxPrompt(d.fxp); }
+  if(d.nav){e.preventDefault(); return navigate(d.nav);}
+  if(d.open){return navigate('detail', {curId:Number(d.open)});}
   if(d.ver){S.ver=(S.ver===d.ver?'전체':d.ver); S.page=1; S.calOpen=false; return render();}
   if(d.monav){ const len=months().length;
     S.moIdx=Math.min(Math.max(0,S.moIdx+Number(d.monav)),len-1); return render(); }
   if(d.slice){ S.oc=(S.oc===d.slice?'전체':d.slice); S.page=1; return render(); }
   if(d.memo){ S.memoOpen=(String(S.memoOpen)===String(d.memo)?null:d.memo); return render(); }
   if(d.star){ const [id,n]=d.star.split(':');
-    S.fb[id]=S.fb[id]||{s:0,t:''}; S.fb[id].s=Number(n);
-    saveFeedback(id, {score:Number(n)}); return render(); }
-  if(d.msave){ const id=d.msave; el.textContent='저장됨';
-    saveFeedback(id, {memo:fbOf(id).t})
-      .then(()=>{ setTimeout(()=>{S.memoOpen=null; render();},850); }); return; }
+    S.fb[id]=S.fb[id]||{s:0,t:''}; S.fb[id].s=Number(n); return render(); }
+  if(d.msave){ el.textContent='저장됨'; setTimeout(()=>{S.memoOpen=null; render();},850); return; }
   if(d.ck){ const id=d.ck; if(S.sel[id]) delete S.sel[id]; else S.sel[id]=true; return render(); }
   if(d.ckall){ const rs=filtered();
     const on=rs.length>0 && rs.every(t=>S.sel[t.id]);
     if(on) rs.forEach(t=>delete S.sel[t.id]); else rs.forEach(t=>S.sel[t.id]=true);
     return render(); }
-  if(d.goto){ S.screen=d.goto; return render(); }
-  if(d.cite){ S.screen='list'; S.q=EV[d.cite].src; S.oc='전체'; S.page=1; return render(); }
+  if(d.goto){ return navigate(d.goto); }
+  if(d.cite){ S.q=EV[d.cite].src; S.oc='전체'; S.page=1; return navigate('list'); }
   if(d.cnav){
     const total=VERSIONS.length;
     S.cOff = Math.min(Math.max(0, S.cOff + Number(d.cnav)*3), Math.max(0,total-CHART_N));
@@ -2090,31 +3052,32 @@ document.addEventListener('click', e=>{
   if(d.pg){const n=Number(d.pg); if(n>=1){S.page=n; render();} return;}
   if(d.atab){S.admTab=d.atab; return render();}
   if(d.sendtog){const id=Number(d.sendtog);
-    if(S.sendOff[id]) delete S.sendOff[id]; else S.sendOff[id]=true;
-    saveReport(); return render();}
-  if(d.freq){S.send.freq=d.freq; saveReport(); return render();}
-  if(d.ch){S.channels[d.ch]=!S.channels[d.ch]; saveReport(); return render();}
+    if(S.sendOff[id]) delete S.sendOff[id]; else S.sendOff[id]=true; return render();}
+  if(d.freq){S.send.freq=d.freq; return render();}
+  if(d.ch){S.channels[d.ch]=!S.channels[d.ch]; return render();}
   if(d.exD){S.ex.days=Number(d.exD); S.ex.text=null; return render();}
   if(d.dl){const t=S.ex.text!==null?S.ex.text:buildPrompt();
     download(`벤치마킹브리핑_${VERSIONS[0].label.replace(/\./g,'')}.${d.dl}`,t,d.dl==='md'?'text/markdown':'text/plain'); return;}
-  if(d.rmRc){S.recipients.splice(Number(d.rmRc),1); saveReport(); return render();}
-  if(d.rmAdm){const a=ADMINS[Number(d.rmAdm)];
-    ADMINS.splice(Number(d.rmAdm),1);
-    if(a) api('/api/admin/members/'+encodeURIComponent(a.mail), {method:'DELETE'}).catch(apiWarn);
-    return render();}
+  if(d.rmRc){S.recipients.splice(Number(d.rmRc),1); return render();}
+  if(d.rmAdm){ADMINS.splice(Number(d.rmAdm),1); return render();}
   if(d.cgOc){S.cg.oc=d.cgOc; S.cg.step=1; return render();}
   if(d.cgEv){S.cg.ev=d.cgEv; S.cg.step=2; return render();}
   if(d.cgLv){S.cg.lever=d.cgLv; S.cg.step=3; return render();}
   if(d.cgPlan){S.cg.plan=d.cgPlan; S.cg.step=4; return render();}
 
   switch(el.id){
-    case 'selAll': S.sendOff={}; saveReport(); return render();
-    case 'selNone': sendTargets().forEach(t=>S.sendOff[t.id]=true); saveReport(); return render();
+    case 'selAll': S.sendOff={}; return render();
+    case 'selNone': sendTargets().forEach(t=>S.sendOff[t.id]=true); return render();
     case 'fxCopy':{
       const t=curTask();
       try{ const r=navigator.clipboard.writeText(fxText(t)); if(r&&r.catch) r.catch(()=>{}); }catch(err){}
       S.fxCopied=true; render(); setTimeout(()=>{S.fxCopied=false; render();},1400); return;
     }
+    case 'fxAskBtn':
+      S.fxAsk = (S.fxAsk===curTask().id) ? null : curTask().id;
+      S.fxDraft = null; S.fxAskText=''; return render();
+    case 'fxAskX': S.fxAsk=null; S.fxAskText=''; return render();
+    case 'fxAskGo': return runFxPrompt((document.getElementById('fxAskI')||{}).value);
     case 'fxEditBtn':
       S.fxDraft = (S.fxDraft===curTask().id) ? null : curTask().id;
       return render();
@@ -2124,7 +3087,6 @@ document.addEventListener('click', e=>{
       if(txt){
         S.fx[t.id]={text:txt, at:stampNow()};
         S.sysOff[t.id]=true;                 // 시스템 제안 자동 꺼짐
-        saveFormula(t);
       }
       S.fxDraft=null; return render();
     }
@@ -2143,7 +3105,6 @@ document.addEventListener('click', e=>{
         delete S.sysOff[t.id];
         S.fxDraft=null;
       }
-      saveFormula(t);
       return render();
     }
     case 'calBtn':
@@ -2152,8 +3113,8 @@ document.addEventListener('click', e=>{
       return render();
     case 'regen': return regenerate();
     case 'csv': return exportCsv();
-    case 'cgReset': S.cg={step:0,oc:null,ev:null,lever:null,plan:null,done:false}; S.cgBusy=false; return render();
-    case 'cgGo': return createCustom();
+    case 'cgReset': S.cg={step:0,oc:null,ev:null,lever:null,plan:null,name:'',sum:'',err:'',saving:false,done:false}; return render();
+    case 'cgGo': return saveCustomTask();
     case 'cgFreeGo':{const v=(document.getElementById('cgFree')||{}).value;
       if(v&&v.trim()){S.cg.plan=v.trim(); S.cg.step=4; render();} return;}
     case 'exEdit':
@@ -2164,32 +3125,16 @@ document.addEventListener('click', e=>{
     case 'exCopy':{const t=S.ex.editing?document.getElementById('exText').value:(S.ex.text!==null?S.ex.text:buildPrompt());
       try{const r=navigator.clipboard.writeText(t); if(r&&r.catch) r.catch(()=>{});}catch(err){}
       S.ex.copied=true; render(); setTimeout(()=>{S.ex.copied=false; render();},1600); return;}
-    case 'instrSave': S.instruction=document.getElementById('instr').value; S.instrSaved=true;
-      api('/api/admin/instruction', {method:'PUT', body:{text:S.instruction}}).catch(apiWarn);
-      return render();
-    case 'instrReset':
-      api('/api/admin/instruction/reset', {method:'POST'})
-        .then(d=>{ DEFAULT_INSTRUCTION=d.text; S.instruction=d.text; S.instrSaved=true; render(); })
-        .catch(apiWarn);
-      return;
+    case 'instrSave': S.instruction=document.getElementById('instr').value; persistSavedInstruction(S.instruction); S.instrSaved=true; return render();
+    case 'instrReset': S.instruction=DEFAULT_INSTRUCTION; persistSavedInstruction(S.instruction); S.instrSaved=true; return render();
     case 'rcAdd':{const v=(document.getElementById('rcInput')||{}).value;
-      if(v&&v.trim()){S.recipients.push(v.trim()); saveReport(); render();} return;}
+      if(v&&v.trim()){S.recipients.push(v.trim()); render();} return;}
     case 'admAdd':{const v=(document.getElementById('admIn')||{}).value;
       const r=(document.getElementById('admRole')||{}).value;
-      if(v&&v.trim()){
-        const m={mail:v.trim().toLowerCase(), role:r||'조회 전용', note:'수동 추가'};
-        ADMINS.push(m); render();
-        api('/api/admin/members', {method:'POST', body:m}).catch(apiWarn);
-      } return;}
+      if(v&&v.trim()){ADMINS.push({mail:v.trim(),role:r||'조회 전용',note:'수동 추가'}); render();} return;}
     case 'fileBtn': document.getElementById('fileIn').click(); return;
-    case 'rpTest': case 'rpSave':{const o=el.textContent, test=el.id==='rpTest';
-      el.textContent=test?'발송 중…':'저장 중…';
-      const p = test ? api('/api/report/test', {method:'POST'}).then(d=>{ S.send.lastAt=d.sentAt; })
-                     : saveReport();
-      p.then(()=>{ el.textContent=test?'발송됨':'저장됨'; })
-       .catch(()=>{ el.textContent='실패'; })
-       .finally(()=>setTimeout(()=>{el.textContent=o;},1400));
-      return;}
+    case 'rpTest': case 'rpSave':{const o=el.textContent;
+      el.textContent=el.id==='rpTest'?'발송됨':'저장됨'; setTimeout(()=>{el.textContent=o;},1400); return;}
   }
 });
 
@@ -2198,21 +3143,12 @@ document.addEventListener('change', e=>{
   if(el.id==='ocSel'){S.oc=el.value; S.page=1; return render();}
   if(el.id==='perSel'){S.per=Number(el.value); S.page=1; return render();}
   if(el.id==='exOc'){S.ex.oc=el.value; S.ex.text=null; return render();}
-  if(el.id==='sendTime'){S.send.time=el.value; saveReport(); return render();}
-  if(el.id==='upNow'){ S.upNow=el.checked; return; }   // 체크 상태만 기억(재렌더 없음)
+  if(el.id==='sendTime'){S.send.time=el.value; return render();}
   if(el.id==='fileIn'){
     const oc=(document.getElementById('upOc')||{}).value||'전사';
-    // 승인은 '업로드 시 선택' 이다 — 올릴 때 정한 값이 그대로 RAG 게이트를 가른다.
-    const useNow=!!((document.getElementById('upNow')||{}).checked);
-    const files=Array.from(el.files||[]);
-    el.value='';
-    Promise.all(files.map(f => {                // 본문까지 추출하려면 파일 자체를 보내야 한다
-        const fd=new FormData(); fd.append('file', f); fd.append('aff', oc);
-        fd.append('use_now', useNow ? 'true' : 'false');
-        return api('/api/admin/uploads/file', {method:'POST', form:fd}).then(d=>UPLOADS.unshift(d.upload));
-      }))
-      .catch(apiWarn).finally(render);
-    return;
+    Array.from(el.files||[]).forEach(f=>UPLOADS.unshift({
+      name:f.name, oc, size:(f.size/1024).toFixed(0)+' KB', at:'방금', st:'검수 대기'}));
+    el.value=''; return render();
   }
 });
 
@@ -2220,7 +3156,7 @@ document.addEventListener('input', e=>{
   const el=e.target;
   if(el.dataset && el.dataset.fbt){
     const id=el.dataset.fbt;
-    S.fb[id]=S.fb[id]||{s:0,t:''}; S.fb[id].t=el.value; return;   // 저장은 '저장' 버튼에서
+    S.fb[id]=S.fb[id]||{s:0,t:''}; S.fb[id].t=el.value; return;
   }
   if(el.dataset && el.dataset.f){
     const t=curTask();
@@ -2228,7 +3164,6 @@ document.addEventListener('input', e=>{
     S.fields[t.id][el.dataset.f]=el.value;
     const box=document.querySelector('.result .stack');
     if(box) box.innerHTML=resultInner(t);
-    saveFields(t.id);           // 타이핑이 멈추면 저장 (디바운스)
     return;
   }
   if(el.id==='q'){S.q=el.value; S.page=1; const p=el.selectionStart; render();
@@ -2236,6 +3171,10 @@ document.addEventListener('input', e=>{
   if(el.id==='instr'){S.instruction=el.value; S.instrSaved=false;
     const n=document.querySelector('.card-h .note'); if(n) n.textContent='저장되지 않은 변경'; return;}
   if(el.id==='exResearch'){S.ex.research=el.value; S.ex.text=null; return;}
+  // 프롬프트 편집 textarea — "편집 완료"를 누르기 전에 다른 화면으로 이동해도
+  // 입력한 내용이 사라지지 않도록(같은 세션 안에서는) 타이핑마다 바로 상태에 반영한다.
+  // 새로고침 시에는 저장 개념이 없는 필드라 자동으로 기본값으로 되돌아간다.
+  if(el.id==='exText'){S.ex.text=el.value; return;}
 });
 
 document.addEventListener('keydown', e=>{
@@ -2245,143 +3184,9 @@ document.addEventListener('keydown', e=>{
   if(e.target.id==='cgFree') document.getElementById('cgFreeGo').click();
 });
 
-/* ══════════════ 백엔드 연결 ══════════════
-   화면 로직은 그대로 두고, 데이터 출처와 저장만 API 로 연결한다. */
-const oiTok = () => localStorage.getItem('oi-token') || '';
-
-async function api(path, opt){
-  opt = opt || {};
-  const headers = {Authorization:'Bearer '+oiTok()};
-  let body;
-  if(opt.form){ body=opt.form; }              // FormData 는 Content-Type 을 두지 않는다(브라우저가 boundary 를 붙인다)
-  else if(opt.body !== undefined){ headers['Content-Type']='application/json'; body=JSON.stringify(opt.body); }
-  const res = await fetch(path, {method:opt.method||'GET', headers, body});
-  if(res.status===401){                       // 토큰 만료 → 로그인으로
-    localStorage.removeItem('oi-token'); location.replace('/login');
-    throw new Error('세션이 만료되었습니다.');
-  }
-  const data = await res.json().catch(()=>({}));
-  if(!res.ok) throw new Error(data.detail || ('요청 실패 ('+res.status+')'));
-  return data;
-}
-/* 화면은 이미 갱신된 뒤라 저장 실패는 콘솔 경고로만 남긴다 */
-function apiWarn(e){ console.warn('[O/I Spark] 저장 실패:', e && e.message); }
-
-/* 점수와 피드백은 따로 보낸다 — 서버는 넘어온 항목만 갱신하므로
-   별점 저장이 아직 타이핑 중인 피드백을 덮어쓰지 않는다. */
-function saveFeedback(id, patch){
-  return api('/api/proposals/'+id+'/feedback', {method:'PUT', body:patch}).catch(apiWarn);
-}
-const fieldTimers = {};
-function saveFields(id){                       // 타이핑 중 매번 보내지 않도록 디바운스
-  clearTimeout(fieldTimers[id]);
-  fieldTimers[id] = setTimeout(()=>{
-    api('/api/proposals/'+id+'/fields', {method:'PUT', body:{fields:S.fields[id]||{}}}).catch(apiWarn);
-  }, 500);
-}
-function saveFormula(t){
-  const off = S.sysOff[t.id]===true;
-  return api('/api/proposals/'+t.id+'/formula',
-      {method:'PUT', body:{sysOff:off, text:off ? ((S.fx[t.id]||{}).text || null) : null}})
-    .then(d=>{ if(off && S.fx[t.id]) S.fx[t.id].at = d.at; })
-    .catch(apiWarn);
-}
-function saveReport(){
-  return api('/api/report/settings', {method:'PUT', body:{
-    freq:S.send.freq, time:S.send.time, channels:S.channels,
-    recipients:S.recipients, sendOff:Object.keys(S.sendOff).map(Number),
-  }}).catch(apiWarn);
-}
-/* 커스텀 생성도 비동기다 — 재생성과 완전히 같은 폴링 패턴을 쓴다.
-   옛 POST /api/discovery/generate 의 'OC 지정 + note 주입' 을 이 화면이 흡수해서,
-   사용자가 고른 OC·근거·레버를 제약으로 발굴 LLM 이 본문을 채운다(계열사당 1분 안팎).
-   LLM 이 실패하면 서버가 예전 문자열 조립으로 폴백하므로 과제는 반드시 만들어진다. */
-async function createCustom(){
-  const c = S.cg;
-  S.cgBusy = true; render();
-  try{
-    let d = await api('/api/proposals/custom', {method:'POST',
-      body:{oc:c.oc, lever:c.lever, ev:c.ev?[c.ev]:[], plan:c.plan||''}});
-    if(d.job){
-      const t0 = Date.now();
-      while(d.status === 'running'){
-        if(Date.now() - t0 > REGEN_MAX_MS) throw new Error('생성이 너무 오래 걸립니다.');
-        await new Promise(r => setTimeout(r, REGEN_POLL_MS));
-        d = await api('/api/proposals/custom/' + encodeURIComponent(d.job));
-      }
-      if(d.status === 'failed') throw new Error(d.error || '생성에 실패했습니다.');
-    }
-    applyProposals(d);
-    S.cg.done = true; S.curId = d.id;
-  }catch(e){ alert('과제 생성에 실패했습니다. '+e.message); }
-  finally{ S.cgBusy = false; render(); }
-}
-
-/* 서버 응답을 화면 데이터에 넣기 — 다른 코드가 잡고 있는 참조를 끊지 않도록 제자리에서 교체 */
-function fill(target, src){
-  if(Array.isArray(target)){ target.length=0; (src||[]).forEach(v=>target.push(v)); }
-  else { Object.keys(target).forEach(k=>delete target[k]); Object.assign(target, src||{}); }
-  return target;
-}
-function applyProposals(d){
-  fill(VERSIONS, d.versions); fill(TASKS, d.tasks);
-  if(!TASKS.some(t=>t.id===S.curId) && TASKS.length) S.curId = TASKS[0].id;
-}
-function applyBootstrap(d){
-  fill(OCS, d.ocs); fill(OC_COLOR, d.ocColor); fill(BIZ_C, d.bizColor);
-  fill(OC, {}); OCS.forEach(o => OC[o.code] = o);
-
-  // 관리지표·산출식·입력항목은 서버에서, 계산 함수는 화면에서 (LEVER_CALC)
-  fill(LOGIC, {});
-  Object.keys(d.levers).forEach(k=>{
-    const c = LEVER_CALC[k] || NO_CALC;
-    LOGIC[k] = {metric:d.levers[k].metric, text:d.levers[k].text,
-                fields:d.levers[k].fields, calc:c.calc, show:c.show};
-  });
-  fill(LEVERS, Object.keys(LOGIC));
-
-  fill(EV, d.evidence); fill(EV_TH, d.evTheme); fill(EV_BIZ_FB, d.evBizFallback);
-  fill(EV_NEW, d.evNew); fill(KIND_MAP, d.kindMap); fill(TH2, d.themes);
-  fill(SOURCES, d.sources); fill(UPLOADS, d.uploads); fill(ADMINS, d.admins);
-  DEFAULT_INSTRUCTION = d.instruction || '';
-
-  fill(TR_KINDS, ['전체'].concat(d.kinds || []));
-  fill(TR_BIZS,  ['전체'].concat(Object.keys(d.bizColor || {})));
-  if(d.today) TR_TODAY = new Date(d.today+'T00:00:00');
-
-  applyProposals(d);
-
-  // 로그인 계정별 작업 상태 (평가·기준값·수식·발송 설정)
-  const st = d.state || {};
-  S.fb = st.fb || {}; S.fields = st.fields || {}; S.fx = st.fx || {};
-  S.sysOff = st.sysOff || {}; S.sendOff = st.sendOff || {};
-  S.send = st.send || S.send; S.recipients = st.recipients || [];
-  S.channels = st.channels || S.channels;
-  S.instruction = d.instruction || ''; S.instrSaved = true;
-  S.evalCriteria = d.evalCriteria || '';
-
-  // 기간·달력 기본값을 서버 기준일에 맞춘다
-  S.trTo = trIso(TR_TODAY);
-  S.trFrom = trIso(trShift(TR_TODAY, 30));
-  S.calYM = VERSIONS.length ? VERSIONS[0].label.slice(0,7).replace('.','-') : S.trTo.slice(0,7);
-}
-
-async function boot(){
-  try{
-    applyBootstrap(await api('/api/bootstrap'));
-  }catch(e){
-    document.getElementById('main').innerHTML =
-      `<div class="card" style="margin:48px auto;max-width:540px"><div class="card-b">
-         <h2 style="margin-bottom:8px">데이터를 불러오지 못했습니다</h2>
-         <p class="note">${esc(e.message)}</p>
-         <p class="note" style="margin-top:10px">백엔드가 떠 있는지 확인하세요.
-            개발 환경은 <code>uvicorn app.main:app --reload</code> (기본 8000 포트)입니다.</p>
-       </div></div>`;
-    return;
-  }
-  render();
-}
-boot();
+history.replaceState({screen:S.screen, curId:S.curId}, '', '#'+S.screen);
+render();
+loadSavedTasks();   // 백엔드에 저장된 커스텀 과제를 불러와 목록에 반영
 
 /* ===== 테마 토글 ===== */
 (function(){
