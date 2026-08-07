@@ -114,8 +114,44 @@ html[data-theme="light"] .oi-logo{background:linear-gradient(100deg,#7c3aed,#256
 .pipe-r{display:flex;align-items:center;gap:8px;font-size:11px;color:var(--t3)}
 .dot{width:5px;height:5px;border-radius:50%;flex:none}
 
-.body{flex:1;min-width:0}
+.body{flex:1;min-width:0;display:flex;flex-direction:column}
 .main{padding:26px 26px 48px;display:flex;flex-direction:column;gap:18px}
+/* ===== 상단 네비게이션(토바) + 계정 드롭다운 ===== */
+.topbar{height:56px;flex:none;display:flex;align-items:center;gap:10px;padding:0 22px;
+  background:var(--panel);border-bottom:1px solid var(--line);position:sticky;top:0;z-index:40}
+.tb-theme{width:34px;height:34px;flex:none;display:flex;align-items:center;justify-content:center;
+  border:1px solid var(--line-mid);border-radius:9px;background:var(--panel-sub);color:var(--t1);cursor:pointer;font-size:15px;line-height:1}
+.tb-theme:hover{border-color:var(--brand);color:var(--brand)}
+.tb-acct{position:relative;margin-left:2px}
+.tb-trigger{display:flex;align-items:center;gap:9px;padding:5px 8px 5px 5px;border-radius:10px;cursor:pointer;border:1px solid transparent;background:none}
+.tb-trigger:hover{background:var(--fill);border-color:var(--line-mid)}
+.tb-av{width:34px;height:34px;border-radius:50%;background:var(--brand-soft);color:var(--brand);display:flex;align-items:center;justify-content:center;font-weight:800;font-size:14px;flex:none}
+.tb-meta{display:flex;flex-direction:column;line-height:1.25;text-align:left;min-width:0}
+.tb-name{font-size:13px;font-weight:700;color:var(--ink);white-space:nowrap}
+.tb-role{font-size:11px;color:var(--t3);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:170px}
+.tb-caret{color:var(--t4);font-size:10px;margin-left:2px;flex:none}
+.tb-menu{position:absolute;top:calc(100% + 7px);right:0;min-width:172px;background:var(--panel);border:1px solid var(--line);border-radius:12px;box-shadow:0 16px 40px -16px rgba(0,0,0,.35);padding:6px;display:none;flex-direction:column;gap:2px;z-index:50}
+.tb-menu.open{display:flex}
+.tb-mi{display:flex;align-items:center;gap:10px;padding:9px 11px;border:0;background:none;border-radius:8px;cursor:pointer;font-size:12.5px;font-weight:600;color:var(--t1);text-align:left;width:100%}
+.tb-mi:hover{background:var(--fill)}
+.tb-mi.danger{color:var(--bad)}
+.tb-mi .ic{width:16px;text-align:center;color:var(--t3);flex:none}
+.tb-mi.danger .ic{color:var(--bad)}
+/* ===== 마이페이지 ===== */
+.my-acct{display:flex;align-items:center;gap:14px;flex-wrap:wrap}
+.my-av{width:52px;height:52px;border-radius:50%;background:var(--brand-soft);color:var(--brand);display:flex;align-items:center;justify-content:center;font-weight:800;font-size:20px;flex:none}
+.my-em{font-size:15px;font-weight:700;color:var(--ink)}
+.my-btns{margin-left:auto;display:flex;gap:8px;flex-wrap:wrap}
+.btn.danger{color:var(--bad);border-color:var(--bad)}
+.btn.danger:hover{background:var(--bad-bg)}
+.mylist{display:flex;flex-direction:column;gap:8px}
+.mycard{display:flex;flex-direction:column;gap:6px;padding:12px 14px;border:1px solid var(--line);border-radius:11px;background:var(--panel);cursor:pointer;text-align:left;width:100%}
+.mycard:hover{border-color:var(--brand);background:var(--fill)}
+.myc-t{font-size:13px;font-weight:700;color:var(--ink)}
+.myc-m{display:flex;align-items:center;gap:7px;flex-wrap:wrap}
+.myc-fb{font-size:11.5px;color:var(--t2);font-weight:600}
+.myc-star{color:#e0a022;letter-spacing:1px}
+.my-empty{padding:18px;text-align:center;color:var(--t4);font-size:12.5px}
 
 /* ===== 공통 ===== */
 h1{font-size:21px;font-weight:700;letter-spacing:-.5px}
@@ -787,18 +823,29 @@ table.ttbl{width:100%;border-collapse:collapse;table-layout:fixed}
 <div class="app">
   <aside class="side">
     <div class="brand" style="flex-direction:column;align-items:flex-start;justify-content:center;gap:4px">
-      <div style="display:flex;align-items:center;gap:8px;width:100%">
-        <span class="oi-logo" style="font-size:19px">O/I Spark</span>
-        <button id="themeBtn" type="button" aria-label="다크/라이트 테마 전환" title="다크/라이트 전환"
-        style="margin-left:auto;width:30px;height:30px;flex:none;display:flex;align-items:center;justify-content:center;
-        border:1px solid var(--line-mid);border-radius:8px;background:var(--panel-sub);color:var(--t1);
-        cursor:pointer;font-size:14px;line-height:1">🌙</button>
-      </div>
+      <span class="oi-logo" style="font-size:19px">O/I Spark</span>
       <span class="brand-sb">SK이노베이션 O/I추진단</span>
     </div>
     <nav class="nav" id="nav"></nav>
   </aside>
-  <div class="body"><main class="main" id="main"></main></div>
+  <div class="body">
+    <header class="topbar">
+      <div style="margin-left:auto"></div>
+      <button id="themeBtn" class="tb-theme" type="button" aria-label="다크/라이트 테마 전환" title="다크/라이트 전환">🌙</button>
+      <div class="tb-acct">
+        <button class="tb-trigger" id="tbTrigger" type="button" onclick="toggleAcctMenu(event)">
+          <span class="tb-av" id="tbAv">·</span>
+          <span class="tb-meta"><span class="tb-name" id="tbName">-</span><span class="tb-role" id="tbRole">-</span></span>
+          <span class="tb-caret">▼</span>
+        </button>
+        <div class="tb-menu" id="tbMenu">
+          <button class="tb-mi" type="button" onclick="closeAcctMenu();navigate('my')"><span class="ic">👤</span><span>마이페이지</span></button>
+          <button class="tb-mi danger" type="button" onclick="oiLogout()"><span class="ic">→</span><span>로그아웃</span></button>
+        </div>
+      </div>
+    </header>
+    <main class="main" id="main"></main>
+  </div>
 </div>
 
 <script>
@@ -1103,16 +1150,7 @@ function renderNav(){
         const c = it.k==='list' ? `<span class="nav-c num">${TASKS.length}</span>` : '';
         return `<button class="nav-b ${on?'on':''}" data-nav="${it.k}">
           <span class="nav-i">${it.icon}</span><span>${it.label}</span>${c}</button>`;
-      }).join('') + `</div>`).join('') + `
-    ${pipePanel()}
-    <div class="acct">
-      <div class="acct-u"><span class="acct-av">👤</span><span class="acct-em">${esc(S.userEmail || localStorage.getItem('oi-user') || '')}</span></div>
-      <div class="acct-row">
-        <button class="acct-b" onclick="oiChangePw()">비밀번호 변경</button>
-        <button class="acct-b danger" onclick="oiWithdraw()">탈퇴</button>
-      </div>
-      <button class="nav-b logout-b" onclick="oiLogout()"><span class="nav-i">→</span><span>로그아웃</span></button>
-    </div>`;
+      }).join('') + `</div>`).join('') + pipePanel();
 }
 
 /* ---------- 캘린더 ---------- */
@@ -2531,10 +2569,69 @@ function viewAdmin(){
 }
 
 /* ══════════════ 라우팅 ══════════════ */
-const VIEWS={list:viewList, detail:viewDetail, trend:viewTrend, custom:viewCustom, export:viewExport, report:viewReport, admin:viewAdmin};
+/* ---------- 상단 토바(계정) ---------- */
+function syncTopbar(){
+  const em = S.userEmail || localStorage.getItem('oi-user') || '';
+  const local = (em.split('@')[0]) || '계정';
+  const set = (id,v)=>{ const el=document.getElementById(id); if(el) el.textContent=v; };
+  set('tbName', local);
+  set('tbRole', em);
+  set('tbAv', (local[0]||'·').toUpperCase());
+}
+function toggleAcctMenu(e){ e.stopPropagation(); const m=document.getElementById('tbMenu'); if(m) m.classList.toggle('open'); }
+function closeAcctMenu(){ const m=document.getElementById('tbMenu'); if(m) m.classList.remove('open'); }
+document.addEventListener('click', e=>{
+  const m=document.getElementById('tbMenu');
+  if(m && m.classList.contains('open') && !e.target.closest('.tb-acct')) m.classList.remove('open');
+});
+
+/* ---------- 마이페이지 ---------- */
+function myTaskCard(t, extra){
+  return `<button class="mycard" type="button" onclick="navigate('detail',{curId:${t.id}})">
+    <span class="myc-t">${esc(t.name)}</span>
+    <span class="myc-m"><span class="tag oc">${esc((OC[t.oc]||{}).name||t.oc)}</span><span class="tag lv">${esc(t.lever)}</span>${extra||''}</span>
+  </button>`;
+}
+function viewMy(){
+  const em = S.userEmail || localStorage.getItem('oi-user') || '';
+  const initial = ((em.split('@')[0]||'')[0]||'·').toUpperCase();
+  const fbTasks = TASKS.filter(t => { const f=S.fb[t.id]; return f && ((f.s||0)>0 || (f.t||'').trim()); });
+  const myCustom = TASKS.filter(t => t.origin==='커스텀');
+  const fbHtml = fbTasks.length ? `<div class="mylist">${fbTasks.map(t=>{
+      const f=S.fb[t.id]||{}; const s=f.s||0;
+      const stars = `<span class="myc-fb"><span class="myc-star">${'★'.repeat(s)}${'☆'.repeat(5-s)}</span>${(f.t||'').trim()?' · '+esc(f.t):''}</span>`;
+      return myTaskCard(t, stars);
+    }).join('')}</div>` : `<div class="my-empty">아직 피드백을 남긴 과제가 없습니다.</div>`;
+  const csHtml = myCustom.length ? `<div class="mylist">${myCustom.map(t=>myTaskCard(t)).join('')}</div>`
+    : `<div class="my-empty">아직 커스텀 생성한 과제가 없습니다.</div>`;
+  return `
+  <div class="page-h"><div><h1>마이페이지</h1></div></div>
+  <div class="card"><div class="card-b">
+    <div class="my-acct">
+      <div class="my-av">${esc(initial)}</div>
+      <div><div class="my-em">${esc(em)}</div><div class="note">SK이노베이션 O/I추진단</div></div>
+      <div class="my-btns">
+        <button class="btn" type="button" onclick="oiChangePw()">비밀번호 변경</button>
+        <button class="btn" type="button" onclick="oiLogout()">로그아웃</button>
+        <button class="btn danger" type="button" onclick="oiWithdraw()">탈퇴</button>
+      </div>
+    </div>
+  </div></div>
+  <div class="card">
+    <div class="card-h"><h2>내가 피드백한 과제</h2><span class="note num" style="margin-left:auto">${fbTasks.length}건</span></div>
+    <div class="card-b">${fbHtml}</div>
+  </div>
+  <div class="card">
+    <div class="card-h"><h2>커스텀 생성한 과제</h2><span class="note num" style="margin-left:auto">${myCustom.length}건</span></div>
+    <div class="card-b">${csHtml}</div>
+  </div>`;
+}
+
+const VIEWS={list:viewList, detail:viewDetail, trend:viewTrend, custom:viewCustom, export:viewExport, report:viewReport, admin:viewAdmin, my:viewMy};
 function render(){
   renderNav();
   document.getElementById('main').innerHTML = (VIEWS[S.screen]||viewList)();
+  syncTopbar();
 }
 
 // 앱 내 화면 전환을 브라우저 히스토리에 쌓아, 뒤로가기가 로그인 화면이 아니라
