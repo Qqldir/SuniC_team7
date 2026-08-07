@@ -1,0 +1,2454 @@
+<!DOCTYPE html>
+<html lang="ko" data-theme="dark">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>O/I Spark — 신규 과제 발굴 (트렌드룸 개선)</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css">
+<style>
+/* ===== 디자인 시스템 토큰 (유지) ===== */
+:root{
+  --bg:#ebf1f3; --panel:#fff; --panel-sub:#fafbfc;
+  --brand:#2f4a57; --brand-hover:#1e3138; --brand-soft:#e9eff2; --brand-tint:#f4f8f9;
+  --ink:#101c21; --t1:#3c4149; --t2:#4b5160; --t3:#6b7280; --t4:#9096a2; --t5:#b4b9c3;
+  --line:#e8eaed; --line-soft:#f0f1f3; --line-faint:#f4f5f7; --line-mid:#e2e5e9;
+  --fill:#f4f5f7; --fill2:#f2f4f7;
+  --ok:#16a34a; --ok-bg:#eaf7ee;
+  --warn:#d97706; --warn-bg:#fdf4e7;
+  --bad:#dc2626; --bad-bg:#fdeceb;
+  --c1:#2f4a57; --c2:#9db3bd; --c3:#cfdbe1;
+  --edit:#2563eb;
+  color-scheme:light;
+}
+/* ===== 다크 테마 (랜딩 페이지 색상표 기반: 딥 네이비/퍼플 + 퍼플·블루 액센트) ===== */
+html[data-theme="dark"]{
+  --bg:#0a0912; --panel:#14121f; --panel-sub:#1a1730;
+  --brand:#a855f7; --brand-hover:#9333ea; --brand-soft:#241a3f; --brand-tint:#1d1733;
+  --ink:#edeaf7; --t1:#d6d2e8; --t2:#b3aecf; --t3:#8f8ab0; --t4:#6f6a8e; --t5:#544f6e;
+  --line:#262233; --line-soft:#201c2e; --line-faint:#1b1827; --line-mid:#2f2a42;
+  --fill:#1c1930; --fill2:#1a1730;
+  --ok:#34d399; --ok-bg:#12281f;
+  --warn:#fbbf24; --warn-bg:#2a2113;
+  --bad:#f87171; --bad-bg:#2a1618;
+  --c1:#a855f7; --c2:#7c6ba8; --c3:#463f63;
+  --edit:#60a5fa;
+  color-scheme:dark;
+}
+html[data-theme="dark"] ::-webkit-scrollbar-thumb{background:#2f2a42}
+html[data-theme="dark"] .ctip,html[data-theme="dark"] .ptip{background:#241f38;box-shadow:0 2px 12px rgba(0,0,0,.5)}
+html{transition:background-color .22s ease}
+body{transition:background-color .22s ease,color .22s ease}
+*{box-sizing:border-box;margin:0;padding:0}
+html{background:var(--bg)}
+body{background:var(--bg);color:var(--ink);
+  font-family:"Pretendard Variable",Pretendard,-apple-system,system-ui,"Malgun Gothic",sans-serif;
+  -webkit-font-smoothing:antialiased;min-width:1160px}
+a{color:var(--brand);text-decoration:none}
+button,input,select,textarea{font-family:inherit;color:inherit}
+::-webkit-scrollbar{width:10px;height:10px}
+::-webkit-scrollbar-thumb{background:#dcdfe4;border-radius:8px;border:3px solid transparent;background-clip:content-box}
+.mono{font-family:ui-monospace,SFMono-Regular,Menlo,monospace}
+.num{font-variant-numeric:tabular-nums}
+
+/* ===== 레이아웃 ===== */
+.app{display:flex;min-height:100vh}
+.side{width:236px;flex:none;background:var(--panel);border-right:1px solid var(--line);
+  display:flex;flex-direction:column;position:sticky;top:0;height:100vh}
+.brand{height:60px;flex:none;display:flex;align-items:center;gap:10px;padding:0 18px;border-bottom:1px solid var(--line-soft)}
+.brand-mk{width:26px;height:26px;border-radius:7px;background:var(--brand);color:#fff;
+  display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;letter-spacing:-.4px}
+.brand-nm{font-size:13.5px;font-weight:700;letter-spacing:-.3px}
+.brand-sb{font-size:10.5px;color:var(--t4)}
+.ski-logo{font-family:Arial,'Helvetica Neue',sans-serif;font-weight:800;white-space:nowrap;letter-spacing:-.3px;line-height:1;display:inline-flex;align-items:baseline;gap:5px}
+.ski-logo b{color:#EA002C}
+.ski-logo i{color:#FF7A00;font-weight:700;font-style:normal}
+.oi-logo{font-weight:700;letter-spacing:-.02em;white-space:nowrap;background:linear-gradient(100deg,#f5f3ff,#a855f7 45%,#38bdf8);-webkit-background-clip:text;background-clip:text;color:transparent}
+.logout-b{color:var(--t3)}
+.logout-b:hover{background:var(--fill);color:var(--bad)}
+.logout-b:hover .nav-i{border-color:var(--bad);color:var(--bad)}
+.acct{margin-top:10px;border-top:1px solid var(--line-soft);padding-top:10px;display:flex;flex-direction:column;gap:7px}
+.acct-u{display:flex;align-items:center;gap:8px;padding:0 10px;font-size:11.5px;color:var(--t2);min-width:0}
+.acct-av{width:20px;height:20px;border-radius:50%;background:var(--brand-soft);display:flex;align-items:center;justify-content:center;font-size:11px;flex:none}
+.acct-em{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-weight:600}
+.acct-row{display:flex;gap:6px;padding:0 10px}
+.acct-b{flex:1;font-size:11px;font-weight:600;padding:6px 8px;border:1px solid var(--line-mid);border-radius:7px;background:var(--panel);color:var(--t2);cursor:pointer}
+.acct-b:hover{background:var(--fill);color:var(--ink)}
+.acct-b.danger:hover{border-color:var(--bad);color:var(--bad)}
+.pw-ov{position:fixed;inset:0;z-index:200;background:rgba(4,4,10,.6);backdrop-filter:blur(4px);align-items:center;justify-content:center;padding:24px}
+.pw-modal{width:100%;max-width:360px;background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:22px;display:flex;flex-direction:column;gap:8px}
+.pw-modal h3{font-size:16px;font-weight:700;margin-bottom:4px}
+.pw-l{font-size:11.5px;font-weight:600;color:var(--t3);margin-top:4px}
+.pw-i{height:38px;padding:0 11px;border:1px solid var(--line-mid);border-radius:8px;background:var(--panel-sub);color:var(--ink);font-size:13px}
+.pw-i:focus{outline:none;border-color:var(--brand)}
+.pw-err{color:var(--bad);font-size:11.5px;min-height:14px}
+.pw-actions{display:flex;gap:8px;margin-top:8px}
+.pw-actions .btn{flex:1;justify-content:center}
+.nav{flex:1;overflow-y:auto;padding:14px 10px;display:flex;flex-direction:column;gap:18px}
+.nav-g{display:flex;flex-direction:column;gap:2px}
+.nav-t{font-size:10.5px;font-weight:600;color:var(--t4);letter-spacing:.4px;padding:0 10px 7px}
+.nav-b{display:flex;align-items:center;gap:9px;width:100%;padding:9px 10px;border:0;background:transparent;
+  border-radius:8px;cursor:pointer;text-align:left;font-size:13px;color:var(--t1);font-weight:500}
+.nav-b:hover{background:var(--line-faint)}
+.nav-b.on{background:var(--brand-soft);font-weight:600;color:var(--ink)}
+.nav-i{width:16px;height:16px;flex:none;display:flex;align-items:center;justify-content:center;
+  font-size:10px;color:var(--t5);border:1.5px solid var(--t5);border-radius:4px}
+.nav-b.on .nav-i{border-color:var(--brand);color:var(--brand)}
+.nav-c{margin-left:auto;font-size:10px;font-weight:600;color:var(--brand);background:var(--brand-soft);
+  border-radius:5px;padding:2px 6px}
+.pipe{margin-top:auto;padding:13px;background:var(--panel-sub);border:1px solid var(--line-soft);
+  border-radius:11px;display:flex;flex-direction:column;gap:9px}
+.pipe-h{display:flex;align-items:center;justify-content:space-between}
+.pipe-r{display:flex;align-items:center;gap:8px;font-size:11px;color:var(--t3)}
+.dot{width:5px;height:5px;border-radius:50%;flex:none}
+
+.body{flex:1;min-width:0}
+.main{padding:26px 26px 48px;display:flex;flex-direction:column;gap:18px}
+
+/* ===== 공통 ===== */
+h1{font-size:21px;font-weight:700;letter-spacing:-.5px}
+h2{font-size:14px;font-weight:700;letter-spacing:-.3px}
+.lede{font-size:12.5px;color:var(--t3);line-height:1.6}
+.page-h{display:flex;align-items:flex-end;justify-content:space-between;gap:20px;flex-wrap:wrap}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:14px;
+  box-shadow:0 1px 2px rgba(16,24,40,.04)}
+.card-h{display:flex;align-items:center;gap:10px;padding:14px 17px;border-bottom:1px solid var(--line-soft);flex-wrap:wrap}
+.card-b{padding:17px}
+.btn{height:34px;padding:0 13px;border:1px solid var(--line-mid);background:var(--panel);border-radius:9px;
+  font-size:12.5px;font-weight:600;color:var(--t1);cursor:pointer;display:inline-flex;align-items:center;gap:6px;
+  white-space:nowrap}
+.btn:hover{background:#f7f8fa}
+.btn.pri{background:var(--brand);border-color:var(--brand);color:#fff}
+.btn.pri:hover{background:var(--brand-hover)}
+.btn.sm{height:29px;padding:0 10px;font-size:11.5px;border-radius:7px}
+.btn:disabled{opacity:.5;cursor:default}
+.sel{height:32px;padding:0 10px;border:1px solid var(--line-mid);border-radius:8px;background:var(--panel);
+  font-size:12.5px;font-weight:600;color:var(--t1);cursor:pointer}
+.inp{height:32px;padding:0 10px;border:1px solid var(--line-mid);border-radius:8px;background:var(--panel);
+  font-size:12.5px;width:100%}
+.inp:focus,.sel:focus,textarea:focus{outline:none;border-color:var(--brand)}
+.tag{font-size:10.5px;font-weight:600;border-radius:5px;padding:2px 7px;white-space:nowrap;display:inline-block}
+.tag.oc{color:var(--t2);background:var(--fill2);border:1px solid var(--line)}
+.tag.lv{color:var(--brand);background:var(--brand-soft)}
+.tag.ok{color:var(--ok);background:var(--ok-bg)}
+.tag.wn{color:var(--warn);background:var(--warn-bg)}
+.tag.bd{color:var(--bad);background:var(--bad-bg)}
+.tag.nt{color:var(--t3);background:var(--fill)}
+.chip{font-size:11.5px;padding:5px 11px;border:1px solid var(--line-mid);border-radius:99px;
+  background:var(--panel);color:var(--t2);cursor:pointer;white-space:nowrap;font-weight:500}
+.chip:hover{border-color:var(--t4);color:var(--ink)}
+.chip.on{background:var(--brand);border-color:var(--brand);color:#fff;font-weight:600}
+.row-f{display:flex;align-items:center;gap:6px;flex-wrap:wrap}
+.lbl{font-size:11.5px;font-weight:600;color:var(--t3);white-space:nowrap}
+.hr{height:1px;background:var(--line-soft)}
+.note{font-size:11.5px;color:var(--t4);line-height:1.6}
+.hint{display:flex;gap:8px;background:var(--brand-tint);border:1px solid #dbe5e9;border-radius:10px;
+  padding:11px 13px;font-size:11.5px;color:var(--t1);line-height:1.6}
+.hint .dot{margin-top:6px;background:var(--brand)}
+
+/* ===== 컨트롤 바 (목록 바로 위) ===== */
+.ctlbar{display:flex;align-items:center;gap:10px;padding:12px 17px;border-bottom:1px solid var(--line-soft);
+  flex-wrap:wrap;background:var(--panel-sub);border-radius:14px 14px 0 0}
+.ctl-sep{width:1px;height:18px;background:var(--line);margin:0 2px}
+
+/* ===== 표 ===== */
+table{width:100%;border-collapse:collapse}
+th{text-align:left;font-size:11px;font-weight:600;color:var(--t3);padding:10px 8px;
+  background:var(--panel-sub);border-top:1px solid var(--line-soft);border-bottom:1px solid var(--line-soft);white-space:nowrap}
+td{padding:12px 8px;border-bottom:1px solid var(--line-faint);font-size:12.5px;vertical-align:middle}
+th:first-child,td:first-child{padding-left:17px}
+th:last-child,td:last-child{padding-right:17px}
+.r-hover:hover{background:var(--panel-sub)}
+.tt{font-size:13px;font-weight:600;letter-spacing:-.2px;line-height:1.45}
+.ts{font-size:11.5px;color:var(--t4);line-height:1.5;margin-top:3px}
+.tr{text-align:right}
+.dgrp td{background:var(--panel-sub);padding:8px 17px;font-size:11.5px;font-weight:700;color:var(--t2);
+  border-bottom:1px solid var(--line-faint)}
+
+/* ===== 페이지네이션 ===== */
+.pager{display:flex;align-items:center;gap:10px;padding:13px 17px}
+.pg{width:28px;height:28px;display:flex;align-items:center;justify-content:center;border:1px solid var(--line-mid);
+  border-radius:7px;font-size:11.5px;color:var(--t2);cursor:pointer;background:var(--panel);font-weight:500}
+.pg:hover{background:var(--fill)}
+.pg.on{background:var(--ink);border-color:var(--ink);color:#fff;font-weight:600}
+.pg:disabled{opacity:.4;cursor:default}
+
+/* ===== 캘린더 ===== */
+.calwrap{position:relative}
+.calbtn{height:32px;padding:0 11px;border:1px solid var(--line-mid);border-radius:8px;background:var(--panel);
+  font-size:12.5px;font-weight:600;color:var(--t1);cursor:pointer;display:inline-flex;align-items:center;gap:7px;
+  white-space:nowrap}
+.calbtn:hover{background:#f7f8fa}
+.calbtn.act{border-color:var(--brand);color:var(--brand)}
+.cal{position:absolute;top:38px;left:0;z-index:40;width:272px;background:var(--panel);
+  border:1px solid var(--line);border-radius:12px;box-shadow:0 8px 24px rgba(16,24,40,.14);padding:12px}
+.cal-h{display:flex;align-items:center;justify-content:space-between;margin-bottom:9px}
+.cal-m{font-size:12.5px;font-weight:700}
+.cal-nav{width:24px;height:24px;border:1px solid var(--line-mid);border-radius:6px;background:var(--panel);
+  cursor:pointer;font-size:11px;color:var(--t2);display:flex;align-items:center;justify-content:center}
+.cal-nav:hover{background:var(--fill)}
+.cal-nav:disabled{opacity:.35;cursor:default}
+.cal-g{display:grid;grid-template-columns:repeat(7,1fr);gap:2px}
+.cal-w{font-size:10px;color:var(--t4);text-align:center;padding:3px 0;font-weight:600}
+.cal-d{height:32px;border:0;background:transparent;border-radius:7px;font-size:11.5px;color:var(--t5);
+  display:flex;flex-direction:column;align-items:center;justify-content:center;gap:1px;cursor:default;
+  font-variant-numeric:tabular-nums}
+.cal-d.has{color:var(--ink);font-weight:600;cursor:pointer;background:var(--brand-soft)}
+.cal-d.has:hover{background:#dbe6ea}
+.cal-d.sel{background:var(--brand);color:#fff}
+.cal-n{font-size:9px;font-weight:600;opacity:.8}
+.cal-f{margin-top:9px;padding-top:9px;border-top:1px solid var(--line-soft);display:flex;gap:6px;align-items:center}
+.cal-all{flex:1;height:30px;border:1px solid var(--line-mid);border-radius:8px;background:var(--panel);
+  font-size:11.5px;font-weight:600;color:var(--t1);cursor:pointer}
+.cal-all:hover{background:var(--fill)}
+.cal-all.on{background:var(--ink);border-color:var(--ink);color:#fff}
+
+/* ===== 누적 막대 그래프 ===== */
+.chart{display:flex;align-items:flex-end;gap:8px;padding:16px 17px 10px;height:136px}
+.stackbar{width:100%;max-width:56px;display:flex;flex-direction:column;justify-content:flex-end;
+  border-radius:5px 5px 0 0;overflow:visible;position:relative}
+.seg{width:100%;position:relative;min-height:3px;transition:filter .12s}
+.seg:first-child{border-radius:5px 5px 0 0}
+.bw:hover .seg{filter:saturate(.55) opacity(.7)}
+.bw .seg:hover{filter:none}
+.tip{display:none;position:absolute;left:50%;transform:translateX(-50%);bottom:calc(100% + 6px);
+  background:var(--ink);color:#fff;font-size:11px;font-weight:600;padding:4px 9px;border-radius:6px;
+  white-space:nowrap;z-index:30;pointer-events:none;box-shadow:0 3px 10px rgba(16,24,40,.2)}
+.tip::after{content:'';position:absolute;left:50%;top:100%;transform:translateX(-50%);
+  border:4px solid transparent;border-top-color:var(--ink)}
+.seg:hover .tip{display:block}
+.legend{display:flex;gap:12px;flex-wrap:wrap;padding:0 17px 13px;align-items:center}
+.lg-i{display:flex;align-items:center;gap:5px;font-size:10.5px;color:var(--t3)}
+.lg-d{width:8px;height:8px;border-radius:2px;flex:none}
+
+/* ===== 산출식 ===== */
+.cbox{width:17px;height:17px;border:1.5px solid var(--line-mid);border-radius:5px;display:flex;
+  align-items:center;justify-content:center;font-size:10px;color:transparent;background:var(--panel)}
+.cbox.on{background:var(--brand);border-color:var(--brand);color:#fff;font-weight:700}
+.icb{width:28px;height:28px;border:1px solid var(--line-mid);border-radius:7px;background:var(--panel);
+  color:var(--t3);cursor:pointer;font-size:13px;display:flex;align-items:center;justify-content:center;flex:none}
+.icb:hover{border-color:var(--brand);color:var(--brand);background:var(--brand-tint)}
+.icb.act{border-color:var(--edit);color:var(--edit);background:#f3f7fe}
+.fx-mark{font-weight:500;color:var(--edit);font-size:11px}
+.fx-input{width:100%;height:82px;border:1px solid var(--edit);border-radius:9px;padding:11px 13px;
+  font:12.5px/1.7 ui-monospace,Menlo,monospace;background:#f8fbff;color:var(--edit);resize:vertical}
+.fx-input:focus{outline:none;border-color:var(--edit)}
+.dim-block{opacity:.42;pointer-events:none;filter:grayscale(.35)}
+.result.result-mod{background:#f3f7fe;border-color:#dbe6fb}
+.inp:disabled{background:var(--fill);color:var(--t4);cursor:not-allowed}
+
+/* ===== (미사용) 수식 편집기 ===== */
+.fx-head{display:flex;align-items:center;gap:8px;margin-bottom:7px;flex-wrap:wrap}
+.fx-str{font-family:ui-monospace,Menlo,monospace;font-size:12.5px;line-height:1.7;
+  background:var(--panel-sub);border:1px solid var(--line-soft);border-left:3px solid var(--brand);
+  border-radius:0 9px 9px 0;padding:11px 13px;color:var(--ink)}
+.fx-str.mod{color:var(--edit);background:#f3f7fe;border-color:#dbe6fb;border-left-color:var(--edit)}
+.fx-badge{font-size:10.5px;font-weight:600;border-radius:5px;padding:2px 7px;white-space:nowrap}
+.fx-badge.sys{color:var(--t3);background:var(--fill)}
+.fx-badge.mod{color:var(--edit);background:#e8f0fe}
+.terms{display:flex;flex-direction:column;gap:5px}
+.term-h{display:grid;grid-template-columns:1fr 92px 104px 26px;gap:7px;padding:0 0 3px;
+  font-size:10.5px;font-weight:600;color:var(--t4)}
+.term{display:grid;grid-template-columns:1fr 92px 104px 26px;gap:7px;align-items:center}
+.term-op{font-size:11px;color:var(--t4);font-weight:700;padding:2px 0 0 2px}
+.term-n{font-size:12.5px;font-weight:500}
+.term-u{font-size:11.5px;color:var(--t4)}
+.term-x{width:26px;height:30px;border:1px solid var(--line-mid);border-radius:7px;background:var(--panel);
+  color:var(--t4);cursor:pointer;font-size:12px;display:flex;align-items:center;justify-content:center}
+.term-x:hover{border-color:var(--bad);color:var(--bad);background:var(--bad-bg)}
+.term-add{height:30px;border:1px dashed var(--line-mid);border-radius:8px;background:transparent;
+  font-size:11.5px;font-weight:600;color:var(--t3);cursor:pointer;width:100%}
+.term-add:hover{border-color:var(--brand);color:var(--brand);background:var(--brand-tint)}
+.term-grp{font-size:10.5px;font-weight:700;color:var(--t3);padding:7px 0 3px;letter-spacing:.2px}
+.inp.mod{border-color:#c3d6f7;background:#f8fbff}
+.cnav{flex:none;width:26px;height:26px;border:1px solid var(--line-mid);border-radius:7px;background:var(--panel);
+  cursor:pointer;font-size:11px;color:var(--t2);display:flex;align-items:center;justify-content:center;
+  align-self:center;margin-bottom:16px}
+.cnav:hover{background:var(--fill)}
+.cnav:disabled{opacity:.35;cursor:default}
+.bw{flex:1;min-width:0;display:flex;flex-direction:column;align-items:center;gap:5px;justify-content:flex-end;
+  height:100%;background:none;border:0;cursor:pointer;padding:0}
+.bv{font-size:11.5px;font-weight:700;color:var(--t2);font-variant-numeric:tabular-nums}
+.bar{width:100%;max-width:56px;background:var(--c3);border-radius:5px 5px 0 0;transition:background .15s;min-height:3px}
+.bw:hover .bar{background:var(--c2)}
+.bw.on .bar{background:var(--brand)}
+.bw.on .bv{color:var(--brand)}
+.bl{font-size:10.5px;color:var(--t4);white-space:nowrap}
+.bw.on .bl{color:var(--ink);font-weight:600}
+
+/* ===== 단계형 ===== */
+.step-bar{display:flex;gap:6px;align-items:center;flex-wrap:wrap}
+.step{display:flex;align-items:center;gap:7px;font-size:11.5px;color:var(--t4);white-space:nowrap}
+.step-n{width:19px;height:19px;border-radius:50%;border:1.5px solid var(--line-mid);
+  display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700}
+.step.on{color:var(--ink);font-weight:600}
+.step.on .step-n{background:var(--brand);border-color:var(--brand);color:#fff}
+.step.dn .step-n{background:var(--brand-soft);border-color:var(--brand-soft);color:var(--brand)}
+.step-ar{color:var(--t5);font-size:10px}
+.opts{display:flex;flex-wrap:wrap;gap:7px}
+.opt{text-align:left;font-size:12.5px;padding:10px 13px;border:1px solid var(--line-mid);
+  border-radius:10px;background:var(--panel);cursor:pointer;line-height:1.5;max-width:100%}
+.opt:hover{border-color:var(--brand);background:var(--brand-tint)}
+.pv-r{padding:9px 0;border-bottom:1px solid var(--line-faint)}
+.pv-r:last-child{border-bottom:none}
+.pv-k{font-size:11px;font-weight:600;color:var(--t3);margin-bottom:3px}
+.pv-v{font-size:12.5px;line-height:1.55}
+.pv-e{font-size:12px;color:var(--t5)}
+
+/* ===== Logic ===== */
+.formula{font-family:ui-monospace,Menlo,monospace;font-size:12px;line-height:1.7;color:var(--ink);
+  background:var(--panel-sub);border:1px solid var(--line-soft);border-left:3px solid var(--brand);
+  border-radius:0 9px 9px 0;padding:11px 13px}
+.fgrid{display:grid;grid-template-columns:1fr 1fr;gap:10px 14px}
+.fld{display:flex;flex-direction:column;gap:5px}
+.fld-l{font-size:11px;font-weight:600;color:var(--t3)}
+.fld-h{font-size:10.5px;color:var(--t5);line-height:1.5}
+.result{display:flex;align-items:center;gap:14px;background:var(--brand-tint);border:1px solid #dbe5e9;
+  border-radius:11px;padding:14px 16px}
+.result-v{font-size:24px;font-weight:700;letter-spacing:-1px;line-height:1.1}
+.pending{color:var(--t4);font-size:15px;font-weight:600;letter-spacing:0}
+
+/* ===== 근거 ===== */
+.ev{padding:14px 17px;border-bottom:1px solid var(--line-faint);display:flex;gap:12px}
+.ev:last-child{border-bottom:none}
+.ev-n{flex:none;width:22px;height:22px;border-radius:6px;background:var(--brand-soft);color:var(--brand);
+  font-size:10.5px;font-weight:700;display:flex;align-items:center;justify-content:center}
+.ev-t{font-size:12.5px;font-weight:600;line-height:1.45}
+.ev-s{font-size:11.5px;color:var(--t3);line-height:1.65;margin-top:5px}
+.ev-m{font-size:11px;color:var(--t4);margin-top:6px;display:flex;align-items:center;gap:7px;flex-wrap:wrap}
+.ev-l{font-size:11px;font-weight:600;color:var(--brand)}
+.ev-l:hover{text-decoration:underline}
+
+/* ===== 기타 ===== */
+.tog{width:30px;height:18px;border-radius:10px;background:var(--line-mid);padding:2px;display:flex;
+  border:0;cursor:pointer;flex:none;transition:background .15s}
+.tog.on{background:var(--brand);justify-content:flex-end}
+.tog-k{width:14px;height:14px;border-radius:50%;background:#fff}
+.tog-row{display:flex;align-items:center;gap:9px;font-size:12px;color:var(--t1)}
+.tabs{display:flex;gap:4px;border-bottom:1px solid var(--line)}
+.tab{font-size:13px;font-weight:500;color:var(--t4);padding:9px 13px;cursor:pointer;background:none;border:0;
+  border-bottom:2px solid transparent;margin-bottom:-1px;white-space:nowrap}
+.tab.on{color:var(--ink);font-weight:600;border-bottom-color:var(--brand)}
+textarea{width:100%;border:1px solid var(--line-mid);border-radius:10px;padding:12px;
+  font:12px/1.75 ui-monospace,Menlo,monospace;resize:vertical;background:var(--panel-sub)}
+.empty{padding:52px 20px;display:flex;flex-direction:column;align-items:center;gap:9px;text-align:center}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:16px;align-items:start}
+.grid-a{display:grid;grid-template-columns:1fr 320px;gap:16px;align-items:start}
+.col{display:flex;flex-direction:column;gap:16px}
+.stack{display:flex;flex-direction:column;gap:12px}
+.dropz{border:1.5px dashed #c3d2d9;background:var(--brand-tint);border-radius:12px;padding:24px 18px;
+  display:flex;flex-direction:column;align-items:center;gap:8px;text-align:center;cursor:pointer}
+
+/* ═══════ 일별 건수 차트 ═══════ */
+.cwrap{padding:6px 17px 4px;flex:1;display:flex;flex-direction:column;min-height:0}
+.crow{display:flex;align-items:stretch;gap:0}
+.cwrap > .crow:first-child{flex:1;min-height:0}
+.cyax{flex:none;width:30px;display:flex;flex-direction:column;justify-content:space-between;
+  align-items:flex-end;padding-right:8px;font-size:11px;color:var(--t3);font-variant-numeric:tabular-nums;
+  line-height:1}
+.cyax.rt{align-items:flex-start;padding:0 0 0 8px;width:36px}
+.cyax.sp{height:auto;padding-top:0;padding-bottom:0}
+.cplot{flex:1;min-width:0;position:relative;min-height:176px;max-height:250px}
+.cgrid{position:absolute;inset:0;display:flex;flex-direction:column;justify-content:space-between}
+.cgrid span{height:1px;background:var(--line);opacity:.85}
+.cgrid span:last-child{background:var(--t5);opacity:.5}
+.cbars{position:absolute;inset:0;display:flex;align-items:flex-end;gap:10px;padding:0 4px}
+.cb{flex:1;min-width:0;display:flex;flex-direction:column;justify-content:flex-end;
+  background:none;border:0;padding:0;cursor:pointer;height:100%;position:relative}
+.cbar{width:100%;background:var(--bar);min-height:3px;border-radius:5px 5px 0 0;transition:opacity .12s}
+.cbars:hover .cbar{opacity:.4}
+.cb:hover .cbar{opacity:1}
+.cb.act .cbar{outline:2px solid var(--ink);outline-offset:2px;border-radius:5px 5px 1px 1px}
+.cxax{flex:1;min-width:0;display:flex;gap:10px;padding:7px 4px 0}
+.cx{flex:1;min-width:0;text-align:center;font-size:11px;color:var(--t3);cursor:pointer;
+  font-variant-numeric:tabular-nums;white-space:nowrap}
+.cx:hover{color:var(--brand)}
+.cx.act{color:var(--ink);font-weight:700}
+.ctip{display:none;position:absolute;left:50%;transform:translateX(-50%);bottom:calc(100% + 8px);
+  background:#161616;color:#fff;border-radius:2px;padding:9px 11px;z-index:40;pointer-events:none;
+  min-width:132px;box-shadow:0 2px 10px rgba(0,0,0,.28)}
+.cb:hover .ctip{display:block}
+.ctip-d{font-size:10.5px;color:#c6c6c6;margin-bottom:5px;font-variant-numeric:tabular-nums}
+.ctip-r{display:flex;align-items:center;gap:10px;font-size:12px;white-space:nowrap}
+.ctip-v{margin-left:auto;font-weight:700;font-variant-numeric:tabular-nums}
+.clg{display:flex;gap:14px;align-items:center;padding:8px 17px 14px}
+.clg-i{display:flex;align-items:center;gap:6px;font-size:11px;color:var(--t2)}
+.clg-d{width:10px;height:10px;border-radius:1px;flex:none}
+
+/* ═══════ OC별 구성 (도넛 + 순위 바) ═══════ */
+.pie-wrap{display:flex;flex-direction:column;justify-content:center;padding:16px 17px;min-width:0;flex:1}
+.pie-top{display:flex;align-items:center;gap:26px;min-width:0}
+.pie{width:196px;height:196px;flex:none;position:relative}
+.pie svg{width:100%;height:100%;transform:rotate(-90deg)}
+.psl{cursor:pointer;transition:opacity .12s, stroke-width .12s}
+.pie:hover .psl{opacity:.34}
+.pie .psl:hover{opacity:1}
+.pie-c{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;
+  pointer-events:none}
+.pie-n{font-size:34px;font-weight:700;letter-spacing:-1.4px;line-height:1;font-variant-numeric:tabular-nums}
+.pie-u{font-size:11.5px;color:var(--t3);margin-top:6px;font-variant-numeric:tabular-nums;font-weight:600}
+
+.pie-lg{flex:1;min-width:0;display:flex;flex-direction:column;justify-content:center;gap:1px;
+  min-height:242px}
+.pl{display:flex;align-items:center;gap:8px;padding:0 4px;cursor:pointer;border:0;background:none;
+  width:100%;text-align:left;border-radius:5px;height:26px;flex:none}
+.pl:hover{background:var(--panel-sub)}
+.pl-d{width:9px;height:9px;border-radius:2px;flex:none}
+.pl-n{font-size:11.5px;line-height:1;color:var(--t1);flex:none;width:122px;overflow:hidden;
+  text-overflow:ellipsis;white-space:nowrap}
+.pl-tr{flex:1;min-width:24px;height:7px;background:var(--line-soft);border-radius:4px;
+  overflow:hidden;display:block}
+.pl-fl{display:block;height:100%;border-radius:4px}
+.pl-v{font-size:11.5px;line-height:1;font-weight:700;font-variant-numeric:tabular-nums;width:20px;text-align:right;flex:none}
+.pl-p{font-size:10.5px;line-height:1;color:var(--t4);width:32px;text-align:right;font-variant-numeric:tabular-nums;flex:none}
+.pl.sel{background:var(--brand-tint)}
+.pl.sel .pl-n{color:var(--brand)}
+.grid-c{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:16px;align-items:stretch}
+.grid-c > .card{display:flex;flex-direction:column;min-width:0}
+
+/* 좁은 폭에서는 두 카드를 세로로 — 파이 줄바꿈·막대 과확대 방지 */
+@media (max-width:1340px){
+  .grid-c{grid-template-columns:minmax(0,1fr)}
+  .cplot{max-height:220px}
+}
+
+/* 파이 조각 툴팁 */
+.ptip{display:none;position:fixed;z-index:200;background:#161616;color:#fff;border-radius:2px;
+  padding:9px 11px;min-width:150px;box-shadow:0 2px 12px rgba(0,0,0,.3);pointer-events:none;
+  font-family:inherit}
+
+/* ═══════ 시황 티커 ═══════ */
+.ticker{background:var(--panel);border:1px solid var(--line);border-radius:14px;
+  box-shadow:0 1px 2px rgba(16,24,40,.04);overflow:hidden;height:46px;display:flex}
+.tk-view{flex:1;min-width:0;overflow:hidden;position:relative;display:flex;align-items:center}
+.tk-view::before,.tk-view::after{content:'';position:absolute;top:0;bottom:0;width:40px;
+  pointer-events:none;z-index:2}
+.tk-view::before{left:0;background:linear-gradient(to left,transparent,var(--panel))}
+.tk-view::after{right:0;background:linear-gradient(to right,transparent,var(--panel))}
+.tk-track{display:flex;align-items:center;white-space:nowrap;animation:tkroll 44s linear infinite;
+  will-change:transform}
+.tk-view:hover .tk-track{animation-play-state:paused}
+@keyframes tkroll{from{transform:translateX(0)}to{transform:translateX(-50%)}}
+.tk-i{display:inline-flex;align-items:center;gap:7px;padding:0 17px;position:relative;
+  text-decoration:none;height:44px}
+.tk-i+.tk-i::before{content:'';position:absolute;left:0;top:50%;transform:translateY(-50%);
+  width:1px;height:13px;background:var(--line)}
+.tk-nm{font-size:12px;color:var(--t2)}
+.tk-i.sk .tk-nm{color:var(--ink);font-weight:700}
+.tk-p{font-size:12px;font-weight:700;font-variant-numeric:tabular-nums;color:var(--ink)}
+.tk-c{font-size:11px;font-weight:600;font-variant-numeric:tabular-nums}
+.tk-c.up{color:#dc2626}
+.tk-c.dn{color:#2563eb}
+.tk-go{font-size:9.5px;color:var(--t5);opacity:0;transition:opacity .12s}
+.tk-i:hover .tk-nm{color:var(--brand);text-decoration:underline;text-underline-offset:3px}
+.tk-i:hover .tk-go{opacity:1;color:var(--brand)}
+@media (prefers-reduced-motion: reduce){ .tk-track{animation:none} }
+
+/* ═══════ 티커 오른쪽 트렌드룸 버튼 ═══════ */
+.tk-btn{flex:none;display:flex;align-items:center;justify-content:center;padding:0 22px;border:0;
+  background:#0f62fe;cursor:pointer;font-size:12.5px;font-weight:700;color:#fff;
+  white-space:nowrap;letter-spacing:-.2px;transition:background .12s}
+.tk-btn:hover{background:#0043ce}
+
+/* ═══════ 트렌드룸 ═══════ */
+.tr-hero{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:16px}
+.tr-c{background:var(--panel);border:1px solid var(--line);border-radius:14px;
+  box-shadow:0 1px 2px rgba(16,24,40,.04);display:flex;flex-direction:column;overflow:hidden}
+.tr-c:hover{border-color:#cdd6dc}
+.tr-band{height:4px;flex:none}
+.tr-b{padding:15px 16px 14px;display:flex;flex-direction:column;gap:8px;flex:1}
+.tr-meta{display:flex;align-items:center;gap:7px;font-size:10.5px;color:var(--t4);flex-wrap:wrap}
+.tr-src{font-size:11.5px;font-weight:700;color:var(--ink)}
+.tr-t{font-size:14px;font-weight:700;line-height:1.42;letter-spacing:-.25px}
+.tr-s{font-size:12px;color:var(--t3);line-height:1.65;display:-webkit-box;-webkit-line-clamp:4;
+  -webkit-box-orient:vertical;overflow:hidden}
+.tr-f{margin-top:auto;padding-top:4px;display:flex;align-items:center;gap:6px;flex-wrap:wrap}
+.tr-lk{font-size:11px;font-weight:600;color:var(--brand);margin-left:auto;white-space:nowrap}
+.tr-lk:hover{text-decoration:underline;text-underline-offset:3px}
+
+.tr-row{display:flex;gap:14px;padding:15px 17px;border-bottom:1px solid var(--line-faint);align-items:flex-start}
+.tr-row:last-child{border-bottom:none}
+.tr-row:hover{background:var(--panel-sub)}
+.tr-d{flex:none;width:74px;display:flex;flex-direction:column;gap:3px}
+.tr-dd{font-size:11px;color:var(--t3);font-variant-numeric:tabular-nums;font-weight:600}
+.tr-dk{font-size:10px;color:var(--t5)}
+.tr-m{flex:1;min-width:0;display:flex;flex-direction:column;gap:5px}
+.tr-rt{font-size:13px;font-weight:600;line-height:1.45}
+.tr-rs{font-size:11.5px;color:var(--t3);line-height:1.65;display:-webkit-box;-webkit-line-clamp:3;
+  -webkit-box-orient:vertical;overflow:hidden}
+.tr-a{flex:none;display:flex;flex-direction:column;gap:6px;align-items:flex-end;width:132px}
+.tr-cite{font-size:11px;font-weight:600;color:var(--t2);border:1px solid var(--line-mid);
+  border-radius:7px;background:var(--panel);padding:5px 9px;cursor:pointer;white-space:nowrap}
+.tr-cite:hover{border-color:var(--brand);color:var(--brand);background:var(--brand-tint)}
+.tr-n{font-size:10.5px;color:var(--t4);font-variant-numeric:tabular-nums}
+.bizdot{width:7px;height:7px;border-radius:2px;flex:none}
+@media (max-width:1245px){ .tr-hero{grid-template-columns:repeat(2,minmax(0,1fr))} }
+
+/* ═══════ 트렌드룸 (개선) ═══════ */
+.tr2{display:grid;grid-template-columns:minmax(0,1fr) 372px;gap:16px;align-items:start}
+.tr2-l{display:flex;flex-direction:column;gap:16px;min-width:0}
+.tr2-r{position:sticky;top:20px}
+.bizdot{width:7px;height:7px;border-radius:2px;flex:none}
+
+.ai-mk{width:20px;height:20px;border-radius:6px;background:var(--brand);color:#fff;display:flex;
+  align-items:center;justify-content:center;font-size:9.5px;font-weight:700;flex:none}
+.ai-ctl{display:flex;flex-direction:column;gap:9px;padding:12px 15px;border-bottom:1px solid var(--line-soft);
+  background:var(--panel-sub)}
+.ai-row{display:flex;align-items:center;gap:6px;flex-wrap:wrap}
+.ai-k{font-size:11.5px;font-weight:600;color:var(--t3);width:28px;flex:none}
+.ai-b{padding:15px 15px 14px;display:flex;flex-direction:column;gap:12px;transition:opacity .18s}
+.ai-hl{font-size:13.5px;font-weight:600;line-height:1.66;letter-spacing:-.3px;text-wrap:pretty}
+.ai-i{display:grid;grid-template-columns:3px 1fr;gap:13px;background:var(--panel-sub);
+  border:1px solid var(--line-soft);border-radius:10px;overflow:hidden}
+.ai-i-b{padding:12px 14px 13px;display:flex;flex-direction:column;gap:6px}
+.ai-tag{font-size:11px;font-weight:700;padding:3px 8px;border-radius:5px;border:0;cursor:pointer;color:#fff}
+.ai-h{font-size:13px;font-weight:600;line-height:1.5;letter-spacing:-.2px}
+.ai-p{font-size:12px;color:var(--t2);line-height:1.7;text-wrap:pretty}
+.ai-f{font-size:10.5px;color:var(--t4);line-height:1.6}
+.dinp{height:30px;padding:0 8px;border:1px solid var(--line-mid);border-radius:8px;background:var(--panel);
+  font-size:11.5px;font-variant-numeric:tabular-nums}
+
+.thg{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:8px;padding:14px 17px}
+.thc{display:flex;flex-direction:column;gap:7px;align-items:flex-start;padding:11px 12px;
+  border:1px solid var(--line);border-radius:10px;cursor:pointer;text-align:left;background:var(--panel)}
+.thc:hover{border-color:var(--t4)}
+.thc-t{display:flex;align-items:baseline;gap:6px;width:100%}
+.thc-n{font-size:12px;font-weight:600;letter-spacing:-.2px;color:var(--t1)}
+.thc-c{margin-left:auto;font-size:14px;font-weight:700;font-variant-numeric:tabular-nums}
+.thc-bar{width:100%;height:4px;border-radius:99px;background:#eef1f3;overflow:hidden;display:block}
+.thc-bar i{display:block;height:4px;border-radius:99px}
+.method{margin:0 17px 15px;background:var(--brand-tint);border:1px solid #dbe5e9;border-radius:10px;
+  padding:13px 15px;display:flex;flex-direction:column;gap:7px}
+.method b{font-size:11.5px;color:var(--ink)}
+.method p{font-size:11.5px;color:var(--t1);line-height:1.75}
+
+.g-h{display:flex;align-items:baseline;gap:9px;padding:9px 17px;background:var(--panel-sub);
+  border-bottom:1px solid var(--line-faint);border-top:1px solid var(--line-faint)}
+.g-l{font-size:11.5px;font-weight:700;color:var(--t1)}
+.g-s{font-size:10.5px;color:var(--t4);font-variant-numeric:tabular-nums}
+.tr2-row{display:flex;gap:14px;padding:14px 17px;border-bottom:1px solid var(--line-faint);align-items:flex-start}
+.tr2-row:hover{background:var(--panel-sub)}
+.tr2-d{flex:none;width:64px;display:flex;flex-direction:column;gap:4px;padding-top:1px}
+.tr2-dd{font-size:11.5px;color:var(--t2);font-variant-numeric:tabular-nums;font-weight:700}
+.nb{font-size:9.5px;font-weight:700;color:#fff;background:#0f62fe;border-radius:4px;padding:2px 5px;
+  align-self:flex-start;letter-spacing:.2px}
+.tr2-m{flex:1;min-width:0;display:flex;flex-direction:column;gap:5px}
+.tr2-t{font-size:13px;font-weight:600;line-height:1.45;letter-spacing:-.2px}
+.tr2-s{font-size:11.5px;color:var(--t3);line-height:1.65;display:-webkit-box;-webkit-line-clamp:2;
+  -webkit-box-orient:vertical;overflow:hidden}
+.tr2-a{flex:none;width:126px;display:flex;flex-direction:column;gap:7px;align-items:flex-end}
+.citep{font-size:11.5px;font-weight:700;font-variant-numeric:tabular-nums;padding:4px 9px;border-radius:7px;
+  white-space:nowrap;border:0;cursor:pointer}
+.thtag{font-size:10.5px;font-weight:600;border-radius:5px;padding:2px 7px}
+.empty2{padding:44px 17px;display:flex;flex-direction:column;gap:6px;align-items:center}
+@media (max-width:1560px){ .tr2{grid-template-columns:1fr} .tr2-r{position:static;order:-1} }
+
+
+/* ═══════ 과제 평가·피드백 ═══════ */
+.fbtog{display:inline-flex;align-items:center;gap:5px;height:27px;padding:0 9px;border:1px solid var(--line-mid);
+  border-radius:7px;background:var(--panel);font-size:11.5px;font-weight:600;color:var(--t3);cursor:pointer;
+  white-space:nowrap}
+.fbtog:hover{border-color:var(--brand);color:var(--brand)}
+.fbtog.has{border-color:#e8c67a;background:#fdf8ec;color:#9a6a12}
+.fbtog.open{border-color:var(--ink);background:var(--ink);color:#fff}
+.fbtog .st{color:#e0a022;font-size:12px;line-height:1}
+.fbtog.open .st{color:#f5c463}
+
+.fbrow > td{background:var(--panel-sub);padding:0 !important;border-bottom:1px solid var(--line)}
+.fb{display:flex;align-items:center;gap:14px;padding:13px 17px;flex-wrap:wrap}
+.fb-k{font-size:11px;font-weight:700;color:var(--t3);white-space:nowrap}
+.fb-l{display:flex;align-items:center;gap:9px;flex:none}
+.stars{display:flex;flex-direction:row-reverse;gap:1px}
+.star{border:0;background:none;cursor:pointer;font-size:18px;line-height:1;padding:0 1px;
+  color:#dfe3e8;transition:color .1s}
+.star.on{color:#e0a022}
+.stars:hover .star{color:#dfe3e8}
+.star:hover,.star:hover ~ .star{color:#e0a022}
+.fb-sc{font-size:11.5px;font-weight:700;color:var(--t2);font-variant-numeric:tabular-nums;width:34px}
+.fb-i{flex:1;min-width:200px}
+.fb-note{padding:0 17px 12px;font-size:10.5px;color:var(--t4)}
+
+/* ═══════ 페이저 ═══════ */
+.pager{display:flex;align-items:center;gap:12px;padding:13px 17px;flex-wrap:wrap}
+.tot{font-size:12px;font-weight:700;color:var(--ink);font-variant-numeric:tabular-nums;white-space:nowrap}
+
+/* ═══════ 셀렉트·캘린더 아이콘 통일 (꺽쇠) ═══════ */
+.sel{appearance:none;-webkit-appearance:none;padding:0 24px 0 10px;
+  background-image:url("data:image/svg+xml;charset=utf8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='10' viewBox='0 0 10 10'%3E%3Cpath d='M2 3.6L5 6.6L8 3.6' stroke='%236b7280' stroke-width='1.4' fill='none' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+  background-repeat:no-repeat;background-position:right 8px center}
+.chev{width:10px;height:10px;flex:none;color:var(--t4);display:block}
+
+/* ═══════ 목록 표 (과제 제안) ═══════ */
+.tw{overflow-x:auto}
+table.ttbl{width:100%;border-collapse:collapse;table-layout:fixed}
+.ttbl th{text-align:left;font-size:11px;font-weight:600;color:var(--t3);padding:9px 8px;
+  background:var(--panel-sub);border-top:1px solid var(--line-soft);
+  border-bottom:1px solid var(--line-soft);white-space:nowrap}
+.ttbl td{padding:9px 8px;border-bottom:1px solid var(--line-faint);font-size:12.5px;vertical-align:middle}
+.ttbl th:first-child,.ttbl td:first-child{padding-left:15px}
+.ttbl th:last-child,.ttbl td:last-child{padding-right:15px}
+.ttbl tr.trow:hover{background:var(--panel-sub)}
+.ttbl tr.trow.on{background:#f3f7fe}
+.ttbl .tt{font-size:12.5px;font-weight:600;letter-spacing:-.2px;line-height:1.4;
+  overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.ttbl .ts{font-size:11px;color:var(--t4);line-height:1.45;margin-top:2px;
+  overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+
+/* 체크박스 */
+.ck{width:16px;height:16px;border:1.5px solid var(--line-mid);border-radius:4px;background:var(--panel);
+  cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:10px;
+  color:transparent;padding:0;line-height:1}
+.ck:hover{border-color:var(--brand)}
+.ck.on{background:var(--brand);border-color:var(--brand);color:#fff;font-weight:700}
+.ck.part{background:var(--brand-soft);border-color:var(--brand);color:var(--brand);font-weight:700}
+
+/* 말풍선 · 상세 */
+.memo{width:28px;height:28px;border:1px solid var(--line-mid);background:var(--panel);cursor:pointer;
+  color:var(--t4);display:flex;align-items:center;justify-content:center;border-radius:7px;padding:0}
+.memo:hover{border-color:var(--brand);color:var(--brand);background:var(--brand-tint)}
+.memo.has{border-color:#c3d6f7;color:var(--edit);background:#f6faff}
+.memo.rated{border-color:#e8c67a;color:#d0951c;background:#fdf8ec}
+.memo.open{border-color:var(--ink);background:var(--ink);color:#fff}
+
+/* 메모 입력 행 */
+.ttbl .mrow > td{background:#f8fafd;padding:0 !important;border-bottom:1px solid var(--line)}
+.mbox{display:flex;align-items:center;gap:10px;padding:11px 15px;flex-wrap:wrap}
+.mk{font-size:11px;font-weight:700;color:var(--t3);white-space:nowrap}
+.mi{flex:1;min-width:180px;height:32px}
+.msc{font-size:12px;font-weight:700;color:var(--t2);font-variant-numeric:tabular-nums;
+  width:36px;flex:none}
+/* 패널 별점 — 넉넉한 클릭 영역 */
+.bs{display:flex;flex-direction:row-reverse;gap:0;flex:none}
+.bst{border:0;background:none;cursor:pointer;font-size:20px;line-height:1;
+  width:26px;height:26px;padding:0;color:#dfe3e8;transition:color .1s}
+.bst.on{color:#e0a022}
+.bs:hover .bst{color:#dfe3e8}
+.bst:hover,.bst:hover ~ .bst{color:#e0a022}
+.mnote{padding:0 15px 9px;font-size:10.5px;color:var(--t4)}
+
+/* 패널 액션 — 표의 상세 버튼과 구분되는 형태 */
+.msave{height:30px;padding:0 16px;border:0;border-radius:99px;background:#0f62fe;color:#fff;
+  font-size:12px;font-weight:700;cursor:pointer;white-space:nowrap;flex:none;transition:background .12s}
+.msave:hover{background:#0043ce}
+.mclose{width:28px;height:28px;border:0;border-radius:50%;background:transparent;color:var(--t4);
+  font-size:13px;cursor:pointer;display:flex;align-items:center;justify-content:center;flex:none;
+  line-height:1;padding:0}
+.mclose:hover{background:#e5e9f0;color:var(--ink)}
+
+</style>
+<script>
+/* 저장된 테마를 페인트 전에 적용 (기본값: dark) */
+/* 인증 게이트 — 로그인 토큰 없으면 로그인 페이지로 */
+(function(){ try{ if(!localStorage.getItem('oi-token')){ location.replace('/login'); } }catch(e){} })();
+(function(){try{var t=localStorage.getItem('oi-theme');document.documentElement.setAttribute('data-theme',t==='light'?'light':'dark');}catch(e){}})();
+</script>
+</head>
+<body>
+<div class="app">
+  <aside class="side">
+    <div class="brand" style="flex-direction:column;align-items:flex-start;justify-content:center;gap:4px">
+      <div style="display:flex;align-items:center;gap:8px;width:100%">
+        <span class="oi-logo" style="font-size:19px">O/I Spark</span>
+        <button id="themeBtn" type="button" aria-label="다크/라이트 테마 전환" title="다크/라이트 전환"
+        style="margin-left:auto;width:30px;height:30px;flex:none;display:flex;align-items:center;justify-content:center;
+        border:1px solid var(--line-mid);border-radius:8px;background:var(--panel-sub);color:var(--t1);
+        cursor:pointer;font-size:14px;line-height:1">🌙</button>
+      </div>
+      <span class="brand-sb">SK이노베이션 O/I추진단</span>
+    </div>
+    <nav class="nav" id="nav"></nav>
+  </aside>
+  <div class="body"><main class="main" id="main"></main></div>
+</div>
+
+<script>
+/* ══════════════ 서버 데이터 ══════════════
+   OC·레버·근거자료·과제 제안·소스·권한은 모두 백엔드에서 받는다 (GET /api/bootstrap).
+   여기서는 빈 컨테이너만 선언하고 boot() 가 "제자리에서" 채운다.
+   재할당하지 않는 이유: 아래 코드가 잡고 있는 참조(OC_C = OC_COLOR 등)를 끊지 않기 위해. */
+const OCS = [];          // [{code, name, biz}]
+const OC_COLOR = {};     // code → 색상
+const OC = {};           // code → OC
+const LOGIC = {};        // 레버 → {metric, text, fields, calc, show}
+const LEVERS = [];
+const EV = {};           // 근거 자료 id → {src, kind, date, url, title, sum}
+const VERSIONS = [];     // 생성 버전 (최신 우선)
+const TASKS = [];        // 과제 제안
+const SOURCES = [], UPLOADS = [], ADMINS = [];
+let DEFAULT_INSTRUCTION = '';
+/* 소스 상태 → 배지 색 (표시 규칙이라 화면이 갖는다) */
+const SRC_ST = {'정상':'ok','지연':'wn','계정 필요':'bd'};
+
+const N = v => (v===''||v==null||isNaN(Number(String(v).replace(/,/g,'')))) ? 0 : Number(String(v).replace(/,/g,''));
+
+/* ══════════════ 레버별 기대효과 계산 ══════════════
+   관리지표·산출식 문구·입력 항목은 서버(lever 테이블)에서 내려오고,
+   입력값으로 숫자를 실제 계산하고 표기하는 부분만 화면이 갖는다. */
+const LEVER_CALC = {
+  '정비/TA':{
+    calc:f => (f.b!==''&&f.c!=='') ? Number(f.c)*Number(f.b) - N(f.x) : null,
+    show:f => `${f.c}일 × ${f.b}억 − 투자비 ${N(f.x)}억`,
+  },
+  '에너지비':{
+    calc:f => (f.a!==''&&f.b!==''&&f.c!==''&&f.d!=='')
+      ? Number(f.a)*Number(f.b)/100*Number(f.c)*10000*Number(f.d)/1e8 - N(f.x) : null,
+    show:f => `${f.a}kWh/t × ${f.b}% × ${f.c}만t × ${f.d}원 − 투자비 ${N(f.x)}억`,
+  },
+  '물류비':{
+    calc:f => (f.a!==''&&f.b!=='') ? Number(f.a)*Number(f.b)/100 - N(f.x) : null,
+    show:f => `${f.a}억 × ${f.b}% − 협상비용 ${N(f.x)}억`,
+  },
+  '수율':{
+    calc:f => (f.a!==''&&f.b!==''&&f.c!=='')
+      ? N(f.a)*(Number(f.c)-Number(f.b))/100 - N(f.x) : null,
+    show:f => `${f.a}억 × (${f.c}% − ${f.b}%) − 투자비 ${N(f.x)}억`,
+  },
+  '구매':{
+    calc:f => (f.a!==''&&f.b!=='') ? Number(f.a)*Number(f.b)/100 - N(f.x) : null,
+    show:f => `${f.a}억 × ${f.b}% − 전환비용 ${N(f.x)}억`,
+  },
+  '간접비':{
+    calc:f => (f.a!==''&&f.b!=='') ? Number(f.a)*Number(f.b)/100 - N(f.x) : null,
+    show:f => `${f.a}억 × ${f.b}% − 정리비용 ${N(f.x)}억`,
+  },
+  '운전자본':{
+    calc:f => (f.a!==''&&f.b!==''&&f.c!==''&&f.d!=='')
+      ? (Number(f.a)-Number(f.b))*Number(f.c)*Number(f.d)/100 - N(f.x) : null,
+    show:f => `(${f.a}일 − ${f.b}일) × ${f.c}억 × ${f.d}% − 투자비 ${N(f.x)}억`,
+  },
+};
+/* 서버에 새 레버가 추가됐는데 계산식이 아직 없을 때 — 화면은 뜨고 금액만 비워 둔다 */
+const NO_CALC = {calc:()=>null, show:()=>''};
+
+const stampNow = () => {
+  const d=new Date(), p=n=>String(n).padStart(2,'0');
+  return `${d.getFullYear()}. ${p(d.getMonth()+1)}. ${p(d.getDate())} ${p(d.getHours())}:${p(d.getMinutes())}`;
+};
+/* 산출식 상태 — 시스템 제안(ON, 기본) / 사용자 수식(OFF) */
+const sysOn  = t => S.sysOff[t.id] !== true;
+const userFx = t => S.fx[t.id];                       // {text, at}
+function fxText(t){
+  return sysOn(t) ? LOGIC[t.lever].text : (userFx(t)?.text || LOGIC[t.lever].text);
+}
+
+/* ══════════════ 상태 ══════════════ */
+let S = {
+  screen:'list',
+  ver:'전체',            // 날짜 필터 — '전체' 또는 버전 id
+  oc:'전체',
+  q:'',
+  page:1,
+  cOff:0,            // 그래프 윈도우 오프셋 (0 = 최신)
+  moIdx:0,           // OC별 구성 — 표시 월 인덱스
+  per:10,            // 페이지당 건수
+  fb:{},             // 평가·피드백 {id:{s,t}}
+  memoOpen:null,     // 열린 피드백 패널 (하나만)
+  sel:{},            // 스크리닝 체크박스
+  trBiz:'전체',       // 트렌드룸 분야 필터
+  trPeriod:'1m',     // 트렌드룸 기간 프리셋
+  trFrom:'2026-06-30', trTo:'2026-07-30',
+  trTheme:null, trQ:'', trKind:'전체', trSort:'date',
+  trNew:false, trUnl:false, trMethod:false, trGenAt:'오늘 08:12',
+  calOpen:false,
+  calYM:'2026-07',   // 캘린더 표시 월
+  curId:1240,
+  fields:{},
+  fx:{},            // 사용자 수식 {taskId:{text,at}}
+  sysOff:{},        // 시스템 제안 토글 OFF 여부
+  fxDraft:null,     // 수식 편집 중인 과제 id
+  fxCopied:false,
+  regenerating:false,
+  upNow:false,      // 내부 자료 업로드 시 '바로 사용'(= 검수 완료) 여부
+  cg:{step:0, oc:null, ev:null, lever:null, plan:null, done:false},
+  cgBusy:false,    // 커스텀 생성 진행 중(LLM 발굴 — 1분 안팎)
+  ex:{oc:'SKGC', days:30, research:'', editing:false, text:null, copied:false},
+  admTab:'prompt',
+  instruction:DEFAULT_INSTRUCTION,
+  evalCriteria:'',   // 평가 기준 안내 문구 (서버가 내려준다)
+  instrSaved:true,
+  send:{ freq:'매일', time:'08:00', lastAt:'2026.07.24 08:00' },
+  sendOff:{},        // 발송 제외 과제 id (기본은 전체 포함)
+  recipients:['O/I추진단 (jin.k@sk.com)','SKGC 혁신팀 (gc-innov@sk.com)'],
+  channels:{outlook:true, teams:true},
+};
+
+const NAV = [
+  {g:'발굴', items:[{k:'list',label:'과제 제안',icon:'≡'},{k:'custom',label:'커스텀 생성',icon:'+'}]},
+  {g:'활용', items:[{k:'trend',label:'트렌드룸',icon:'T'},{k:'export',label:'프롬프트 내보내기',icon:'>'},{k:'report',label:'AI Reporting',icon:'↗'}]},
+  {g:'관리', items:[{k:'admin',label:'관리자',icon:'⚙'}]},
+];
+
+/* ══════════════ 유틸 ══════════════ */
+const esc = s => String(s==null?'':s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const f1 = n => (Math.round(n*10)/10).toFixed(1);
+const fOf = t => S.fields[t.id] || {};
+const lg = t => LOGIC[t.lever];
+const verOf = id => VERSIONS.find(v => v.id===id);
+const curTask = () => TASKS.find(t => t.id===S.curId) || TASKS[0];
+const verCount = id => TASKS.filter(t => t.ver===id).length;
+const verByLabel = lb => VERSIONS.find(v => v.label===lb);
+const CHART_N = 10;   // 그래프에 한 번에 표시할 생성일 수
+const BAR_C = '#0f62fe';
+const OC_C = OC_COLOR;
+function ocBreakdown(vid){
+  const m={}; TASKS.filter(t=>t.ver===vid).forEach(t=>{m[t.oc]=(m[t.oc]||0)+1;});
+  return OCS.map(o=>o.code).filter(c=>m[c]).map(c=>({oc:c,c:m[c]}));
+}
+function timeline(){
+  let run=0;
+  return VERSIONS.slice().reverse().map(v=>{ const n=verCount(v.id); run+=n; return {...v,n,cum:run}; });
+}
+function chartWindow(){
+  const tl=timeline();
+  const end=Math.max(CHART_N, tl.length-S.cOff), st=Math.max(0,end-CHART_N);
+  return {list:tl.slice(st,Math.min(end,tl.length)), st, total:tl.length};
+}
+function ticks(max){
+  const step=Math.max(1,Math.ceil(max/4));
+  return {top:step*4, arr:[4,3,2,1,0].map(i=>i*step)};
+}
+/* 월 목록 (최신 우선) */
+function months(){
+  const s=new Set(VERSIONS.map(v=>v.label.slice(0,7)));
+  return [...s].sort().reverse();
+}
+/* 백분율 최대잉여법 — 합계 100% 보장 */
+function pctRound(vals, tot){
+  const raw=vals.map(v=>v/tot*100), fl=raw.map(Math.floor);
+  let rem=100-fl.reduce((a,b)=>a+b,0);
+  const ord=raw.map((r,i)=>({i,f:r-Math.floor(r)})).sort((a,b)=>b.f-a.f);
+  const out=fl.slice();
+  for(let k=0;k<rem && ord.length;k++) out[ord[k%ord.length].i]++;
+  return out;
+}
+function pieData(ym){
+  const vids=VERSIONS.filter(v=>v.label.slice(0,7)===ym).map(v=>v.id);
+  const m={}; let tot=0;
+  TASKS.filter(t=>vids.includes(t.ver)).forEach(t=>{ m[t.oc]=(m[t.oc]||0)+1; tot++; });
+  const rows=OCS.map(o=>o.code).filter(c=>m[c]).map(c=>({oc:c,c:m[c]})).sort((a,b)=>b.c-a.c);
+  const pr=pctRound(rows.map(r=>r.c), tot||1);
+  rows.forEach((r,i)=>{ r.p=pr[i]; });
+  return {rows, tot, vids};
+}
+/* 평가·피드백 */
+const fbOf = id => S.fb[id] || {s:0,t:''};
+function verLabel(){
+  if (S.ver==='전체') return '전체 누적';
+  const v = verOf(S.ver);
+  return v ? v.label : '전체 누적';
+}
+
+function netOf(t){
+  if (!sysOn(t)) return null;            // 사용자 수식 사용 중 — 자동 산정 안 함
+  const v = LOGIC[t.lever].calc(fOf(t));
+  return (v===null || isNaN(v)) ? null : v;
+}
+function filtered(){
+  return TASKS.filter(t => {
+    if (S.ver!=='전체' && t.ver!==S.ver) return false;
+    if (S.oc!=='전체' && t.oc!==S.oc) return false;
+    if (S.q){
+      const q = S.q.toLowerCase();
+      const hay = (t.name+' '+t.sum+' '+t.lever+' '+OC[t.oc].name+' '+t.ev.map(e=>EV[e].src).join(' ')).toLowerCase();
+      if (hay.indexOf(q) < 0) return false;
+    }
+    return true;
+  });
+}
+function paged(rows){
+  const per=S.per;
+  const pages=Math.max(1,Math.ceil(rows.length/per));
+  const p=Math.min(S.page,pages);
+  return {pages,p,per,slice:rows.slice((p-1)*per,p*per)};
+}
+
+/* ══════════════ 렌더 ══════════════ */
+function renderNav(){
+  document.getElementById('nav').innerHTML =
+    NAV.map(g => `<div class="nav-g"><div class="nav-t">${g.g}</div>` +
+      g.items.map(it => {
+        const on = S.screen===it.k || (it.k==='list' && S.screen==='detail');
+        const c = it.k==='list' ? `<span class="nav-c num">${TASKS.length}</span>` : '';
+        return `<button class="nav-b ${on?'on':''}" data-nav="${it.k}">
+          <span class="nav-i">${it.icon}</span><span>${it.label}</span>${c}</button>`;
+      }).join('') + `</div>`).join('') + `
+    <div class="pipe">
+      <div class="pipe-h">
+        <span style="font-size:11.5px;font-weight:600;color:var(--t2)">수집 파이프라인</span>
+        <span class="tag ok">정상</span>
+      </div>
+      <div class="pipe-r"><span class="dot" style="background:var(--ok)"></span>크롤링 · 오늘 08:00 완료</div>
+      <div class="pipe-r"><span class="dot" style="background:var(--warn)"></span>유료 매체 4건 · 계정 필요</div>
+      <div class="pipe-r"><span class="dot" style="background:var(--c2)"></span>수집 주기 · 4시간</div>
+    </div>
+    <div class="acct">
+      <div class="acct-u"><span class="acct-av">👤</span><span class="acct-em">${esc(localStorage.getItem('oi-user')||'')}</span></div>
+      <div class="acct-row">
+        <button class="acct-b" onclick="oiChangePw()">비밀번호 변경</button>
+        <button class="acct-b danger" onclick="oiWithdraw()">탈퇴</button>
+      </div>
+      <button class="nav-b logout-b" onclick="oiLogout()"><span class="nav-i">→</span><span>로그아웃</span></button>
+    </div>`;
+}
+
+/* ---------- 캘린더 ---------- */
+const WD = ['일','월','화','수','목','금','토'];
+function renderCal(){
+  const [Y,M] = S.calYM.split('-').map(Number);
+  const first = new Date(Y, M-1, 1);
+  const days  = new Date(Y, M, 0).getDate();
+  const lead  = first.getDay();
+  // 생성일 맵 — label 은 실제 생성일이라 하루에 여러 번 재생성하면 **겹친다**.
+  // 그래서 날짜당 버전을 배열로 모은다. 한 칸에 그날 생성분을 합쳐 보여 주고,
+  // 누르면 그날의 최신 버전을 고른다(VERSIONS 가 최신순이라 [0] 이 최신).
+  // 개별 버전은 위 '생성일 그래프'의 막대(data-ver)에서 하나씩 고를 수 있다.
+  const map = {};
+  VERSIONS.forEach(v => { const [y,m,d] = v.label.split('.').map(Number);
+    if (y===Y && m===M) (map[d] = map[d] || []).push(v); });
+  // 이동 가능 범위
+  const labels = VERSIONS.map(v => v.label).sort();
+  const minYM = labels[0].slice(0,7).replace('.','-');
+  const maxYM = labels[labels.length-1].slice(0,7).replace('.','-');
+  const cur = `${Y}-${String(M).padStart(2,'0')}`;
+
+  let cells = '';
+  for (let i=0;i<lead;i++) cells += '<span class="cal-d"></span>';
+  for (let d=1;d<=days;d++){
+    const vs = map[d];
+    if (vs){
+      const sel = vs.some(v => S.ver===v.id);
+      const n = vs.reduce((a,v) => a+verCount(v.id), 0);
+      cells += `<button class="cal-d has ${sel?'sel':''}" data-cal-d="${vs[0].id}"
+        title="${vs.length>1?`이 날 생성 ${vs.length}회 · 합계 ${n}건`:`${n}건`}">
+        <span>${d}</span><span class="cal-n">${n}</span></button>`;
+    } else {
+      cells += `<span class="cal-d">${d}</span>`;
+    }
+  }
+  return `<div class="cal" id="cal">
+    <div class="cal-h">
+      <button class="cal-nav" data-cal-m="-1" ${cur<=minYM?'disabled':''}>‹</button>
+      <span class="cal-m">${Y}년 ${M}월</span>
+      <button class="cal-nav" data-cal-m="1" ${cur>=maxYM?'disabled':''}>›</button>
+    </div>
+    <div class="cal-g">${WD.map(w=>`<span class="cal-w">${w}</span>`).join('')}${cells}</div>
+    <div class="cal-f">
+      <button class="cal-all ${S.ver==='전체'?'on':''}" data-cal-d="전체">전체 누적 (${TASKS.length}건)</button>
+    </div>
+  </div>`;
+}
+
+/* ---------- 1. 과제 제안 ---------- */
+const CHEV = `<svg class="chev" viewBox="0 0 10 10"><path d="M2 3.6L5 6.6L8 3.6" stroke="currentColor" stroke-width="1.4" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>`;
+const ICON_MEMO = `<svg width="13" height="13" viewBox="0 0 16 16" fill="none"><path d="M3 3.5h10v7H6.5L4 13V10.5H3z" stroke="currentColor" stroke-width="1.3" stroke-linejoin="round"/></svg>`;
+const ICON_MEMO_F = `<svg width="13" height="13" viewBox="0 0 16 16"><path d="M3 3.5h10v7H6.5L4 13V10.5H3z" fill="currentColor"/></svg>`;
+const CUM_OFF = true;
+
+function bigStars(id){
+  const s=fbOf(id).s;
+  return `<span class="bs">${[5,4,3,2,1].map(n=>
+    `<button class="bst ${n<=s?'on':''}" data-star="${id}:${n}" title="${n}점" aria-label="${n}점">★</button>`).join('')}</span>`;
+}
+
+/* ---------- 차트 1 — 일별 생성 건수 ---------- */
+function chartDaily(){
+  const W=chartWindow();
+  const barT=ticks(Math.max(1,...W.list.map(v=>v.n)));
+  return `<div class="card" style="--bar:${BAR_C}">
+    <div class="card-h">
+      <h2>일별 생성 건수</h2>
+      <span class="note">총 ${TASKS.length}건</span>
+      <div style="margin-left:auto" class="row-f" style="gap:6px">
+        <button class="cnav" data-cnav="1" ${W.st<=0?'disabled':''} title="이전 기간">‹</button>
+        <button class="cnav" data-cnav="-1" ${S.cOff<=0?'disabled':''} title="다음 기간">›</button>
+      </div>
+    </div>
+    <div class="cwrap">
+      <div class="crow">
+        <div class="cyax">${barT.arr.map(t=>`<span>${t}</span>`).join('')}</div>
+        <div class="cplot">
+          <div class="cgrid">${[0,1,2,3,4].map(()=>'<span></span>').join('')}</div>
+          <div class="cbars">
+            ${W.list.map(v=>`<button class="cb ${S.ver===v.id?'act':''}" data-ver="${v.id}">
+              <span class="ctip">
+                <span class="ctip-d">${esc(v.label)}</span>
+                <span class="ctip-r">생성<span class="ctip-v">${v.n}건</span></span>
+              </span>
+              <span class="cbar" style="height:${(v.n/barT.top*100).toFixed(2)}%"></span>
+            </button>`).join('')}
+          </div>
+        </div>
+      </div>
+      <div class="crow">
+        <div class="cyax sp"></div>
+        <div class="cxax">
+          ${W.list.map(v=>`<span class="cx ${S.ver===v.id?'act':''}" data-ver="${v.id}">${esc(v.label.slice(5))}</span>`).join('')}
+        </div>
+      </div>
+    </div>
+    <div class="clg">
+      <span class="note">막대나 날짜를 클릭하면 아래 목록이 그 날짜로 좁혀집니다</span>
+    </div>
+  </div>`;
+}
+
+/* ---------- 차트 2 — OC별 구성 ---------- */
+function chartPie(){
+  const MS=months();
+  const i=Math.min(Math.max(0,S.moIdx),MS.length-1);
+  const ym=MS[i];
+  const D=pieData(ym);
+  let acc=0;
+  const slices=D.rows.map(r=>{
+    const pct=r.c/D.tot*100;
+    const el=`<circle class="psl" r="15.915" cx="21" cy="21" fill="transparent"
+      stroke="${OC_C[r.oc]}" stroke-width="6"
+      stroke-dasharray="${pct.toFixed(3)} ${(100-pct).toFixed(3)}"
+      stroke-dashoffset="${(-acc).toFixed(3)}"
+      data-slice="${r.oc}" data-nm="${esc(OC[r.oc].name)}" data-cnt="${r.c}" data-pct="${r.p}"
+      data-col="${OC_C[r.oc]}" data-tot="${D.tot}" data-ym="${ym.replace('-','.')}"></circle>`;
+    acc+=pct; return el;
+  }).join('');
+
+  return `<div class="card">
+    <div class="card-h">
+      <h2>OC별 구성</h2>
+      <div style="margin-left:auto" class="row-f" style="gap:6px">
+        <button class="cnav" data-monav="1" ${i>=MS.length-1?'disabled':''} title="이전 달">‹</button>
+        <button class="cnav" data-monav="-1" ${i<=0?'disabled':''} title="다음 달">›</button>
+      </div>
+    </div>
+    ${D.tot===0?`<div class="empty"><span style="font-size:14px;font-weight:700">해당 월 생성분이 없습니다</span></div>`:`
+    <div class="pie-wrap">
+      <div class="pie-top">
+        <div class="pie">
+          <svg viewBox="0 0 42 42">${slices}</svg>
+          <div class="pie-c"><span class="pie-n">${D.tot}</span><span class="pie-u">${ym.replace('-','.')}</span></div>
+        </div>
+        <div class="pie-lg">
+          ${D.rows.map(r=>`<button class="pl ${S.oc===r.oc?'sel':''}" data-slice="${r.oc}"
+            title="${esc(OC[r.oc].name)} ${r.c}건 (${r.p}%)">
+            <span class="pl-d" style="background:${OC_C[r.oc]}"></span>
+            <span class="pl-n">${esc(OC[r.oc].name)}</span>
+            <span class="pl-tr"><span class="pl-fl" style="width:${(r.c/D.rows[0].c*100).toFixed(1)}%;background:${OC_C[r.oc]}"></span></span>
+            <span class="pl-v">${r.c}</span>
+            <span class="pl-p">${r.p}%</span>
+          </button>`).join('')}
+        </div>
+      </div>
+    </div>`}
+  </div>`;
+}
+
+/* ---------- 시황 티커 ---------- */
+const QUOTES = [
+  {n:'SK이노베이션',      cd:'096770', p:'118,400', c:+2.07, sk:true},
+  {n:'SK아이이테크놀로지', cd:'361610', p:'42,150',  c:-1.28, sk:true},
+  {n:'SK',               cd:'034730', p:'156,900', c:+0.45, sk:true},
+  {n:'SKC',              cd:'011790', p:'134,700', c:+1.36, sk:true},
+  {n:'롯데케미칼',        cd:'011170', p:'71,300',  c:-1.79},
+  {n:'에쓰오일',          cd:'010950', p:'62,800',  c:+1.45},
+  {n:'LG화학',            cd:'051910', p:'298,500', c:-0.83},
+  {n:'금호석유화학',      cd:'011780', p:'134,200', c:+0.60},
+  {n:'한화솔루션',        cd:'009830', p:'24,750',  c:-2.36},
+  {n:'대한유화',          cd:'006650', p:'118,000', c:-0.42},
+  {n:'LG에너지솔루션',     cd:'373220', p:'371,000', c:+1.92},
+  {n:'삼성SDI',           cd:'006400', p:'329,500', c:-0.61},
+];
+const QUOTE_URL = cd => `https://finance.naver.com/item/main.naver?code=${cd}`;
+function tickerItems(){
+  return QUOTES.map(q=>{
+    const up=q.c>0;
+    return `<a class="tk-i ${q.sk?'sk':''}" href="${QUOTE_URL(q.cd)}" target="_blank" rel="noopener"
+      title="${esc(q.n)} 시세·트렌드 보기">
+      <span class="tk-nm">${esc(q.n)}</span>
+      <span class="tk-p">${esc(q.p)}</span>
+      <span class="tk-c ${up?'up':'dn'}">${up?'▲':'▼'} ${Math.abs(q.c).toFixed(2)}%</span>
+      <span class="tk-go">↗</span></a>`;
+  }).join('');
+}
+function tickerBar(){
+  const items=tickerItems();
+  return `<div class="ticker">
+    <div class="tk-view"><div class="tk-track">${items}${items}</div></div>
+    <button class="tk-btn" data-goto="trend">트렌드룸</button>
+  </div>`;
+}
+
+/* ---------- 1. 과제 제안 ---------- */
+function viewList(){
+  const rows=filtered();
+  const {pages,p,slice}=paged(rows);
+  const selN=rows.filter(t=>S.sel[t.id]).length;
+  const allOn=rows.length>0 && selN===rows.length;
+  const partOn=selN>0 && !allOn;
+
+  let lastVer=null;
+  const trs=slice.map(t=>{
+    let head='';
+    if(S.ver==='전체' && t.ver!==lastVer){
+      lastVer=t.ver; const v=verOf(t.ver);
+      head=`<tr class="dgrp"><td colspan="7">${esc(v.label)} · ${verCount(v.id)}건 · ${esc(v.trigger)}</td></tr>`;
+    }
+    const fb=fbOf(t.id), ck=!!S.sel[t.id], mo=String(S.memoOpen)===String(t.id);
+    const done=fb.s||fb.t;
+    const tip = done ? [fb.s?fb.s+'점':null, fb.t?'피드백 있음':null].filter(Boolean).join(' · ') : '평가·피드백 남기기';
+    return head+`<tr class="trow ${ck?'on':''}">
+      <td><button class="ck ${ck?'on':''}" data-ck="${t.id}">✓</button></td>
+      <td style="cursor:pointer" data-open="${t.id}">
+        <div class="tt">${esc(t.name)}${t.grade?` <span class="tag ${t.grade==='A'?'ok':(t.grade==='B'?'nt':'wn')}">${esc(t.grade)} ${esc(t.evalScore)}</span>`:''}${t.verdict==='차단'?` <span class="tag bd">검증 미통과</span>`:''}</div><div class="ts">${t.origin==='AI생성'?'<span class="tag lv">AI</span> ':''}${esc(t.sum)}</div></td>
+      <td><span class="tag oc">${esc(OC[t.oc].name)}</span></td>
+      <td><span class="tag lv">${esc(t.lever)}</span></td>
+      <td><span class="note">${t.ev.map(e=>esc(EV[e].src)).join(', ')}</span></td>
+      <td><button class="memo ${mo?'open':(done?(fb.s?'rated':'has'):'')}" data-memo="${t.id}"
+        title="${esc(tip)}">${done?ICON_MEMO_F:ICON_MEMO}</button></td>
+      <td class="tr"><button class="btn sm" data-open="${t.id}">상세</button></td></tr>
+      ${mo?`<tr class="mrow"><td colspan="7">
+        <div class="mbox">
+          <span class="mk">과제 점수</span>
+          ${bigStars(t.id)}
+          <span class="msc">${fb.s?fb.s+' / 5':'—'}</span>
+          <span class="mk">피드백</span>
+          <input class="inp mi" data-fbt="${t.id}" value="${esc(fb.t)}"
+            placeholder="경제성 · 실현 가능성 · 중복 여부 등 의견">
+          <button class="msave" data-msave="${t.id}">저장</button>
+          <button class="mclose" data-memo="${t.id}" title="닫기" aria-label="닫기">✕</button>
+        </div>
+        <div class="mnote">별점과 피드백은 과제 생성·필터링 에이전트의 학습 데이터로 사용됩니다.</div>
+      </td></tr>`:''}`;
+  }).join('');
+
+  return `
+  <div class="page-h">
+    <div class="stack" style="gap:5px">
+      <h1>과제 제안</h1>
+      <p class="lede">외부 벤치마킹 사례에서 도출한 L1 과제 후보입니다. 재생성 버튼을 누를 때만 새로 생성되고, 기존 생성분은 날짜별로 그대로 유지됩니다.</p>
+    </div>
+  </div>
+  <div class="grid-c">${chartDaily()}${chartPie()}</div>
+  ${tickerBar()}
+  <div class="card">
+    <div class="ctlbar">
+      <span class="lbl">생성일</span>
+      <span class="calwrap">
+        <button class="calbtn ${S.ver!=='전체'?'act':''}" id="calBtn">
+          <span>${esc(verLabel())}</span>${CHEV}
+        </button>${S.calOpen?renderCal():''}
+      </span>
+      <span class="ctl-sep"></span>
+      <span class="lbl">OC</span>
+      <select class="sel" id="ocSel">
+        <option value="전체">전체 OC</option>
+        ${OCS.map(o=>`<option value="${o.code}" ${o.code===S.oc?'selected':''}>${o.name}</option>`).join('')}
+      </select>
+      <span class="ctl-sep"></span>
+      <input class="inp" id="q" placeholder="과제명 · 벤치마크 회사 검색" value="${esc(S.q)}" style="width:200px">
+      <div style="margin-left:auto" class="row-f">
+        <button class="btn" id="regen" ${S.regenerating?'disabled':''}>${S.regenerating?'생성 중…':'↻ 재생성'}</button>
+        <button class="btn" id="csv">CSV 내려받기</button>
+      </div>
+    </div>
+    ${rows.length===0?`
+      <div class="empty"><span style="font-size:14px;font-weight:700">조건에 맞는 후보가 없습니다</span>
+      <span class="note">필터를 넓혀 보세요.</span></div>`:`
+    <div class="tw"><table class="ttbl">
+      <colgroup>
+        <col style="width:40px"><col><col style="width:120px"><col style="width:86px">
+        <col style="width:150px"><col style="width:42px"><col style="width:66px">
+      </colgroup>
+      <thead><tr>
+        <th><button class="ck ${allOn?'on':(partOn?'part':'')}" data-ckall="1">${allOn?'✓':(partOn?'−':'')}</button></th>
+        <th>과제 내용</th><th>OC</th><th>레버</th><th>벤치마크</th><th></th><th></th>
+      </tr></thead><tbody>${trs}</tbody>
+    </table></div>
+    <div class="pager">
+      <select class="sel" id="perSel">
+        ${[10,50,100].map(n=>`<option value="${n}" ${S.per===n?'selected':''}>${n}건씩 보기</option>`).join('')}
+      </select>
+      <span class="tot">총 ${rows.length}건${selN?` · 선택 ${selN}건`:''}</span>
+      <div style="margin-left:auto" class="row-f" style="gap:5px">
+        <button class="pg" data-pg="${p-1}" ${p<=1?'disabled':''}>‹</button>
+        ${Array.from({length:pages},(_,i)=>i+1).map(i=>`<button class="pg ${i===p?'on':''}" data-pg="${i}">${i}</button>`).join('')}
+        <button class="pg" data-pg="${p+1}" ${p>=pages?'disabled':''}>›</button>
+      </div>
+    </div>`}
+  </div>`;
+}
+
+/* ---------- 2. 과제 상세 ---------- */
+function viewDetail(){
+  const t = curTask(), v = fOf(t), L = LOGIC[t.lever], ver = verOf(t.ver);
+  const on = sysOn(t), uf = userFx(t), drafting = S.fxDraft === t.id;
+  return `
+  <div class="row-f" style="font-size:12px;color:var(--t4)">
+    <a href="#" data-nav="list">과제 제안</a><span>/</span>
+    <span class="mono" style="color:var(--t2);font-weight:600">OI-2026-${t.id}</span>
+    <span>·</span><span>${esc(ver.label)} 생성</span>
+  </div>
+
+  <div class="page-h">
+    <div class="stack" style="gap:9px;max-width:800px">
+      <div class="row-f">
+        <span class="tag oc">${esc(OC[t.oc].name)}</span>
+        <span class="tag lv">${esc(t.lever)}</span>
+        ${t.verdict?`<span class="tag ${t.grade==='A'?'ok':(t.grade==='B'?'nt':'wn')}">${esc(t.verdict)} · ${esc(t.grade)} ${esc(t.evalScore)}점</span>`:''}
+      </div>
+      <h1 style="font-size:23px;line-height:1.35">${esc(t.name)}</h1>
+      <p class="lede">${esc(t.plan)}</p>
+      ${t.bg?`<p class="note" style="line-height:1.7">${esc(t.bg)}</p>`:''}
+      ${t.verdict?`<div class="stack" style="gap:6px">
+        <div class="note">${esc(S.evalCriteria)}</div>
+        ${(t.flags||[]).map(f=>`<div class="hint"><span class="dot" style="background:var(--${f.sev==='차단'?'bad':'warn'})"></span><span><strong>${esc(f.sev)}</strong> ${esc(f.msg)}</span></div>`).join('')}
+        <span class="note">채점 방식 ${esc(t.scoredBy)}</span>
+      </div>`:''}
+    </div>
+  </div>
+
+  <div class="grid2">
+    <div class="card">
+      <div class="card-h">
+        <h2>기대효과 Logic</h2>
+        <div style="margin-left:auto" class="tog-row">
+          <span style="font-size:11.5px;font-weight:600;color:${on?'var(--ink)':'var(--t4)'}">시스템 제안</span>
+          <button class="tog ${on?'on':''}" id="sysTog" role="switch" aria-checked="${on}"><span class="tog-k"></span></button>
+        </div>
+      </div>
+      <div class="card-b stack" style="gap:14px">
+        <div>
+          <div class="fx-head">
+            <span class="fld-l">산출식${on?'':` <span class="fx-mark">· ${esc(uf?.at||'')} 사용자 수정</span>`}</span>
+            <div style="margin-left:auto" class="row-f" style="gap:4px">
+              <button class="icb" id="fxCopy" title="산출식 복사">${S.fxCopied?'✓':'⧉'}</button>
+              <button class="icb ${drafting?'act':''}" id="fxEditBtn" title="산출식 수정">✎</button>
+            </div>
+          </div>
+          ${drafting
+            ? `<div class="stack" style="gap:8px">
+                 <textarea id="fxInput" class="fx-input" spellcheck="false">${esc(fxText(t))}</textarea>
+                 <div class="row-f" style="gap:7px">
+                   <button class="btn sm pri" id="fxSave">수정 반영</button>
+                   <button class="btn sm" id="fxCancel">취소</button>
+                   ${uf?`<button class="btn sm" id="fxRestore">시스템 제안 수식 불러오기</button>`:''}
+                 </div>
+                 <span class="note">수정을 반영하면 시스템 제안이 꺼지고 아래 기준값 입력이 비활성화됩니다.</span>
+               </div>`
+            : `<div class="fx-str ${on?'':'mod'}">${esc(fxText(t))}</div>`}
+        </div>
+
+        <div class="${on?'':'dim-block'}">
+          <div class="row-f" style="justify-content:space-between;margin-bottom:8px">
+            <span class="fld-l">기준값 입력</span>
+            <span class="tag ${on?'wn':'nt'}">현업 작성 항목</span>
+          </div>
+          <div class="fgrid">
+            ${L.fields.map(fd => `
+              <div class="fld">
+                <label class="fld-l">${esc(fd.l)}${fd.u?` <span style="color:var(--t5);font-weight:500">(${esc(fd.u)})</span>`:''}</label>
+                <input class="inp num" data-f="${fd.k}" value="${esc(v[fd.k]||'')}" placeholder="${esc(fd.ph)}" ${on?'':'disabled'}>
+                ${fd.hint?`<span class="fld-h">${esc(fd.hint)}</span>`:''}
+              </div>`).join('')}
+          </div>
+        </div>
+
+        <div class="result ${on?'':'result-mod'}"><div class="stack" style="gap:3px">${resultInner(t)}</div></div>
+
+        <div class="hr"></div>
+        <div class="row-f" style="justify-content:space-between">
+          <span class="fld-l">관리지표</span>
+          <span style="font-size:12.5px;font-weight:600">${esc(t.kpi||L.metric)}</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-h">
+        <h2>벤치마크</h2>
+        <span class="note" style="margin-left:auto">${t.ev.length}건</span>
+      </div>
+      ${t.ev.map((k,i) => {
+        const e = EV[k];
+        return `<div class="ev">
+          <span class="ev-n">${String(i+1).padStart(2,'0')}</span>
+          <div style="min-width:0">
+            <div class="ev-t">${esc(e.src)} · ${esc(e.title)}</div>
+            <div class="ev-s">${e.sum ? esc(e.sum)
+              : '<span style="color:var(--t4)">원문 미확보 — 제목만 수집된 자료입니다.</span>'}</div>
+            <div class="ev-m"><span>${esc(e.kind)}</span><span>·</span><span>${esc(e.date)}</span>
+              <a class="ev-l" href="${esc(e.url)}" target="_blank" rel="noopener">원문 보기 ↗</a></div>
+            ${(e.metrics||[]).length?`<div class="ev-m">${e.metrics.map(m=>`<span><b style="color:var(--t2)">${esc(m.label)}</b> ${esc(m.value)}${m.period?` · ${esc(m.period)}`:''}</span>`).join('')}</div>`:''}
+          </div>
+        </div>`;
+      }).join('')}
+    </div>
+  </div>`;
+}
+function resultInner(t){
+  if (!sysOn(t)){
+    return `<span style="font-size:11px;font-weight:600;color:var(--edit)">순 기대효과</span>
+      <span class="result-v pending" style="color:var(--edit)">사용자 수식 기준</span>
+      <span class="note">시스템 제안을 켜면 기준값 입력과 자동 산정이 다시 활성화됩니다</span>`;
+  }
+  const net = netOf(t), f = fOf(t);
+  return `<span style="font-size:11px;font-weight:600;color:var(--brand)">순 기대효과 (투자비 차감)</span>` +
+    (net===null
+      ? `<span class="result-v pending">산정 대기</span><span class="note">기준값을 입력하면 자동 계산됩니다</span>`
+      : `<span class="result-v num">${net>=0?'+':''}${f1(net)}억<span style="font-size:12px;font-weight:600;color:var(--t3);letter-spacing:0"> / 년</span></span>
+         <span class="note mono">${esc(LOGIC[t.lever].show(f))}</span>`);
+}
+
+/* ---------- 3. 커스텀 생성 ---------- */
+const CG_STEPS = ['OC','근거 사례','레버','적용 방향','확인'];
+function viewCustom(){
+  const c = S.cg, evList = Object.keys(EV);
+  let panel = '';
+  if (c.done){
+    panel = `<div class="stack" style="gap:14px">
+      <div class="hint"><span class="dot"></span>
+        <span>커스텀 과제가 <strong>${esc(VERSIONS[0].label)} 버전</strong>에 추가됐습니다. 기대효과는 과제 상세에서 기준값을 입력해 완성합니다.</span></div>
+      <div class="row-f"><button class="btn pri" data-nav="list">과제 제안 목록으로</button>
+        <button class="btn" id="cgReset">새로 만들기</button></div></div>`;
+  } else if (c.step===0){
+    panel = `<div class="stack" style="gap:11px"><div class="fld-l">어느 OC 과제로 만들까요?</div>
+      <div class="opts">${OCS.map(o=>`<button class="opt" data-cg-oc="${o.code}">${esc(o.name)} <span class="note">${esc(o.biz)}</span></button>`).join('')}</div></div>`;
+  } else if (c.step===1){
+    panel = `<div class="stack" style="gap:11px"><div class="fld-l">근거로 삼을 벤치마크 사례를 고르세요</div>
+      <div class="stack" style="gap:7px;max-height:430px;overflow:auto">${evList.map(k=>`
+        <button class="opt" data-cg-ev="${k}" style="width:100%">
+          <div style="font-weight:600">${esc(EV[k].src)} · ${esc(EV[k].title)}</div>
+          <div class="note" style="margin-top:3px">${esc(EV[k].kind)} · ${esc(EV[k].date)}</div>
+        </button>`).join('')}</div></div>`;
+  } else if (c.step===2){
+    panel = `<div class="stack" style="gap:11px"><div class="fld-l">개선 레버를 고르세요</div>
+      <div class="opts">${LEVERS.map(l=>`<button class="opt" data-cg-lv="${esc(l)}">${esc(l)}</button>`).join('')}</div>
+      <span class="note">레버를 고르면 해당 기대효과 산출식이 자동 연결됩니다.</span></div>`;
+  } else if (c.step===3){
+    const opts=['1개 라인·사업장 파일럿 → 효과 검증 → 확산','전담 TF 구성 + 데이터·계측 인프라 선행 구축','외부 솔루션 PoC 후 내재화 여부 판단'];
+    panel = `<div class="stack" style="gap:11px"><div class="fld-l">적용 방향을 고르세요</div>
+      <div class="stack" style="gap:7px">${opts.map(o=>`<button class="opt" data-cg-plan="${esc(o)}" style="width:100%">${esc(o)}</button>`).join('')}</div>
+      <div class="fld" style="margin-top:4px"><label class="fld-l">직접 입력</label>
+        <div class="row-f" style="gap:7px"><input class="inp" id="cgFree" placeholder="적용 방향을 직접 작성">
+        <button class="btn sm" id="cgFreeGo">확인</button></div></div></div>`;
+  } else {
+    panel = `<div class="stack" style="gap:14px"><div class="fld-l">아래 내용으로 과제를 만듭니다</div>
+      <div class="hint"><span class="dot"></span>
+        <span>기대효과 금액은 시스템이 산정하지 않습니다. 산출식과 필요 기준값 항목만 생성되고, 값은 상세 화면에서 현업이 입력합니다.</span></div>
+      <div class="hint"><span class="dot"></span>
+        <span>고른 OC·근거·레버·적용 방향을 조건으로 AI가 배경·리스크·기대효과·KPI까지 작성합니다. <strong>1분 안팎</strong> 걸립니다.</span></div>
+      <button class="btn pri" id="cgGo" style="align-self:flex-start" ${S.cgBusy?'disabled':''}>${S.cgBusy?'생성 중…':'과제 생성'}</button></div>`;
+  }
+
+  return `
+  <div class="page-h">
+    <div class="stack" style="gap:5px">
+      <h1>커스텀 생성</h1>
+      <p class="lede">자동 생성 목록에 없는 과제를 직접 만들 때 사용합니다. 자동 생성이 기본이고 이 화면은 보조 기능입니다.</p>
+    </div>
+    <button class="btn" data-nav="list">자동 생성 목록 보기</button>
+  </div>
+  <div class="card">
+    <div class="card-h"><div class="step-bar">
+      ${CG_STEPS.map((s,i)=>`${i>0?'<span class="step-ar">›</span>':''}
+        <span class="step ${c.step===i?'on':(c.step>i||c.done?'dn':'')}">
+          <span class="step-n">${c.step>i||c.done?'✓':i+1}</span>${esc(s)}</span>`).join('')}
+    </div></div>
+    <div class="grid-a" style="padding:17px">
+      <div>${panel}</div>
+      <div class="card" style="box-shadow:none">
+        <div class="card-h"><h2 style="font-size:13px">미리보기</h2></div>
+        <div class="card-b">
+          ${[['대상 OC', c.oc?OC[c.oc].name:null],
+             ['근거 사례',  c.ev?`${EV[c.ev].src} · ${EV[c.ev].title}`:null],
+             ['개선 레버',  c.lever],
+             ['적용 방향',  c.plan],
+             ['기대효과 산출식', c.lever?LOGIC[c.lever].text:null],
+             ['관리지표',   c.lever?LOGIC[c.lever].metric:null]].map(([k,v])=>`
+            <div class="pv-r"><div class="pv-k">${esc(k)}</div>
+              ${v?`<div class="pv-v">${esc(v)}</div>`:`<div class="pv-e">단계를 진행하면 채워집니다</div>`}</div>`).join('')}
+        </div>
+      </div>
+    </div>
+  </div>`;
+}
+
+/* ---------- 4. 프롬프트 내보내기 ---------- */
+function buildPrompt(){
+  const ocName = S.ex.oc==='전체' ? '전체 OC' : OC[S.ex.oc].name;
+  const items = TASKS.filter(t => S.ex.oc==='전체' || t.oc===S.ex.oc);
+  const evs = [...new Set(items.flatMap(t=>t.ev))].map(k=>EV[k]);
+  return [
+`# 외부 벤치마킹 브리핑 — ${ocName} (최근 ${S.ex.days}일)`,
+`기준: ${VERSIONS[0].label} 수집분 · 출처: 각사 IR·실적발표·전문지·공시 (O/I Spark)`,``,
+`## 수집된 벤치마크 사례`,
+...evs.map(e=>`- [${e.date} · ${e.src} · ${e.kind}] ${e.title}\n  ${e.sum}\n  출처: ${e.url}`),
+``,`---`,`## 지시문`,
+`당신은 SK이노베이션 O/I추진단의 과제 발굴 애널리스트입니다.`,
+`위 벤치마크 사례와 아래 추가 자료를 근거로, ${ocName}에 적용 가능한`,
+`O/I 과제 후보를 제안하세요.`,``,`규칙:`,
+`- 확장 투자형이 아니라 비용·효율·수익성 개선 과제를 우선합니다.`,
+`- 각 과제는 과제명 / 요약 / 레버 / 적용 방안 / 관리지표 / 기대효과 산출식 / 근거를 포함합니다.`,
+`- 기대효과 금액을 임의로 산정하지 마십시오. 산출식과 필요한 기준값 항목만 제시하고 값은 비워 둡니다.`,``,
+`[▼ 추가 자료 — 자동 수집되지 않는 내용을 여기에 붙여넣으세요]`,
+S.ex.research || '(미입력)',
+  ].join('\n');
+}
+function viewExport(){
+  const text = S.ex.text!==null ? S.ex.text : buildPrompt();
+  return `
+  <div class="page-h">
+    <div class="stack" style="gap:5px">
+      <h1>프롬프트 내보내기</h1>
+      <p class="lede">증권사 리서치처럼 API가 없어 자동 수집되지 않는 자료가 있습니다. 수집된 벤치마크 사례와 추가 자료를 함께 사내 LLM에 투입할 수 있도록 프롬프트를 조립합니다.</p>
+    </div>
+    <div class="row-f">
+      <button class="btn" id="exEdit">${S.ex.editing?'편집 완료':'프롬프트 수정'}</button>
+      <button class="btn" id="exReset">초기화</button>
+      <button class="btn pri" id="exCopy">${S.ex.copied?'복사 완료':'복사'}</button>
+    </div>
+  </div>
+  <div class="grid-a">
+    <div class="card">
+      <div class="card-h"><h2>조립된 프롬프트</h2>
+        <span class="note" style="margin-left:auto">${text.length.toLocaleString()}자 · 약 ${Math.round(text.length/1.6).toLocaleString()} 토큰</span></div>
+      <div class="card-b">
+        ${S.ex.editing
+          ? `<textarea id="exText" style="height:420px">${esc(text)}</textarea>`
+          : `<div class="mono" style="font-size:11.5px;line-height:1.85;white-space:pre-wrap;max-height:420px;overflow:auto;color:var(--t1)">${esc(text)}</div>`}
+      </div>
+    </div>
+    <div class="col">
+      <div class="card"><div class="card-h"><h2>범위</h2></div>
+        <div class="card-b stack" style="gap:12px">
+          <div class="fld"><label class="fld-l">대상 OC</label>
+            <select class="sel" id="exOc">
+              <option value="전체" ${S.ex.oc==='전체'?'selected':''}>전체 OC</option>
+              ${OCS.map(o=>`<option value="${o.code}" ${S.ex.oc===o.code?'selected':''}>${o.name}</option>`).join('')}
+            </select></div>
+          <div class="fld"><label class="fld-l">기간</label>
+            <div class="row-f">${[7,14,30].map(d=>`<button class="chip ${S.ex.days===d?'on':''}" data-ex-d="${d}">최근 ${d}일</button>`).join('')}</div></div>
+        </div></div>
+      <div class="card"><div class="card-h"><h2>추가 자료 붙여넣기</h2></div>
+        <div class="card-b stack" style="gap:9px">
+          <textarea id="exResearch" placeholder="증권사 리서치·사내 자료 등 자동 수집되지 않는 내용을 붙여넣으면 프롬프트에 함께 포함됩니다" style="height:150px;font-family:inherit;font-size:12.5px;line-height:1.6">${esc(S.ex.research)}</textarea>
+          <span class="note">붙여넣은 내용은 브라우저 안에서만 처리되며 외부로 전송되지 않습니다.</span>
+        </div></div>
+      <div class="card"><div class="card-h"><h2>파일로 내려받기</h2></div>
+        <div class="card-b row-f" style="gap:8px">
+          <button class="btn" data-dl="md">.md</button><button class="btn" data-dl="txt">.txt</button>
+        </div></div>
+    </div>
+  </div>`;
+}
+
+/* ---------- 5. AI Reporting ---------- */
+/* 지난 발송 이후 생성된 과제 = 발송 대상 기본값 */
+function sendTargets(){
+  const last = S.send.lastAt.slice(0,10);            // 2026.07.24
+  const vids = VERSIONS.filter(v => v.label > last).map(v => v.id);
+  return TASKS.filter(t => vids.includes(t.ver));
+}
+const sendIncluded = () => sendTargets().filter(t => !S.sendOff[t.id]);
+
+function viewReport(){
+  const targets = sendTargets();
+  const inc = sendIncluded();
+  const FREQ = ['매일','주 3회','주 1회'];
+  return `
+  <div class="page-h">
+    <div class="stack" style="gap:5px">
+      <h1>AI Reporting</h1>
+      <p class="lede">지난 발송 이후 생성된 과제를 Outlook 메일과 Teams로 발송합니다. 기본값은 전체 포함이며, 체크를 해제해 제외할 수 있습니다.</p>
+    </div>
+    <div class="row-f"><button class="btn" id="rpTest">테스트 발송</button>
+      <button class="btn pri" id="rpSave">설정 저장</button></div>
+  </div>
+  <div class="grid-a">
+    <div class="col">
+      <div class="card">
+        <div class="card-h">
+          <h2>발송 대상</h2>
+          <span class="note">지난 발송 ${esc(S.send.lastAt)} 이후 ${targets.length}건 · 선택 ${inc.length}건</span>
+          <div style="margin-left:auto" class="row-f" style="gap:6px">
+            <button class="btn sm" id="selAll">전체 선택</button>
+            <button class="btn sm" id="selNone">전체 해제</button>
+          </div>
+        </div>
+        ${targets.length===0 ? `
+          <div class="empty">
+            <span style="font-size:14px;font-weight:700">지난 발송 이후 새로 생성된 과제가 없습니다</span>
+            <span class="note">이 경우 과제 없이 요약만 전송됩니다.</span>
+          </div>` : `
+        <table>
+          <thead><tr>
+            <th style="width:42px"></th>
+            <th style="min-width:200px">과제명</th>
+            <th style="width:120px">OC</th>
+            <th style="width:86px">레버</th>
+            <th style="width:96px">생성일</th>
+          </tr></thead>
+          <tbody>
+          ${targets.map(t => {
+            const ck = !S.sendOff[t.id];
+            return `<tr class="r-hover" style="cursor:pointer" data-sendtog="${t.id}">
+              <td><span class="cbox ${ck?'on':''}">${ck?'✓':''}</span></td>
+              <td><div class="tt" style="${ck?'':'color:var(--t4)'}">${esc(t.name)}</div></td>
+              <td><span class="tag oc">${esc(OC[t.oc].name)}</span></td>
+              <td><span class="tag lv">${esc(t.lever)}</span></td>
+              <td class="note num">${esc(verOf(t.ver).label)}</td>
+            </tr>`;
+          }).join('')}
+          </tbody>
+        </table>`}
+      </div>
+
+      <div class="card">
+        <div class="card-h"><h2>발송 미리보기</h2>
+          <span class="note" style="margin-left:auto">${esc(S.send.freq)} ${esc(S.send.time)} · ${inc.length}건</span></div>
+        <div class="card-b">
+          <div class="card" style="box-shadow:none;background:var(--panel-sub)">
+            <div class="card-h" style="background:var(--panel);border-radius:14px 14px 0 0">
+              <span class="oi-logo" style="font-size:14px">O/I Spark</span>
+              <span class="note">신규 과제 제안 ${inc.length}건</span></div>
+            <div style="padding:14px">
+              ${inc.length===0 ? `<span class="note">선택된 과제가 없습니다. 이 경우 과제 없이 요약만 전송됩니다.</span>` :
+                inc.map((t,i)=>`<div style="display:flex;gap:10px;padding:9px 0;${i>0?'border-top:1px solid var(--line-faint)':''}">
+                  <span class="mono" style="font-size:11px;font-weight:700;color:var(--brand);flex:none;margin-top:2px">${String(i+1).padStart(2,'0')}</span>
+                  <div style="min-width:0"><div class="tt">${esc(t.name)}</div>
+                    <div class="ts">${esc(OC[t.oc].name)} · ${esc(t.lever)} · 근거 ${t.ev.map(e=>esc(EV[e].src)).join(', ')}</div></div>
+                </div>`).join('')}
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="card"><div class="card-h"><h2>최근 발송</h2></div>
+        <table><thead><tr><th style="width:140px">일시</th><th style="width:130px">채널</th><th>내용</th><th style="width:84px">결과</th></tr></thead>
+        <tbody>
+          <tr><td class="mono num">07.24 08:00</td><td>Outlook · Teams</td><td>신규 과제 3건</td><td><span class="tag ok">발송</span></td></tr>
+          <tr><td class="mono num">07.22 08:00</td><td>Outlook · Teams</td><td>신규 과제 6건</td><td><span class="tag ok">발송</span></td></tr>
+          <tr><td class="mono num">07.20 08:00</td><td>Outlook · Teams</td><td>신규 후보 없음 — 요약만 전송</td><td><span class="tag nt">요약</span></td></tr>
+        </tbody></table>
+      </div>
+    </div>
+
+    <div class="col">
+      <div class="card"><div class="card-h"><h2>발송 주기 · 시각</h2></div>
+        <div class="card-b stack" style="gap:13px">
+          <div class="fld"><label class="fld-l">발송 주기</label>
+            <div class="row-f">${FREQ.map(f=>`<button class="chip ${S.send.freq===f?'on':''}" data-freq="${esc(f)}">${esc(f)}</button>`).join('')}</div>
+          </div>
+          <div class="fld"><label class="fld-l">발송 시각</label>
+            <input class="inp" type="time" id="sendTime" value="${esc(S.send.time)}" style="width:120px">
+          </div>
+          <span class="note">${esc(S.send.freq)} ${esc(S.send.time)}에 발송됩니다. 선택된 과제가 없으면 요약만 전송됩니다.</span>
+        </div></div>
+
+      <div class="card"><div class="card-h"><h2>발송 채널</h2></div>
+        <div class="card-b stack" style="gap:11px">
+          <div class="tog-row"><button class="tog ${S.channels.outlook?'on':''}" data-ch="outlook"><span class="tog-k"></span></button><span>Outlook 메일</span></div>
+          <div class="tog-row"><button class="tog ${S.channels.teams?'on':''}" data-ch="teams"><span class="tog-k"></span></button><span>Microsoft Teams</span></div>
+        </div></div>
+
+      <div class="card"><div class="card-h"><h2>수신처</h2></div>
+        <div class="card-b stack" style="gap:10px">
+          <div class="row-f" style="gap:6px">
+            ${S.recipients.map((r,i)=>`<span class="tag nt" style="padding:5px 9px;font-weight:500">${esc(r)}
+              <button style="border:0;background:none;color:var(--t5);cursor:pointer;padding:0 0 0 4px" data-rm-rc="${i}">×</button></span>`).join('')}
+          </div>
+          <div class="row-f" style="gap:7px">
+            <input class="inp" id="rcInput" placeholder="이름 (mail@sk.com)">
+            <button class="btn sm" id="rcAdd">추가</button></div>
+        </div></div>
+    </div>
+  </div>`;
+}
+
+/* ═══════════════ 트렌드룸 (개선) ═══════════════
+   기간·분야 단위 AI 동향 요약 + 상위 테마 + 자료 목록.
+   요약은 기간/분야 선택에만 반응하고, 아래 목록 필터와는 분리됩니다. */
+
+const BIZ_C = {};    // 사업분야 → 색상 (서버 biz_segment)
+
+/* 테마 축 = 과제 레버 체계. 서버 theme 테이블에서 받는다. */
+const TH2 = {};      // 테마명 → {c, bg, head, body}
+
+/* 자료 → 테마 배정 (LLM 배정 결과를 feed_item.theme 에 저장해 둔 값) */
+const EV_TH = {};        // 자료 id → 테마명
+const EV_BIZ_FB = {};    // 참조 과제가 없을 때 쓸 사업분야
+const EV_NEW = {};       // 새로 들어온 자료 표시
+
+/* 자료명(Earnings call) → 종류 필터 카테고리(실적발표) */
+const KIND_MAP = {};
+/* 종류·분야 필터 항목 — 서버가 가진 자료 종류/사업부문에서 boot() 가 채운다 */
+const TR_KINDS = ['전체'];
+const TR_BIZS  = ['전체'];
+const TR_PERIODS = [
+  {k:'7d', l:'최근 1주', d:7}, {k:'1m', l:'최근 1개월', d:30}, {k:'3m', l:'최근 3개월', d:91},
+  {k:'6m', l:'최근 6개월', d:182}, {k:'all', l:'전체', d:9999}, {k:'custom', l:'직접 설정', d:0},
+];
+/* 기간 필터의 기준일 — 서버 설정(OI_TODAY)을 따른다. boot() 가 덮어쓴다. */
+let TR_TODAY = new Date();
+
+function evRefs(k){ return TASKS.filter(t=>t.ev.includes(k)); }
+function evOCs(k){ return [...new Set(evRefs(k).map(t=>t.oc))]; }
+function evBiz(k){ const b=[...new Set(evOCs(k).map(c=>OC[c].biz))]; return b.length?b:[EV_BIZ_FB[k]]; }
+function evKind(k){ return KIND_MAP[EV[k].kind] || 'IR·보고서'; }
+
+const trPd    = s => { const [y,m,d]=s.split('.').map(Number); return new Date(y, m-1, d); };
+const trIso   = dt => dt.getFullYear()+'-'+String(dt.getMonth()+1).padStart(2,'0')+'-'+String(dt.getDate()).padStart(2,'0');
+const trDot   = dt => dt.getFullYear()+'.'+String(dt.getMonth()+1).padStart(2,'0')+'.'+String(dt.getDate()).padStart(2,'0');
+const trMD    = dt => String(dt.getMonth()+1).padStart(2,'0')+'.'+String(dt.getDate()).padStart(2,'0');
+const trShift = (dt,n) => { const x=new Date(dt); x.setDate(x.getDate()-n); return x; };
+const trMon   = dt => { const x=new Date(dt); x.setDate(x.getDate()-((x.getDay()+6)%7)); x.setHours(0,0,0,0); return x; };
+
+function trRange(){
+  if (S.trPeriod==='custom')
+    return [new Date(S.trFrom+'T00:00:00'), new Date(S.trTo+'T23:59:59')];
+  const p = TR_PERIODS.find(x=>x.k===S.trPeriod) || TR_PERIODS[1];
+  const end = new Date(TR_TODAY); end.setHours(23,59,0,0);
+  return [trShift(TR_TODAY, p.d), end];
+}
+/* 기간 + 분야까지만 적용한 집합 — AI 요약·상위 테마의 모집단 */
+function trScope(){
+  const [f,t] = trRange();
+  return Object.keys(EV).filter(k=>{
+    const d = trPd(EV[k].date);
+    if (d<f || d>t) return false;
+    if (S.trBiz!=='전체' && !evBiz(k).includes(S.trBiz)) return false;
+    return true;
+  });
+}
+
+function viewTrend(){
+  const scope = trScope();
+  const [f,t] = trRange();
+  const pLabel = (TR_PERIODS.find(p=>p.k===S.trPeriod)||TR_PERIODS[1]).l;
+  const scopeSpan = S.trPeriod==='all' ? `수집 전 기간 · ~${trDot(t)}` : `${trDot(f)} – ${trDot(t)}`;
+  const bizLabel = S.trBiz==='전체' ? '전 분야' : S.trBiz;
+
+  /* ── 테마 집계 ── */
+  const cnt={}; scope.forEach(k=>{ const th=EV_TH[k]; cnt[th]=(cnt[th]||0)+1; });
+  const ranked = Object.keys(cnt).sort((a,b)=> cnt[b]-cnt[a] || a.localeCompare(b));
+  const maxC = ranked.length ? cnt[ranked[0]] : 1;
+
+  /* ── 요약 헤드라인 ── */
+  let headline = '선택한 기간에 수집된 자료가 없습니다. 기간을 넓혀 보세요.';
+  if (ranked.length===1)
+    headline = `${bizLabel} 자료 ${scope.length}건은 모두 ${ranked[0]} 축에 모였습니다.`;
+  else if (ranked.length>1)
+    headline = `${bizLabel} 자료 ${scope.length}건이 ${ranked.length}개 테마에 걸쳐 있고, `
+      + `${ranked[0]}(${cnt[ranked[0]]}건)과 ${ranked[1]}(${cnt[ranked[1]]}건)에 언급이 집중됐습니다. `
+      + `공통 논조는 비용 항목을 개별로 깎기보다 운영 순서·계약 구조를 다시 짜는 쪽입니다.`;
+
+  const bullets = ranked.slice(0,3).map(th=>{
+    const T=TH2[th];
+    const srcs = scope.filter(k=>EV_TH[k]===th).slice(0,3).map(k=>EV[k].src).join(' · ');
+    return `<div class="ai-i">
+      <span style="background:${T.c}"></span>
+      <div class="ai-i-b">
+        <div class="row-f" style="gap:8px">
+          <button class="ai-tag" style="background:${T.c}" data-tr="theme:${esc(th)}">${esc(th)}</button>
+          <span style="font-size:11px;font-weight:600;color:var(--t3)" class="num">자료 ${cnt[th]}건</span>
+          <span style="font-size:11px;color:var(--t5)">${esc(srcs)}</span>
+        </div>
+        <div class="ai-h">${esc(T.head)}</div>
+        <div class="ai-p">${esc(T.body)}</div>
+      </div></div>`;
+  }).join('');
+
+  /* ── 목록 필터 ── */
+  const q = (S.trQ||'').trim().toLowerCase();
+  let rows = scope.filter(k=>{
+    const e=EV[k];
+    if (S.trTheme && EV_TH[k]!==S.trTheme) return false;
+    if (S.trKind!=='전체' && evKind(k)!==S.trKind) return false;
+    if (S.trNew && !EV_NEW[k]) return false;
+    if (S.trUnl && evRefs(k).length>0) return false;
+    if (q && !(e.title+e.sum+e.src).toLowerCase().includes(q)) return false;
+    return true;
+  });
+  rows.sort((a,b)=> S.trSort==='cite'
+    ? (evRefs(b).length-evRefs(a).length) || (trPd(EV[b].date)-trPd(EV[a].date))
+    : trPd(EV[b].date)-trPd(EV[a].date));
+
+  /* ── 주차 그룹핑 ── */
+  const groups=[];
+  rows.forEach(k=>{
+    const d=trPd(EV[k].date), m0=trMon(d), key=trIso(m0);
+    let g=groups.find(x=>x.key===key);
+    if(!g){
+      const nth=Math.floor((m0.getDate()-1)/7)+1;
+      g={key, label:`${m0.getMonth()+1}월 ${nth}주`, sub:`${trMD(m0)} – ${trMD(trShift(m0,-6))}`, rows:[]};
+      groups.push(g);
+    }
+    g.rows.push(k);
+  });
+
+  const rowHtml = k=>{
+      const e=EV[k], th=EV_TH[k], T=TH2[th], bz=evBiz(k)[0], n=evRefs(k).length;
+      return `<div class="tr2-row">
+        <div class="tr2-d">
+          <span class="tr2-dd">${esc(trMD(trPd(e.date)))}</span>
+          ${EV_NEW[k]?'<span class="nb">NEW</span>':''}
+        </div>
+        <div class="tr2-m">
+          <div class="row-f" style="gap:7px">
+            <span class="bizdot" style="background:${BIZ_C[bz]||'var(--c2)'}"></span>
+            <span style="font-size:11.5px;font-weight:700">${esc(e.src)}</span>
+            <span style="font-size:11px;color:var(--t5)">·</span>
+            <span style="font-size:11px;color:var(--t3)">${esc(evKind(k))}</span>
+            <span class="thtag" style="background:${T.bg};color:${T.c}">${esc(th)}</span>
+          </div>
+          <div class="tr2-t">${esc(e.title)}</div>
+          <div class="tr2-s">${e.sum ? esc(e.sum)
+            : '<span style="color:var(--t4)">원문 미확보</span>'}</div>
+        </div>
+        <div class="tr2-a">
+          <button class="citep" style="background:${n?'var(--brand-soft)':'#fdf4e7'};color:${n?'var(--brand)':'#a06a08'}"
+            ${n?`data-cite="${k}"`:''}>${n?`인용 과제 ${n}건`:'미연결'}</button>
+          <a class="tr-lk" href="${esc(e.url)}" target="_blank" rel="noopener">원문 ↗</a>
+        </div>
+      </div>`;
+  };
+  /* 인용 많은 순 정렬에서는 주차 그룹을 접고 단일 목록으로 — 두 순서는 양립 불가 */
+  const groupHtml = S.trSort==='cite'
+    ? rows.map(rowHtml).join('')
+    : groups.map(g=>`
+    <div class="g-h"><span class="g-l">${esc(g.label)}</span><span class="g-s">${esc(g.sub)}</span>
+      <span class="g-s" style="margin-left:auto">${g.rows.length}건</span></div>
+    ${g.rows.map(rowHtml).join('')}`).join('');
+
+  const newN = scope.filter(k=>EV_NEW[k]).length;
+  const unlN = scope.filter(k=>evRefs(k).length===0).length;
+  const hasF = !!(S.trTheme || q || S.trKind!=='전체' || S.trNew || S.trUnl);
+
+  return `
+  <div class="page-h">
+    <div class="stack" style="gap:5px">
+      <h1>트렌드룸</h1>
+      <p class="lede">수집된 외부 자료를 기간·분야 단위로 요약해 산업 동향으로 보여줍니다. 여기 실린 자료들은 과제 생성의 근거로 사용됩니다.</p>
+    </div>
+    <div class="row-f">
+      <span class="note">수집 ${Object.keys(EV).length}건 · 오늘 08:00 갱신</span>
+      <button class="btn" data-goto="list">과제 제안으로</button>
+    </div>
+  </div>
+
+  <div class="tr2">
+    <div class="tr2-l">
+
+      <div class="card">
+        <div class="card-h">
+          <h2 style="white-space:nowrap">상위 테마</h2>
+          <span class="note">선택한 기간 내 자료를 테마 축에 배정한 결과 · 클릭하면 아래 목록이 좁혀집니다</span>
+          <button class="btn sm" style="margin-left:auto" data-tr="method:x">테마 선정 기준 ${S.trMethod?'▴':'▾'}</button>
+        </div>
+        <div class="thg">
+          ${ranked.length? ranked.map(th=>{
+            const T=TH2[th], on=S.trTheme===th;
+            return `<button class="thc" data-tr="theme:${esc(th)}"
+              style="${on?`background:${T.bg};border-color:${T.c}`:''}">
+              <span class="thc-t">
+                <span class="thc-n" style="${on?`color:${T.c}`:''}">${esc(th)}</span>
+                <span class="thc-c" style="color:${T.c}">${cnt[th]}</span>
+              </span>
+              <span class="thc-bar"><i style="background:${T.c};width:${Math.round(cnt[th]/maxC*100)}%"></i></span>
+            </button>`;
+          }).join('') : '<span class="note">해당 기간에 자료가 없습니다.</span>'}
+        </div>
+        ${S.trMethod?`<div class="method">
+          <b>테마는 이렇게 정해집니다</b>
+          <p>① <strong>고정 축</strong> — 과제 레버 체계(정비·에너지·구매·수율·물류·간접비·운전자본)를 그대로 테마 축으로 씁니다. 축이 고정이라 기간을 바꿔도 증감 비교가 가능합니다.<br>
+          ② <strong>배정</strong> — LLM이 자료 1건을 축 1개에 배정하고, 배정 근거 문장을 함께 남깁니다.<br>
+          ③ <strong>미배정 처리</strong> — 배정 확신도가 낮은 자료는 축에 넣지 않고 '미배정 풀'로 보냅니다. 이때 <strong>"이 자료의 핵심 동인" 한 문장</strong>을 함께 생성해 둡니다.<br>
+          ④ <strong>신규 테마 승격</strong> — 미배정 자료끼리 그 동인 문장의 유사도로 묶고, <strong>같은 묶음이 3건 이상</strong>이 되면 LLM이 이름·정의·기존 축과의 경계를 제안해 관리자 승인 대기열에 올립니다. 승인 시 과거 자료까지 재배정합니다.<br>
+          ⑤ <strong>접힘</strong> — 어디에도 묶이지 않은 잔여 자료와 기간 내 1건뿐인 테마는 '기타'로 묶습니다.</p>
+        </div>`:''}
+      </div>
+
+      <div class="card">
+        <div class="ctlbar" style="border-radius:14px 14px 0 0">
+          <input class="inp" id="trQ" style="width:230px" placeholder="제목·요약·출처 검색" value="${esc(S.trQ||'')}">
+          <select class="sel" id="trKind">
+            ${TR_KINDS.map(k=>`<option ${S.trKind===k?'selected':''}>${esc(k==='전체'?'자료 종류 전체':k)}</option>`).join('')}
+          </select>
+          <select class="sel" id="trSort">
+            <option value="date" ${S.trSort==='date'?'selected':''}>최신순</option>
+            <option value="cite" ${S.trSort==='cite'?'selected':''}>인용 많은 순</option>
+          </select>
+          <span class="ctl-sep"></span>
+          <button class="chip ${S.trNew?'on':''}" data-tr="new:x">신규 ${newN}</button>
+          <button class="chip ${S.trUnl?'on':''}" data-tr="unl:x">미연결 ${unlN}</button>
+          ${hasF?`<button class="chip" data-tr="clear:x" style="border:0;text-decoration:underline;text-underline-offset:3px">필터 해제</button>`:''}
+          <span class="note num" style="margin-left:auto">${rows.length}건 표시</span>
+        </div>
+        ${rows.length? groupHtml : `<div class="empty2">
+          <span style="font-size:14px;font-weight:700">조건에 맞는 자료가 없습니다</span>
+          <span class="note">기간을 넓히거나 필터를 해제해 보세요.</span></div>`}
+      </div>
+
+    </div>
+
+    <div class="tr2-r">
+      <div class="card">
+        <div class="card-h" style="padding:13px 15px">
+          <span class="ai-mk">AI</span>
+          <h2>동향 요약</h2>
+          <span class="note" style="font-size:11px">${esc(pLabel)} · ${scopeSpan} · ${esc(bizLabel)}</span>
+          <button class="btn sm" style="margin-left:auto" data-tr="regen:x">↻ 다시 생성</button>
+        </div>
+        <div class="ai-ctl">
+          <div class="ai-row">
+            <span class="ai-k">분야</span>
+            ${TR_BIZS.map(x=>`<button class="chip ${S.trBiz===x?'on':''}" data-tr="biz:${esc(x)}">${esc(x)}</button>`).join('')}
+          </div>
+          <div class="ai-row">
+            <span class="ai-k">기간</span>
+            ${TR_PERIODS.map(p=>`<button class="chip ${S.trPeriod===p.k?'on':''}" data-tr="period:${p.k}">${esc(p.l)}</button>`).join('')}
+          </div>
+          ${S.trPeriod==='custom'?`<div class="ai-row">
+            <span class="ai-k"></span>
+            <input type="date" class="dinp" id="trFrom" value="${esc(S.trFrom)}">
+            <span class="note">–</span>
+            <input type="date" class="dinp" id="trTo" value="${esc(S.trTo)}">
+          </div>`:''}
+        </div>
+        <div class="ai-b" id="aiBody">
+          <p class="ai-hl">${esc(headline)}</p>
+          <div class="stack" style="gap:10px">${bullets}</div>
+          <div class="stack" style="gap:3px">
+            <span class="ai-f">근거 ${scope.length}건 · 출처 ${new Set(scope.map(k=>EV[k].src)).size}곳 · ${esc(S.trGenAt)} 생성</span>
+            <span class="ai-f" style="color:var(--t5)">요약은 기간·분야 선택에만 반응합니다 (왼쪽 검색·필터와 무관)</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  `;
+}
+
+/* ── 트렌드룸 인터랙션 ── */
+function trBump(){
+  const b=document.getElementById('aiBody');
+  if(b){ b.style.opacity='.35'; }
+  clearTimeout(window.__trT);
+  window.__trT=setTimeout(()=>{ S.trGenAt='방금'; render(); }, 420);
+}
+document.addEventListener('click', e=>{
+  const el=e.target.closest('[data-tr]'); if(!el) return;
+  const raw=el.dataset.tr, i=raw.indexOf(':');
+  const k=raw.slice(0,i), v=raw.slice(i+1);
+  if(k==='biz'){ S.trBiz=v; render(); return trBump(); }
+  if(k==='period'){ S.trPeriod=v; render(); return trBump(); }
+  if(k==='regen'){ return trBump(); }
+  if(k==='theme'){ S.trTheme = (S.trTheme===v?null:v); return render(); }
+  if(k==='method'){ S.trMethod=!S.trMethod; return render(); }
+  if(k==='new'){ S.trNew=!S.trNew; return render(); }
+  if(k==='unl'){ S.trUnl=!S.trUnl; return render(); }
+  if(k==='clear'){ S.trTheme=null; S.trQ=''; S.trKind='전체'; S.trNew=false; S.trUnl=false; return render(); }
+});
+document.addEventListener('change', e=>{
+  const el=e.target;
+  if(el.id==='trKind'){ S.trKind = el.value==='자료 종류 전체' ? '전체' : el.value; return render(); }
+  if(el.id==='trSort'){ S.trSort=el.value; return render(); }
+  if(el.id==='trFrom'){ S.trFrom=el.value; render(); return trBump(); }
+  if(el.id==='trTo'){ S.trTo=el.value; render(); return trBump(); }
+});
+document.addEventListener('input', e=>{
+  if(e.target.id!=='trQ') return;
+  S.trQ=e.target.value; render();
+  const n=document.getElementById('trQ');
+  if(n){ n.focus(); n.setSelectionRange(n.value.length, n.value.length); }
+});
+
+/* ═══════════════ 파이 조각 툴팁 ═══════════════ */
+let PT=null;
+function ptip(){
+  if(!PT){ PT=document.createElement('div'); PT.className='ptip'; document.body.appendChild(PT); }
+  return PT;
+}
+function ptShow(s,e){
+  const t=ptip();
+  t.innerHTML = `<span class="ctip-d">${esc(s.dataset.ym)} · 전체 ${s.dataset.tot}건</span>
+    <span class="ctip-r"><span class="ctip-s" style="background:${s.dataset.col}"></span>
+      ${esc(s.dataset.nm)}<span class="ctip-v">${s.dataset.cnt}건</span></span>
+    <span class="ctip-f"><span>비중 ${s.dataset.pct}%</span></span>`;
+  t.style.display='block';
+  ptMove(e);
+}
+function ptMove(e){
+  const t=ptip(); const r=t.getBoundingClientRect();
+  let x=e.clientX-r.width/2, y=e.clientY-r.height-12;
+  x=Math.max(8,Math.min(x,window.innerWidth-r.width-8));
+  if(y<8) y=e.clientY+16;
+  t.style.left=x+'px'; t.style.top=y+'px';
+}
+function ptHide(){ if(PT) PT.style.display='none'; }
+document.addEventListener('mouseover',e=>{ const s=e.target.closest?.('.psl'); if(s) ptShow(s,e); });
+document.addEventListener('mousemove',e=>{ if(!PT||PT.style.display==='none')return;
+  const s=e.target.closest?.('.psl'); if(s) ptMove(e); else ptHide(); });
+document.addEventListener('mouseout',e=>{ if(e.target.closest?.('.psl')) ptHide(); });
+
+/* ---------- 6. 관리자 ---------- */
+function viewAdmin(){
+  const tabs=[['prompt','생성 인스트럭션'],['sources','크롤링 소스'],['uploads','내부 자료'],['perm','권한']];
+  let body='';
+  if (S.admTab==='prompt'){
+    body=`<div class="card">
+      <div class="card-h"><h2>과제 생성 인스트럭션</h2>
+        <span class="note" style="margin-left:auto">${S.instrSaved?'저장됨':'저장되지 않은 변경'}</span></div>
+      <div class="card-b stack" style="gap:11px">
+        <span class="note">생성 엔진이 사용하는 지시문입니다. 운영 중 계속 수정하며 고도화할 수 있습니다.</span>
+        <textarea id="instr" style="height:340px">${esc(S.instruction)}</textarea>
+        <div class="row-f"><button class="btn pri" id="instrSave">저장</button>
+          <button class="btn" id="instrReset">초기값 복원</button></div>
+      </div></div>`;
+  }
+  if (S.admTab==='sources'){
+    const paid = SOURCES.filter(s=>s.st==='계정 필요').length;
+    body=`<div class="hint"><span class="dot"></span>
+      <span>멘토 제공 소스 목록 기준으로 등록했습니다. <strong>${paid}건은 유료 구독이라 접근이 막혀 있습니다</strong> — 사내 계정 보유 여부 확인이 필요합니다.</span></div>
+    <div class="card">
+      <div class="card-h"><h2>크롤링 소스</h2><span class="note">${SOURCES.length}건</span>
+        <button class="btn sm" style="margin-left:auto">+ 소스 추가</button></div>
+      <table><thead><tr>
+        <th style="min-width:250px">소스</th><th style="width:92px">수집 방식</th>
+        <th style="width:110px">마지막 수집</th><th style="width:112px" class="tr">누적 / 신규</th>
+        <th style="width:96px">상태</th><th style="width:66px" class="tr"></th></tr></thead>
+      <tbody>${SOURCES.map(s=>`<tr class="r-hover">
+        <td><div class="tt" style="font-size:12.5px">${esc(s.name)} ${s.paid?'<span class="tag wn" style="margin-left:4px">유료</span>':''}</div>
+          <div class="ts mono">${esc(s.url)}</div></td>
+        <td><span class="tag ${s.type==='키워드'?'lv':'nt'}">${esc(s.type)}</span></td>
+        <td class="note num">${esc(s.last)}</td>
+        <td class="tr num">${s.cnt.toLocaleString()} ${s.fresh?`<span style="color:var(--brand);font-weight:600">+${s.fresh}</span>`:''}</td>
+        <td><span class="tag ${SRC_ST[s.st]}">${esc(s.st)}</span></td>
+        <td class="tr"><button class="btn sm">편집</button></td></tr>`).join('')}</tbody></table>
+      <div style="padding:12px 17px"><span class="note">수집 방식은 두 가지입니다 — <strong>키워드형</strong>(검색 언어·지역 지정, 상위 n건) / <strong>고정 URL형</strong>(지정 URL의 특정 구역 추출)</span></div>
+    </div>`;
+  }
+  if (S.admTab==='uploads'){
+    body=`<div class="grid-a">
+      <div class="card"><div class="card-h"><h2>업로드된 내부 자료</h2><span class="note">${UPLOADS.length}건</span></div>
+        <table><thead><tr><th style="min-width:250px">파일</th><th style="width:130px">귀속 OC</th><th style="width:104px">업로드</th><th style="width:92px">상태</th></tr></thead>
+        <tbody>${UPLOADS.map(u=>`<tr class="r-hover">
+          <td><div class="tt" style="font-size:12.5px">${esc(u.name)}</div><div class="ts">${esc(u.size)}</div></td>
+          <td><span class="tag oc">${esc(u.oc)}</span></td>
+          <td class="note num">${esc(u.at)}</td>
+          <td><span class="tag ${u.st==='검수 완료'?'ok':'wn'}">${esc(u.st)}</span></td></tr>`).join('')}</tbody></table>
+      </div>
+      <div class="card"><div class="card-h"><h2>자료 추가</h2></div>
+        <div class="card-b stack" style="gap:12px">
+          <div class="dropz" id="dz">
+            <span style="width:32px;height:32px;border-radius:10px;background:var(--brand-soft);color:var(--brand);display:flex;align-items:center;justify-content:center;font-size:15px;font-weight:700">↑</span>
+            <span style="font-size:12.5px;font-weight:600">파일을 끌어다 놓거나 선택</span>
+            <span class="note">CSV · PDF · XLSX</span>
+            <input type="file" id="fileIn" multiple style="display:none">
+            <button class="btn sm" id="fileBtn">파일 선택</button>
+          </div>
+          <div class="fld"><label class="fld-l">귀속 OC</label>
+            <select class="sel" id="upOc"><option>전사</option>${OCS.map(o=>`<option>${o.name}</option>`).join('')}</select></div>
+          <label class="fld-l" style="display:flex;align-items:center;gap:7px;cursor:pointer">
+            <input type="checkbox" id="upNow" ${S.upNow?'checked':''}>바로 사용 (과제 발굴에 즉시 반영)</label>
+          <span class="note">체크하면 업로드 즉시 '검수 완료'가 되어 발굴 프롬프트에 들어갑니다. 체크하지 않으면 목록에만 남습니다.</span>
+          <span class="note">기존 과제 기록 DB를 올리면 중복 과제 검출에 사용됩니다.</span>
+        </div></div>
+    </div>`;
+  }
+  if (S.admTab==='perm'){
+    body=`<div class="grid-a">
+      <div class="card"><div class="card-h"><h2>권한</h2><span class="note">${ADMINS.length}명</span></div>
+        <table><thead><tr><th style="min-width:220px">Outlook 메일</th><th style="width:110px">권한</th><th style="width:170px">비고</th><th style="width:70px" class="tr"></th></tr></thead>
+        <tbody>${ADMINS.map((a,i)=>`<tr class="r-hover">
+          <td class="mono" style="font-size:12px">${esc(a.mail)}</td>
+          <td><span class="tag ${a.role==='관리자'?'lv':'nt'}">${esc(a.role)}</span></td>
+          <td class="note">${esc(a.note)}</td>
+          <td class="tr"><button class="btn sm" data-rm-adm="${i}">삭제</button></td></tr>`).join('')}</tbody></table>
+      </div>
+      <div class="card"><div class="card-h"><h2>권한 추가</h2></div>
+        <div class="card-b stack" style="gap:11px">
+          <div class="fld"><label class="fld-l">Outlook 메일 주소</label>
+            <input class="inp" id="admIn" placeholder="name@sk.com">
+            <span class="fld-h">사내 HR 명부와 연계되지 않아 이름 검색은 지원하지 않습니다.</span></div>
+          <div class="fld"><label class="fld-l">권한</label>
+            <select class="sel" id="admRole"><option>관리자</option><option>조회 전용</option></select></div>
+          <button class="btn pri" id="admAdd">추가</button>
+        </div></div>
+    </div>`;
+  }
+  return `
+  <div class="page-h"><div class="stack" style="gap:5px">
+    <h1>관리자</h1>
+    <p class="lede">생성 인스트럭션, 크롤링 소스, 내부 자료, 권한을 관리합니다.</p>
+  </div></div>
+  <div class="tabs">${tabs.map(([k,l])=>`<button class="tab ${S.admTab===k?'on':''}" data-atab="${k}">${esc(l)}</button>`).join('')}</div>
+  ${body}`;
+}
+
+/* ══════════════ 라우팅 ══════════════ */
+const VIEWS={list:viewList, detail:viewDetail, trend:viewTrend, custom:viewCustom, export:viewExport, report:viewReport, admin:viewAdmin};
+function render(){
+  renderNav();
+  document.getElementById('main').innerHTML = (VIEWS[S.screen]||viewList)();
+}
+
+/* ══════════════ 동작 ══════════════ */
+function download(name,text,mime){
+  const blob=new Blob(['\uFEFF'+text],{type:(mime||'text/plain')+';charset=utf-8'});
+  const a=document.createElement('a'); a.href=URL.createObjectURL(blob); a.download=name; a.click();
+  setTimeout(()=>URL.revokeObjectURL(a.href),1000);
+}
+const CSV_COLS=['과제ID','생성일','OC','과제명','레버','요약','적용방안','관리지표','기대효과 Logic','순 기대효과(억)','벤치마크','원문 URL','과제 점수','피드백','배경','리스크','기대효과','KPI','KPI 산출식','상태','출처','점수','판정'];
+function exportCsv(){
+  const q=v=>'"'+String(v==null?'':v).replace(/\r?\n/g,' / ').replace(/"/g,'""')+'"';
+  const rows=filtered().map(t=>{
+    const net=netOf(t);
+    return ['OI-2026-'+t.id, verOf(t.ver).label, OC[t.oc].name, t.name, t.lever, t.sum, t.plan,
+      LOGIC[t.lever].metric, fxText(t), net===null?(sysOn(t)?'산정 대기':'사용자 수식'):f1(net),
+      t.ev.map(e=>`${EV[e].src}(${EV[e].date})`).join('; '),
+      t.ev.map(e=>EV[e].url).join('; '),
+      fbOf(t.id).s || '', fbOf(t.id).t || '',
+      t.bg||'', t.risk||'', t.eff||'', t.kpi||'', t.kpiFx||'', t.status||'', t.origin||'',
+      t.evalScore==null?'':t.evalScore, t.verdict||''].map(q).join(',');
+  });
+  download(`OI_Spark_과제_${(S.ver==='전체'?'전체':verOf(S.ver).label).replace(/\./g,'')}.csv`,
+    CSV_COLS.map(q).join(',')+'\n'+rows.join('\n'),'text/csv');
+}
+/* 재생성은 비동기다 — 서버가 작업 id 를 즉시 주고, 여기서 끝날 때까지 폴링한다.
+   LLM 발굴은 계열사 1곳당 1분 내외라 한 번의 HTTP 응답으로는 못 받는다
+   (nginx 기본 60초·Cloudflare 100초에서 끊긴다). */
+const REGEN_POLL_MS = 2000;
+const REGEN_MAX_MS  = 10 * 60 * 1000;
+
+async function regenerate(){
+  S.regenerating=true; render();
+  try{
+    let d = await api('/api/proposals/regenerate', {method:'POST'});
+    if(d.job){
+      const t0 = Date.now();
+      while(d.status === 'running'){
+        if(Date.now() - t0 > REGEN_MAX_MS) throw new Error('생성이 너무 오래 걸립니다.');
+        await new Promise(r => setTimeout(r, REGEN_POLL_MS));
+        d = await api('/api/proposals/regenerate/' + encodeURIComponent(d.job));
+      }
+      if(d.status === 'failed') throw new Error(d.error || '생성에 실패했습니다.');
+    }
+    applyProposals(d);
+    /* 재생성 횟수에는 제한이 없고 중복만 걸러진다. 새로 저장된 과제가 하나도 없으면
+       서버가 ver=null 과 함께 사유(reason)를 준다 — 조용히 넘기면 사용자는 버튼이
+       고장난 줄 알고 계속 누른다. 반드시 사유를 보여 준다. */
+    if(d.ver){ S.ver=d.ver; S.page=1; S.cOff=0; S.calOpen=false; }
+    else if(d.reason){ alert(d.reason); }
+  }catch(e){ alert('재생성에 실패했습니다. '+e.message); }
+  finally{ S.regenerating=false; render(); }
+}
+
+document.addEventListener('click', e=>{
+  const el=e.target.closest('[data-nav],[data-open],[data-lv],[data-ver],[data-pg],[data-atab],[data-tn],[data-ch],[data-ex-d],[data-dl],[data-rm-rc],[data-rm-adm],[data-cg-oc],[data-cg-ev],[data-cg-lv],[data-cg-plan],[data-cal-d],[data-cal-m],[data-cnav],[data-sendtog],[data-freq],[data-monav],[data-slice],[data-memo],[data-star],[data-msave],[data-ck],[data-ckall],[data-goto],[data-tr],[data-cite],button');
+  // 캘린더 외부 클릭 시 닫기
+  if(S.calOpen && !e.target.closest('#cal') && el && el.id!=='calBtn'){ S.calOpen=false; }
+  if(S.calOpen && !el){ S.calOpen=false; return render(); }
+  if(!el) return;
+  const d=el.dataset;
+  if(d.nav){e.preventDefault(); S.screen=d.nav; return render();}
+  if(d.open){S.curId=Number(d.open); S.screen='detail'; return render();}
+  if(d.ver){S.ver=(S.ver===d.ver?'전체':d.ver); S.page=1; S.calOpen=false; return render();}
+  if(d.monav){ const len=months().length;
+    S.moIdx=Math.min(Math.max(0,S.moIdx+Number(d.monav)),len-1); return render(); }
+  if(d.slice){ S.oc=(S.oc===d.slice?'전체':d.slice); S.page=1; return render(); }
+  if(d.memo){ S.memoOpen=(String(S.memoOpen)===String(d.memo)?null:d.memo); return render(); }
+  if(d.star){ const [id,n]=d.star.split(':');
+    S.fb[id]=S.fb[id]||{s:0,t:''}; S.fb[id].s=Number(n);
+    saveFeedback(id, {score:Number(n)}); return render(); }
+  if(d.msave){ const id=d.msave; el.textContent='저장됨';
+    saveFeedback(id, {memo:fbOf(id).t})
+      .then(()=>{ setTimeout(()=>{S.memoOpen=null; render();},850); }); return; }
+  if(d.ck){ const id=d.ck; if(S.sel[id]) delete S.sel[id]; else S.sel[id]=true; return render(); }
+  if(d.ckall){ const rs=filtered();
+    const on=rs.length>0 && rs.every(t=>S.sel[t.id]);
+    if(on) rs.forEach(t=>delete S.sel[t.id]); else rs.forEach(t=>S.sel[t.id]=true);
+    return render(); }
+  if(d.goto){ S.screen=d.goto; return render(); }
+  if(d.cite){ S.screen='list'; S.q=EV[d.cite].src; S.oc='전체'; S.page=1; return render(); }
+  if(d.cnav){
+    const total=VERSIONS.length;
+    S.cOff = Math.min(Math.max(0, S.cOff + Number(d.cnav)*3), Math.max(0,total-CHART_N));
+    return render();
+  }
+  if(d.calD){
+    S.ver = d.calD; S.page=1; S.calOpen=false;
+    if(d.calD!=='전체'){ // 선택한 생성일이 그래프에 보이도록 윈도우 조정
+      const asc=VERSIONS.slice().reverse();
+      const i=asc.findIndex(v=>v.id===d.calD);
+      if(i>=0 && i < asc.length-CHART_N-S.cOff) S.cOff = Math.max(0, asc.length-CHART_N-i);
+    }
+    return render();
+  }
+  if(d.calM){
+    const [Y,M]=S.calYM.split('-').map(Number);
+    const nd=new Date(Y, M-1+Number(d.calM), 1);
+    S.calYM = `${nd.getFullYear()}-${String(nd.getMonth()+1).padStart(2,'0')}`;
+    return render();
+  }
+  if(d.pg){const n=Number(d.pg); if(n>=1){S.page=n; render();} return;}
+  if(d.atab){S.admTab=d.atab; return render();}
+  if(d.sendtog){const id=Number(d.sendtog);
+    if(S.sendOff[id]) delete S.sendOff[id]; else S.sendOff[id]=true;
+    saveReport(); return render();}
+  if(d.freq){S.send.freq=d.freq; saveReport(); return render();}
+  if(d.ch){S.channels[d.ch]=!S.channels[d.ch]; saveReport(); return render();}
+  if(d.exD){S.ex.days=Number(d.exD); S.ex.text=null; return render();}
+  if(d.dl){const t=S.ex.text!==null?S.ex.text:buildPrompt();
+    download(`벤치마킹브리핑_${VERSIONS[0].label.replace(/\./g,'')}.${d.dl}`,t,d.dl==='md'?'text/markdown':'text/plain'); return;}
+  if(d.rmRc){S.recipients.splice(Number(d.rmRc),1); saveReport(); return render();}
+  if(d.rmAdm){const a=ADMINS[Number(d.rmAdm)];
+    ADMINS.splice(Number(d.rmAdm),1);
+    if(a) api('/api/admin/members/'+encodeURIComponent(a.mail), {method:'DELETE'}).catch(apiWarn);
+    return render();}
+  if(d.cgOc){S.cg.oc=d.cgOc; S.cg.step=1; return render();}
+  if(d.cgEv){S.cg.ev=d.cgEv; S.cg.step=2; return render();}
+  if(d.cgLv){S.cg.lever=d.cgLv; S.cg.step=3; return render();}
+  if(d.cgPlan){S.cg.plan=d.cgPlan; S.cg.step=4; return render();}
+
+  switch(el.id){
+    case 'selAll': S.sendOff={}; saveReport(); return render();
+    case 'selNone': sendTargets().forEach(t=>S.sendOff[t.id]=true); saveReport(); return render();
+    case 'fxCopy':{
+      const t=curTask();
+      try{ const r=navigator.clipboard.writeText(fxText(t)); if(r&&r.catch) r.catch(()=>{}); }catch(err){}
+      S.fxCopied=true; render(); setTimeout(()=>{S.fxCopied=false; render();},1400); return;
+    }
+    case 'fxEditBtn':
+      S.fxDraft = (S.fxDraft===curTask().id) ? null : curTask().id;
+      return render();
+    case 'fxSave':{
+      const t=curTask(); const box=document.getElementById('fxInput');
+      const txt=(box?box.value:'').trim();
+      if(txt){
+        S.fx[t.id]={text:txt, at:stampNow()};
+        S.sysOff[t.id]=true;                 // 시스템 제안 자동 꺼짐
+        saveFormula(t);
+      }
+      S.fxDraft=null; return render();
+    }
+    case 'fxCancel': S.fxDraft=null; return render();
+    case 'fxRestore':{
+      const box=document.getElementById('fxInput');
+      if(box) box.value = LOGIC[curTask().lever].text;
+      return;
+    }
+    case 'sysTog':{
+      const t=curTask();
+      if(sysOn(t)){                          // ON → OFF : 사용자 수식 모드
+        S.sysOff[t.id]=true;
+        if(!S.fx[t.id]) S.fx[t.id]={text:LOGIC[t.lever].text, at:stampNow()};
+      } else {                               // OFF → ON : 초기 상태 복귀
+        delete S.sysOff[t.id];
+        S.fxDraft=null;
+      }
+      saveFormula(t);
+      return render();
+    }
+    case 'calBtn':
+      S.calOpen=!S.calOpen;
+      if(S.calOpen) S.calYM = (S.ver==='전체'?VERSIONS[0].label:verOf(S.ver).label).slice(0,7).replace('.','-');
+      return render();
+    case 'regen': return regenerate();
+    case 'csv': return exportCsv();
+    case 'cgReset': S.cg={step:0,oc:null,ev:null,lever:null,plan:null,done:false}; S.cgBusy=false; return render();
+    case 'cgGo': return createCustom();
+    case 'cgFreeGo':{const v=(document.getElementById('cgFree')||{}).value;
+      if(v&&v.trim()){S.cg.plan=v.trim(); S.cg.step=4; render();} return;}
+    case 'exEdit':
+      if(S.ex.editing){S.ex.text=document.getElementById('exText').value;}
+      else{S.ex.text=S.ex.text!==null?S.ex.text:buildPrompt();}
+      S.ex.editing=!S.ex.editing; return render();
+    case 'exReset': S.ex.text=null; S.ex.editing=false; return render();
+    case 'exCopy':{const t=S.ex.editing?document.getElementById('exText').value:(S.ex.text!==null?S.ex.text:buildPrompt());
+      try{const r=navigator.clipboard.writeText(t); if(r&&r.catch) r.catch(()=>{});}catch(err){}
+      S.ex.copied=true; render(); setTimeout(()=>{S.ex.copied=false; render();},1600); return;}
+    case 'instrSave': S.instruction=document.getElementById('instr').value; S.instrSaved=true;
+      api('/api/admin/instruction', {method:'PUT', body:{text:S.instruction}}).catch(apiWarn);
+      return render();
+    case 'instrReset':
+      api('/api/admin/instruction/reset', {method:'POST'})
+        .then(d=>{ DEFAULT_INSTRUCTION=d.text; S.instruction=d.text; S.instrSaved=true; render(); })
+        .catch(apiWarn);
+      return;
+    case 'rcAdd':{const v=(document.getElementById('rcInput')||{}).value;
+      if(v&&v.trim()){S.recipients.push(v.trim()); saveReport(); render();} return;}
+    case 'admAdd':{const v=(document.getElementById('admIn')||{}).value;
+      const r=(document.getElementById('admRole')||{}).value;
+      if(v&&v.trim()){
+        const m={mail:v.trim().toLowerCase(), role:r||'조회 전용', note:'수동 추가'};
+        ADMINS.push(m); render();
+        api('/api/admin/members', {method:'POST', body:m}).catch(apiWarn);
+      } return;}
+    case 'fileBtn': document.getElementById('fileIn').click(); return;
+    case 'rpTest': case 'rpSave':{const o=el.textContent, test=el.id==='rpTest';
+      el.textContent=test?'발송 중…':'저장 중…';
+      const p = test ? api('/api/report/test', {method:'POST'}).then(d=>{ S.send.lastAt=d.sentAt; })
+                     : saveReport();
+      p.then(()=>{ el.textContent=test?'발송됨':'저장됨'; })
+       .catch(()=>{ el.textContent='실패'; })
+       .finally(()=>setTimeout(()=>{el.textContent=o;},1400));
+      return;}
+  }
+});
+
+document.addEventListener('change', e=>{
+  const el=e.target;
+  if(el.id==='ocSel'){S.oc=el.value; S.page=1; return render();}
+  if(el.id==='perSel'){S.per=Number(el.value); S.page=1; return render();}
+  if(el.id==='exOc'){S.ex.oc=el.value; S.ex.text=null; return render();}
+  if(el.id==='sendTime'){S.send.time=el.value; saveReport(); return render();}
+  if(el.id==='upNow'){ S.upNow=el.checked; return; }   // 체크 상태만 기억(재렌더 없음)
+  if(el.id==='fileIn'){
+    const oc=(document.getElementById('upOc')||{}).value||'전사';
+    // 승인은 '업로드 시 선택' 이다 — 올릴 때 정한 값이 그대로 RAG 게이트를 가른다.
+    const useNow=!!((document.getElementById('upNow')||{}).checked);
+    const files=Array.from(el.files||[]);
+    el.value='';
+    Promise.all(files.map(f => {                // 본문까지 추출하려면 파일 자체를 보내야 한다
+        const fd=new FormData(); fd.append('file', f); fd.append('aff', oc);
+        fd.append('use_now', useNow ? 'true' : 'false');
+        return api('/api/admin/uploads/file', {method:'POST', form:fd}).then(d=>UPLOADS.unshift(d.upload));
+      }))
+      .catch(apiWarn).finally(render);
+    return;
+  }
+});
+
+document.addEventListener('input', e=>{
+  const el=e.target;
+  if(el.dataset && el.dataset.fbt){
+    const id=el.dataset.fbt;
+    S.fb[id]=S.fb[id]||{s:0,t:''}; S.fb[id].t=el.value; return;   // 저장은 '저장' 버튼에서
+  }
+  if(el.dataset && el.dataset.f){
+    const t=curTask();
+    S.fields[t.id]=S.fields[t.id]||{};
+    S.fields[t.id][el.dataset.f]=el.value;
+    const box=document.querySelector('.result .stack');
+    if(box) box.innerHTML=resultInner(t);
+    saveFields(t.id);           // 타이핑이 멈추면 저장 (디바운스)
+    return;
+  }
+  if(el.id==='q'){S.q=el.value; S.page=1; const p=el.selectionStart; render();
+    const n=document.getElementById('q'); if(n){n.focus(); n.setSelectionRange(p,p);} return;}
+  if(el.id==='instr'){S.instruction=el.value; S.instrSaved=false;
+    const n=document.querySelector('.card-h .note'); if(n) n.textContent='저장되지 않은 변경'; return;}
+  if(el.id==='exResearch'){S.ex.research=el.value; S.ex.text=null; return;}
+});
+
+document.addEventListener('keydown', e=>{
+  if(e.key!=='Enter') return;
+  if(e.target.id==='rcInput') document.getElementById('rcAdd').click();
+  if(e.target.id==='admIn') document.getElementById('admAdd').click();
+  if(e.target.id==='cgFree') document.getElementById('cgFreeGo').click();
+});
+
+/* ══════════════ 백엔드 연결 ══════════════
+   화면 로직은 그대로 두고, 데이터 출처와 저장만 API 로 연결한다. */
+const oiTok = () => localStorage.getItem('oi-token') || '';
+
+async function api(path, opt){
+  opt = opt || {};
+  const headers = {Authorization:'Bearer '+oiTok()};
+  let body;
+  if(opt.form){ body=opt.form; }              // FormData 는 Content-Type 을 두지 않는다(브라우저가 boundary 를 붙인다)
+  else if(opt.body !== undefined){ headers['Content-Type']='application/json'; body=JSON.stringify(opt.body); }
+  const res = await fetch(path, {method:opt.method||'GET', headers, body});
+  if(res.status===401){                       // 토큰 만료 → 로그인으로
+    localStorage.removeItem('oi-token'); location.replace('/login');
+    throw new Error('세션이 만료되었습니다.');
+  }
+  const data = await res.json().catch(()=>({}));
+  if(!res.ok) throw new Error(data.detail || ('요청 실패 ('+res.status+')'));
+  return data;
+}
+/* 화면은 이미 갱신된 뒤라 저장 실패는 콘솔 경고로만 남긴다 */
+function apiWarn(e){ console.warn('[O/I Spark] 저장 실패:', e && e.message); }
+
+/* 점수와 피드백은 따로 보낸다 — 서버는 넘어온 항목만 갱신하므로
+   별점 저장이 아직 타이핑 중인 피드백을 덮어쓰지 않는다. */
+function saveFeedback(id, patch){
+  return api('/api/proposals/'+id+'/feedback', {method:'PUT', body:patch}).catch(apiWarn);
+}
+const fieldTimers = {};
+function saveFields(id){                       // 타이핑 중 매번 보내지 않도록 디바운스
+  clearTimeout(fieldTimers[id]);
+  fieldTimers[id] = setTimeout(()=>{
+    api('/api/proposals/'+id+'/fields', {method:'PUT', body:{fields:S.fields[id]||{}}}).catch(apiWarn);
+  }, 500);
+}
+function saveFormula(t){
+  const off = S.sysOff[t.id]===true;
+  return api('/api/proposals/'+t.id+'/formula',
+      {method:'PUT', body:{sysOff:off, text:off ? ((S.fx[t.id]||{}).text || null) : null}})
+    .then(d=>{ if(off && S.fx[t.id]) S.fx[t.id].at = d.at; })
+    .catch(apiWarn);
+}
+function saveReport(){
+  return api('/api/report/settings', {method:'PUT', body:{
+    freq:S.send.freq, time:S.send.time, channels:S.channels,
+    recipients:S.recipients, sendOff:Object.keys(S.sendOff).map(Number),
+  }}).catch(apiWarn);
+}
+/* 커스텀 생성도 비동기다 — 재생성과 완전히 같은 폴링 패턴을 쓴다.
+   옛 POST /api/discovery/generate 의 'OC 지정 + note 주입' 을 이 화면이 흡수해서,
+   사용자가 고른 OC·근거·레버를 제약으로 발굴 LLM 이 본문을 채운다(계열사당 1분 안팎).
+   LLM 이 실패하면 서버가 예전 문자열 조립으로 폴백하므로 과제는 반드시 만들어진다. */
+async function createCustom(){
+  const c = S.cg;
+  S.cgBusy = true; render();
+  try{
+    let d = await api('/api/proposals/custom', {method:'POST',
+      body:{oc:c.oc, lever:c.lever, ev:c.ev?[c.ev]:[], plan:c.plan||''}});
+    if(d.job){
+      const t0 = Date.now();
+      while(d.status === 'running'){
+        if(Date.now() - t0 > REGEN_MAX_MS) throw new Error('생성이 너무 오래 걸립니다.');
+        await new Promise(r => setTimeout(r, REGEN_POLL_MS));
+        d = await api('/api/proposals/custom/' + encodeURIComponent(d.job));
+      }
+      if(d.status === 'failed') throw new Error(d.error || '생성에 실패했습니다.');
+    }
+    applyProposals(d);
+    S.cg.done = true; S.curId = d.id;
+  }catch(e){ alert('과제 생성에 실패했습니다. '+e.message); }
+  finally{ S.cgBusy = false; render(); }
+}
+
+/* 서버 응답을 화면 데이터에 넣기 — 다른 코드가 잡고 있는 참조를 끊지 않도록 제자리에서 교체 */
+function fill(target, src){
+  if(Array.isArray(target)){ target.length=0; (src||[]).forEach(v=>target.push(v)); }
+  else { Object.keys(target).forEach(k=>delete target[k]); Object.assign(target, src||{}); }
+  return target;
+}
+function applyProposals(d){
+  fill(VERSIONS, d.versions); fill(TASKS, d.tasks);
+  if(!TASKS.some(t=>t.id===S.curId) && TASKS.length) S.curId = TASKS[0].id;
+}
+function applyBootstrap(d){
+  fill(OCS, d.ocs); fill(OC_COLOR, d.ocColor); fill(BIZ_C, d.bizColor);
+  fill(OC, {}); OCS.forEach(o => OC[o.code] = o);
+
+  // 관리지표·산출식·입력항목은 서버에서, 계산 함수는 화면에서 (LEVER_CALC)
+  fill(LOGIC, {});
+  Object.keys(d.levers).forEach(k=>{
+    const c = LEVER_CALC[k] || NO_CALC;
+    LOGIC[k] = {metric:d.levers[k].metric, text:d.levers[k].text,
+                fields:d.levers[k].fields, calc:c.calc, show:c.show};
+  });
+  fill(LEVERS, Object.keys(LOGIC));
+
+  fill(EV, d.evidence); fill(EV_TH, d.evTheme); fill(EV_BIZ_FB, d.evBizFallback);
+  fill(EV_NEW, d.evNew); fill(KIND_MAP, d.kindMap); fill(TH2, d.themes);
+  fill(SOURCES, d.sources); fill(UPLOADS, d.uploads); fill(ADMINS, d.admins);
+  DEFAULT_INSTRUCTION = d.instruction || '';
+
+  fill(TR_KINDS, ['전체'].concat(d.kinds || []));
+  fill(TR_BIZS,  ['전체'].concat(Object.keys(d.bizColor || {})));
+  if(d.today) TR_TODAY = new Date(d.today+'T00:00:00');
+
+  applyProposals(d);
+
+  // 로그인 계정별 작업 상태 (평가·기준값·수식·발송 설정)
+  const st = d.state || {};
+  S.fb = st.fb || {}; S.fields = st.fields || {}; S.fx = st.fx || {};
+  S.sysOff = st.sysOff || {}; S.sendOff = st.sendOff || {};
+  S.send = st.send || S.send; S.recipients = st.recipients || [];
+  S.channels = st.channels || S.channels;
+  S.instruction = d.instruction || ''; S.instrSaved = true;
+  S.evalCriteria = d.evalCriteria || '';
+
+  // 기간·달력 기본값을 서버 기준일에 맞춘다
+  S.trTo = trIso(TR_TODAY);
+  S.trFrom = trIso(trShift(TR_TODAY, 30));
+  S.calYM = VERSIONS.length ? VERSIONS[0].label.slice(0,7).replace('.','-') : S.trTo.slice(0,7);
+}
+
+async function boot(){
+  try{
+    applyBootstrap(await api('/api/bootstrap'));
+  }catch(e){
+    document.getElementById('main').innerHTML =
+      `<div class="card" style="margin:48px auto;max-width:540px"><div class="card-b">
+         <h2 style="margin-bottom:8px">데이터를 불러오지 못했습니다</h2>
+         <p class="note">${esc(e.message)}</p>
+         <p class="note" style="margin-top:10px">백엔드가 떠 있는지 확인하세요.
+            개발 환경은 <code>uvicorn app.main:app --reload</code> (기본 8000 포트)입니다.</p>
+       </div></div>`;
+    return;
+  }
+  render();
+}
+boot();
+
+/* ===== 테마 토글 ===== */
+(function(){
+  var btn = document.getElementById('themeBtn');
+  if(!btn) return;
+  function sync(){
+    var dark = document.documentElement.getAttribute('data-theme') !== 'light';
+    btn.textContent = dark ? '🌙' : '☀️';
+    btn.title = dark ? '라이트 모드로 전환' : '다크 모드로 전환';
+  }
+  sync();
+  btn.addEventListener('click', function(){
+    var dark = document.documentElement.getAttribute('data-theme') !== 'light';
+    var next = dark ? 'light' : 'dark';
+    document.documentElement.setAttribute('data-theme', next);
+    try{ localStorage.setItem('oi-theme', next); }catch(e){}
+    sync();
+  });
+})();
+</script>
+
+<!-- 비밀번호 변경 모달 -->
+<div id="pwModal" class="pw-ov" style="display:none">
+  <div class="pw-modal">
+    <h3>비밀번호 변경</h3>
+    <label class="pw-l">현재 비밀번호</label>
+    <input id="pwCur" type="password" class="pw-i" placeholder="현재 비밀번호">
+    <label class="pw-l">새 비밀번호</label>
+    <input id="pwNew" type="password" class="pw-i" placeholder="새 비밀번호 (4자 이상)">
+    <label class="pw-l">새 비밀번호 확인</label>
+    <input id="pwNew2" type="password" class="pw-i" placeholder="새 비밀번호 다시 입력">
+    <div id="pwErr" class="pw-err"></div>
+    <div class="pw-actions">
+      <button class="btn" onclick="oiClosePw()">취소</button>
+      <button class="btn pri" onclick="oiSavePw()">변경</button>
+    </div>
+  </div>
+</div>
+
+<!-- 계정 관리 (로그아웃 / 탈퇴 / 비밀번호 변경) -->
+<script>
+function oiToken(){ return localStorage.getItem('oi-token') || ''; }
+function oiClear(){ localStorage.removeItem('oi-token'); localStorage.removeItem('oi-user'); }
+function oiLogout(){ oiClear(); location.href = '/login'; }
+async function oiWithdraw(){
+  if(!confirm('정말 탈퇴하시겠습니까?\n계정이 삭제되며 다시 로그인할 수 없습니다.')) return;
+  try{
+    const r = await fetch('/api/auth/me', { method:'DELETE', headers:{ Authorization:'Bearer '+oiToken() } });
+    if(!r.ok) throw 0;
+  }catch(e){ alert('탈퇴 처리 중 오류가 발생했습니다.'); return; }
+  oiClear(); alert('탈퇴가 완료되었습니다.'); location.href = '/login';
+}
+function oiChangePw(){ document.getElementById('pwErr').textContent=''; document.getElementById('pwModal').style.display='flex'; document.getElementById('pwCur').focus(); }
+function oiClosePw(){ document.getElementById('pwModal').style.display='none'; ['pwCur','pwNew','pwNew2'].forEach(id=>document.getElementById(id).value=''); }
+async function oiSavePw(){
+  const cur=document.getElementById('pwCur').value, n1=document.getElementById('pwNew').value, n2=document.getElementById('pwNew2').value;
+  const err=document.getElementById('pwErr');
+  if(n1.length<4){ err.textContent='새 비밀번호는 4자 이상이어야 합니다.'; return; }
+  if(n1!==n2){ err.textContent='새 비밀번호가 일치하지 않습니다.'; return; }
+  try{
+    const r=await fetch('/api/auth/change-password',{ method:'POST', headers:{'Content-Type':'application/json', Authorization:'Bearer '+oiToken()}, body:JSON.stringify({current_password:cur, new_password:n1}) });
+    const d=await r.json().catch(()=>({}));
+    if(!r.ok){ err.textContent=d.detail||'변경에 실패했습니다.'; return; }
+    oiClosePw(); alert('비밀번호가 변경되었습니다.');
+  }catch(e){ err.textContent='서버 연결 오류.'; }
+}
+document.getElementById('pwModal').addEventListener('click', e=>{ if(e.target.id==='pwModal') oiClosePw(); });
+</script>
+</body>
+</html>
