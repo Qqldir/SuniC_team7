@@ -8,9 +8,9 @@
 <style>
 /* ===== 디자인 시스템 토큰 (유지) ===== */
 :root{
-  --tmb1:#f2f6fe; --tmb2:#e2ecfd; --tmb3:#cbddfb; --tmb4:#abc7f8; --tmb5:#87acf3;
-  --tmt1:#eefaf8; --tmt2:#d7f1ed; --tmt3:#b2e4dc; --tmt4:#87d2c6; --tmt5:#59bdae;
-  --tmp1:#f5f2fe; --tmp2:#e8e1fd; --tmp3:#d5c6fb; --tmp4:#bda7f8; --tmp5:#a184f3;
+  --tmb1:#eaf3fd; --tmb2:#cbe3fa; --tmb3:#a2cef4; --tmb4:#74b4ee; --tmb5:#4fa3e8;
+  --tmt1:#e7f5f2; --tmt2:#c6e9e2; --tmt3:#9bd7cc; --tmt4:#6ac1b2; --tmt5:#40ac99;
+  --tmp1:#f6eaf2; --tmp2:#e9cfe0; --tmp3:#d3a7c4; --tmp4:#bb84ac; --tmp5:#a06b98;
   --bg:#e9f0f6; --panel:#fff; --panel-sub:#f8fafc;
   --brand:#336591; --brand-hover:#284f73; --brand-soft:#e4eef7; --brand-tint:#eff6fb;
   --ink:#101c21; --t1:#3c4149; --t2:#4b5160; --t3:#6b7280; --t4:#9096a2; --t5:#b4b9c3;
@@ -21,13 +21,14 @@
   --bad:#dc2626; --bad-bg:#fdeceb;
   --c1:#3D7EAE; --c2:#a7c4d8; --c3:#d5e5f0;
   --edit:#2563eb;
+  --bar:#2196F3;
   color-scheme:light;
 }
 /* ===== 다크 테마 (랜딩 페이지 색상표 기반: 딥 네이비/퍼플 + 퍼플·블루 액센트) ===== */
 html[data-theme="dark"]{
-  --tmb1:#181a2c; --tmb2:#1c2440; --tmb3:#233158; --tmb4:#2c4079; --tmb5:#37519b;
-  --tmt1:#151f22; --tmt2:#16302f; --tmt3:#1a4541; --tmt4:#1e5c55; --tmt5:#24756b;
-  --tmp1:#1c1830; --tmp2:#241d47; --tmp3:#2f2465; --tmp4:#3d2d87; --tmp5:#4d38ab;
+  --tmb1:#15243f; --tmb2:#1b3763; --tmb3:#224d8a; --tmb4:#2c64b0; --tmb5:#3a7ad2;
+  --tmt1:#13251f; --tmt2:#163f37; --tmt3:#1a574c; --tmt4:#206f61; --tmt5:#26907a;
+  --tmp1:#201a34; --tmp2:#302453; --tmp3:#453672; --tmp4:#614a8e; --tmp5:#8b639b;
   --bg:#0a0912; --panel:#14121f; --panel-sub:#1a1730;
   --brand:#a855f7; --brand-hover:#9333ea; --brand-soft:#241a3f; --brand-tint:#1d1733;
   --ink:#edeaf7; --t1:#d6d2e8; --t2:#b3aecf; --t3:#8f8ab0; --t4:#6f6a8e; --t5:#544f6e;
@@ -38,6 +39,7 @@ html[data-theme="dark"]{
   --bad:#f87171; --bad-bg:#2a1618;
   --c1:#a855f7; --c2:#7c6ba8; --c3:#463f63;
   --edit:#60a5fa;
+  --bar:#8B639B;
   color-scheme:dark;
 }
 html[data-theme="dark"] ::-webkit-scrollbar-thumb{background:#2f2a42}
@@ -65,7 +67,7 @@ button,input,select,textarea{font-family:inherit;color:inherit}
 .app{display:flex;min-height:100vh}
 .side{width:236px;flex:none;background:var(--panel);border-right:1px solid var(--line);
   display:flex;flex-direction:column;position:sticky;top:0;height:100vh}
-.brand{height:60px;flex:none;display:flex;align-items:center;gap:10px;padding:0 18px;border-bottom:1px solid var(--line-soft)}
+.brand{height:60px;flex:none;display:flex;align-items:center;gap:10px;padding:0 18px}
 .brand-mk{width:26px;height:26px;border-radius:7px;background:var(--brand);color:#fff;
   display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;letter-spacing:-.4px}
 .brand-nm{font-size:13.5px;font-weight:700;letter-spacing:-.3px}
@@ -74,7 +76,7 @@ button,input,select,textarea{font-family:inherit;color:inherit}
 .ski-logo b{color:#EA002C}
 .ski-logo i{color:#FF7A00;font-weight:700;font-style:normal}
 @font-face{font-family:'Chillax';src:url('/fonts/Chillax-Semibold.woff2') format('woff2'),url('/fonts/Chillax-Semibold.woff') format('woff');font-weight:600;font-style:normal;font-display:swap}
-.oi-logo{font-family:'Chillax','Pretendard Variable',Arial,sans-serif;font-weight:600;letter-spacing:-.02em;white-space:nowrap;background:linear-gradient(100deg,#f5f3ff,#a855f7 45%,#38bdf8);-webkit-background-clip:text;background-clip:text;color:transparent}
+.oi-logo{font-family:'Chillax','Pretendard Variable',Arial,sans-serif;font-weight:600;letter-spacing:-.02em;white-space:nowrap;background:linear-gradient(100deg,#9a6ee0,#bd7cb0 52%,#f8b2b2);-webkit-background-clip:text;background-clip:text;color:transparent}
 html[data-theme="light"] .oi-logo{background:linear-gradient(100deg,#2f5d84,#3D7EAE 55%,#5fa0d0);-webkit-background-clip:text;background-clip:text}
 .logout-b{color:var(--t3)}
 .logout-b:hover{background:var(--fill);color:var(--bad)}
@@ -152,6 +154,7 @@ html[data-theme="light"] .oi-logo{background:linear-gradient(100deg,#2f5d84,#3D7
 .myc-fb{font-size:11.5px;color:var(--t2);font-weight:600}
 .myc-star{color:#e0a022;letter-spacing:1px}
 .my-empty{padding:18px;text-align:center;color:var(--t4);font-size:12.5px}
+.tr-pager{display:flex;align-items:center;justify-content:center;gap:16px;padding:15px 17px;border-top:1px solid var(--line-soft)}
 /* ===== 애니메이션 테마 스위치 (해/달) ===== */
 .theme-switch{
   --toggle-size:10px;
@@ -438,6 +441,9 @@ textarea{width:100%;border:1px solid var(--line-mid);border-radius:10px;padding:
 .cb{flex:1;min-width:0;display:flex;flex-direction:column;justify-content:flex-end;
   background:none;border:0;padding:0;cursor:pointer;height:100%;position:relative}
 .cbar{width:100%;background:var(--bar);min-height:3px;border-radius:5px 5px 0 0;transition:opacity .12s}
+/* 그래프 채도 부스트 — 텁텁함 완화 (다크가 더 물빠진 톤이라 강하게) */
+.pie svg,.cbar,.pl-d,.pl-fl{filter:saturate(1.28)}
+html[data-theme="dark"] .pie svg,html[data-theme="dark"] .cbar,html[data-theme="dark"] .pl-d,html[data-theme="dark"] .pl-fl{filter:saturate(1.5)}
 .cbars:hover .cbar{opacity:.4}
 .cb:hover .cbar{opacity:1}
 .cb.act .cbar{outline:2px solid var(--ink);outline-offset:2px;border-radius:5px 5px 1px 1px}
@@ -573,6 +579,7 @@ textarea{width:100%;border:1px solid var(--line-mid);border-radius:10px;padding:
 
 .ai-mk{width:20px;height:20px;border-radius:6px;background:var(--brand);color:#fff;display:flex;
   align-items:center;justify-content:center;font-size:9.5px;font-weight:700;flex:none}
+.ai-img{width:22px;height:22px;flex:none;object-fit:contain;display:block}
 .ai-ctl{display:flex;flex-direction:column;gap:9px;padding:12px 15px;border-bottom:1px solid var(--line-soft);
   background:var(--panel-sub)}
 .ai-row{display:flex;align-items:center;gap:6px;flex-wrap:wrap}
@@ -712,7 +719,7 @@ html[data-theme="dark"] .bst:hover,html[data-theme="dark"] .bst:hover ~ .bst{col
 .kwr.on .kwr-n{color:var(--brand);font-weight:700}
 .kwr-n{font-size:11.5px;color:var(--t1);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .kwr-t{height:6px;background:var(--line-soft);border-radius:4px;overflow:hidden;display:block}
-.kwr-t i{display:block;height:100%;background:#0f62fe;border-radius:4px}
+.kwr-t i{display:block;height:100%;background:var(--bar);border-radius:4px}
 .kwr-v{font-size:11.5px;font-weight:700;text-align:right;font-variant-numeric:tabular-nums}
 .kwr-d{font-size:9.5px;font-weight:600;text-align:right;font-variant-numeric:tabular-nums}
 .kwr-d.up{color:#dc2626}
@@ -1261,7 +1268,7 @@ function bigStars(id){
 function chartDaily(){
   const W=chartWindow();
   const barT=ticks(Math.max(1,...W.list.map(v=>v.n)));
-  return `<div class="card" style="--bar:${BAR_C}">
+  return `<div class="card">
     <div class="card-h">
       <h2>일별 생성 건수</h2>
       <span class="note">총 ${TASKS.length}건</span>
@@ -1297,20 +1304,29 @@ function chartDaily(){
 }
 
 /* ---------- 차트 2 — OC별 구성 ---------- */
+/* 라이트 모드 도넛/범례: Material Blue 스케일(진→연). 막대(#2196F3)와 같은 블루 계열로 묶는다.
+   다크 모드는 OC 고유색(OC_C) 유지. */
+const PIE_LIGHT = ['#0D47A1','#1976D2','#2196F3','#64B5F6','#BBDEFB','#1565C0','#42A5F5','#90CAF9','#E3F2FD'];
+const PIE_DARK  = ['#403D88','#8B639B','#AF719D','#D492A8','#F8B2B2','#5E4A90','#9C6B9C','#C285A8','#E7A6B0'];
+function pieCol(oc, i){
+  const pal = document.documentElement.getAttribute('data-theme')==='light' ? PIE_LIGHT : PIE_DARK;
+  return pal[Math.min(i, pal.length-1)];
+}
 function chartPie(){
   const MS=months();
   const i=Math.min(Math.max(0,S.moIdx),MS.length-1);
   const ym=MS[i];
   const D=pieData(ym);
   let acc=0;
-  const slices=D.rows.map(r=>{
+  const slices=D.rows.map((r,i)=>{
     const pct=r.c/D.tot*100;
+    const col=pieCol(r.oc,i);
     const el=`<circle class="psl" r="15.915" cx="21" cy="21" fill="transparent"
-      stroke="${OC_C[r.oc]}" stroke-width="6"
+      stroke="${col}" stroke-width="6"
       stroke-dasharray="${pct.toFixed(3)} ${(100-pct).toFixed(3)}"
       stroke-dashoffset="${(-acc).toFixed(3)}"
       data-slice="${r.oc}" data-nm="${esc(OC[r.oc].name)}" data-cnt="${r.c}" data-pct="${r.p}"
-      data-col="${OC_C[r.oc]}" data-tot="${D.tot}" data-ym="${ym.replace('-','.')}"></circle>`;
+      data-col="${col}" data-tot="${D.tot}" data-ym="${ym.replace('-','.')}"></circle>`;
     acc+=pct; return el;
   }).join('');
 
@@ -1330,11 +1346,11 @@ function chartPie(){
           <div class="pie-c"><span class="pie-n">${D.tot}</span><span class="pie-u">${ym.replace('-','.')}</span></div>
         </div>
         <div class="pie-lg">
-          ${D.rows.map(r=>`<button class="pl ${S.oc===r.oc?'sel':''}" data-slice="${r.oc}"
+          ${D.rows.map((r,i)=>`<button class="pl ${S.oc===r.oc?'sel':''}" data-slice="${r.oc}"
             title="${esc(OC[r.oc].name)} ${r.c}건 (${r.p}%)">
-            <span class="pl-d" style="background:${OC_C[r.oc]}"></span>
+            <span class="pl-d" style="background:${pieCol(r.oc,i)}"></span>
             <span class="pl-n">${esc(OC[r.oc].name)}</span>
-            <span class="pl-tr"><span class="pl-fl" style="width:${(r.c/D.rows[0].c*100).toFixed(1)}%;background:${OC_C[r.oc]}"></span></span>
+            <span class="pl-tr"><span class="pl-fl" style="width:${(r.c/D.rows[0].c*100).toFixed(1)}%;background:${pieCol(r.oc,i)}"></span></span>
             <span class="pl-v">${r.c}</span>
             <span class="pl-p">${r.p}%</span>
           </button>`).join('')}
@@ -2228,9 +2244,17 @@ function viewTrend(){
     ? (evRefs(b).length-evRefs(a).length) || (trPd(EV[b].date)-trPd(EV[a].date))
     : trPd(EV[b].date)-trPd(EV[a].date));
 
-  /* ── 주차 그룹핑 ── */
+  /* ── 페이지네이션 (10건씩) — 필터·검색·정렬이 바뀌면 1페이지로 되돌린다 ── */
+  const TR_PAGE=10;
+  const trSig=[S.trKw,S.trOc,S.trSrc,S.trKind,S.trNew,S.trUnl,q,S.trSort,S.trBiz,S.trPeriod,S.trFrom,S.trTo].join('|');
+  if(trSig!==S._trSig){ S._trSig=trSig; S.trPage=1; }
+  const trPages=Math.max(1, Math.ceil(rows.length/TR_PAGE));
+  const trPg=Math.min(Math.max(1, S.trPage||1), trPages);
+  const pageRows=rows.slice((trPg-1)*TR_PAGE, trPg*TR_PAGE);
+
+  /* ── 주차 그룹핑 (현재 페이지 기준) ── */
   const groups=[];
-  rows.forEach(k=>{
+  pageRows.forEach(k=>{
     const d=trPd(EV[k].date), m0=trMon(d), key=trIso(m0);
     let g=groups.find(x=>x.key===key);
     if(!g){
@@ -2262,14 +2286,13 @@ function viewTrend(){
           `<button class="kwmini ${S.trKw===w?'on':''}" data-tr="kw:${esc(w)}">${esc(w)}</button>`).join('')}</div>
       </div>
       <div class="tr2-a">
-        <button class="citep" style="background:${n?'var(--brand-soft)':'#fdf4e7'};color:${n?'var(--brand)':'#a06a08'}"
-          ${n?`data-cite="${k}"`:''}>${n?`인용 과제 ${n}건`:'미연결'}</button>
+        ${n?`<button class="citep" style="background:var(--brand-soft);color:var(--brand)" data-cite="${k}">인용 과제 ${n}건</button>`:''}
         <a class="tr-lk" href="${esc(e.url)}" target="_blank" rel="noopener">원문 ↗</a>
       </div>
     </div>`;
   };
   const groupHtml = S.trSort==='cite'
-    ? rows.map(rowHtml).join('')
+    ? pageRows.map(rowHtml).join('')
     : groups.map(g=>`
     <div class="g-h"><span class="g-l">${esc(g.label)}</span><span class="g-s">${esc(g.sub)}</span>
       <span class="g-s" style="margin-left:auto">${g.rows.length}건</span></div>
@@ -2345,7 +2368,7 @@ function viewTrend(){
 
   <div class="card">
     <div class="card-h" style="padding:13px 17px">
-      <span class="ai-mk">AI</span>
+      <img class="ai-img" src="/ai.png" alt="AI">
       <h2>데일리 브리핑</h2>
       <div style="margin-left:auto" class="row-f" style="gap:7px">
         <select class="sel" id="trBizSel">
@@ -2410,6 +2433,11 @@ function viewTrend(){
     ${rows.length? groupHtml : `<div class="empty2">
       <span style="font-size:14px;font-weight:700">조건에 맞는 자료가 없습니다</span>
       <span class="note">기간을 넓히거나 필터를 해제해 보세요.</span></div>`}
+    ${trPages>1?`<div class="tr-pager">
+      <button class="btn sm" data-tr="pg:${trPg-1}" ${trPg<=1?'disabled':''}>‹ 이전</button>
+      <span class="note num">${(trPg-1)*TR_PAGE+1}–${Math.min(trPg*TR_PAGE,rows.length)} / ${rows.length}건 · ${trPg}/${trPages}p</span>
+      <button class="btn sm" data-tr="pg:${trPg+1}" ${trPg>=trPages?'disabled':''}>다음 ›</button>
+    </div>`:''}
   </div>
   `;
 }
@@ -2428,6 +2456,7 @@ document.addEventListener('click', e=>{
   if(k==='biz'){ S.trBiz=v; render(); return trBump(); }
   if(k==='period'){ S.trPeriod=v; render(); return trBump(); }
   if(k==='regen'){ return trBump(); }
+  if(k==='pg'){ S.trPage=Math.max(1,Number(v)); return render(); }
   if(k==='kw'){ S.trKw = (S.trKw===v?null:v); return render(); }
   if(k==='oc'){ S.trOc = (S.trOc===v?null:v); return render(); }
   if(k==='new'){ S.trNew=!S.trNew; return render(); }
@@ -2445,11 +2474,22 @@ document.addEventListener('change', e=>{
   if(el.id==='trFrom'){ S.trFrom=el.value; render(); return trBump(); }
   if(el.id==='trTo'){ S.trTo=el.value; render(); return trBump(); }
 });
+function rerenderSearch(id){
+  render();
+  const n=document.getElementById(id);
+  if(n){ n.focus(); n.setSelectionRange(n.value.length, n.value.length); }
+}
 document.addEventListener('input', e=>{
   if(e.target.id!=='trQ') return;
-  S.trQ=e.target.value; render();
-  const n=document.getElementById('trQ');
-  if(n){ n.focus(); n.setSelectionRange(n.value.length, n.value.length); }
+  S.trQ=e.target.value;
+  if(e.isComposing) return;        // 한글 조합(IME) 중엔 렌더로 입력창을 재생성하지 않는다
+  rerenderSearch('trQ');
+});
+/* 조합이 끝나면(음절 완성/확정) 그때 목록을 갱신한다 — trQ·q 공통 */
+document.addEventListener('compositionend', e=>{
+  const id=e.target && e.target.id;
+  if(id==='trQ'){ S.trQ=e.target.value; rerenderSearch('trQ'); }
+  else if(id==='q'){ S.q=e.target.value; S.page=1; rerenderSearch('q'); }
 });
 
 /* ═══════════════ 파이 조각 툴팁 ═══════════════ */
@@ -2925,7 +2965,9 @@ document.addEventListener('input', e=>{
     saveFields(t.id);                     // 타이핑마다 보내지 않도록 500ms 디바운스
     return;
   }
-  if(el.id==='q'){S.q=el.value; S.page=1; const p=el.selectionStart; render();
+  if(el.id==='q'){S.q=el.value; S.page=1;
+    if(e.isComposing) return;      // 한글 조합 중엔 렌더 스킵 (compositionend 에서 갱신)
+    const p=el.selectionStart; render();
     const n=document.getElementById('q'); if(n){n.focus(); n.setSelectionRange(p,p);} return;}
   if(el.id==='instr'){S.instruction=el.value; S.instrSaved=false;
     const n=document.querySelector('.card-h .note'); if(n) n.textContent='저장되지 않은 변경'; return;}
@@ -3141,6 +3183,8 @@ boot();
     var next = chk.checked ? 'dark' : 'light';
     document.documentElement.setAttribute('data-theme', next);
     try{ localStorage.setItem('oi-theme', next); }catch(e){}
+    // 도넛 등 렌더 시점에 테마색이 정해지는 요소를 다시 칠한다 (부트 완료 후에만)
+    try{ if(S && S.userEmail && typeof render==='function') render(); }catch(e){}
   });
 })();
 </script>
