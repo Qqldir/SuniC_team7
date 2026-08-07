@@ -1,22 +1,42 @@
 # Node
 node_modules/
 frontend/dist/
-frontend/.env
 
 # Python
 backend/.venv/
-backend/__pycache__/
 **/__pycache__/
 *.pyc
-backend/.env
+*.egg-info/
+
+# 환경변수 (.env.example 은 패턴에 걸리지 않으므로 그대로 추적된다)
+.env
+.env.local
+.env.*.local
 
 # SQLite
 *.db
 *.sqlite
 *.sqlite3
 
+!backend/oi_scout.db
+
 # 크롤러 캐시 (자동 재생성)
 backend/data/
+
+# KB 빌드 중간 산출물 (S1 segments · 로그 · 프로파일 덤프).
+# ★ backend/knowledge/ 는 여기에 넣지 마라 — 서버가 런타임에 읽는 제품 자산이고,
+#   원본 DB 가 저장소 밖에 있어 클론 환경에서는 재생성할 수 없다.
+backend/build/
+
+# 테스트·린트 캐시
+.pytest_cache/
+.ruff_cache/
+.mypy_cache/
+.coverage
+htmlcov/
+
+# 작업 계획 산출물 (제품 문서가 아니다. 설계 결과는 db/schema.sql 과 docs/ 가 갖는다)
+docs/plan/
 
 # OS / editor
 .DS_Store
