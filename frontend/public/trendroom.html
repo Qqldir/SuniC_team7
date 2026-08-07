@@ -1013,6 +1013,33 @@ const userFx = t => S.fx[t.id];                       // {text, at}
 function fxText(t){
   return sysOn(t) ? LOGIC[t.lever].text : (userFx(t)?.text || LOGIC[t.lever].text);
 }
+/* 산출식 정리 — 단위 주석 괄호(연산자 없는 '(…)')는 제거. 그룹 괄호는 보존 */
+function fxClean(formula){ return (formula||'').replace(/\(([^()×✕*÷\/＋+\-−–]*)\)/g,' '); }
+function fxTokens(formula){ return fxClean(formula).split(/[×✕*÷\/＋+\-−–=%()]/).map(s=>s.trim()).filter(Boolean); }
+/* 입력이 필요한 값(피연산자) = 숫자로 시작하지 않는 항목만 (상수·단위 제외) */
+function fxOperands(formula){ return [...new Set(fxTokens(formula).filter(tk => !/^[\d.,]/.test(tk)))]; }
+/* 기준값 입력 필드 — 시스템 제안이면 레버 고정 필드, 수정 산출식이면 그 피연산자들 */
+function fxFields(t){
+  if(sysOn(t)) return LOGIC[t.lever].fields || [];
+  return fxOperands(fxText(t)).map(op => ({k:op, l:op, ph:'값 입력'}));
+}
+/* 커스텀 산출식 계산 — 피연산자가 모두 유효 숫자로 채워지면 금액 반환, 아니면 null */
+const fxNum = v => { if(v===''||v==null) return null; const n=Number(String(v).replace(/,/g,'')); return isNaN(n)?null:n; };
+function fxCompute(t){
+  if(sysOn(t)) return null;
+  const ops = fxOperands(fxText(t));
+  const vals = S.fields[t.id] || {};
+  const nums = ops.map(op => fxNum(vals[op]));
+  if(nums.some(n => n===null)) return null;                 // 채울 값이 남아 있으면 계산 안 함
+  let expr = fxClean(fxText(t));
+  ops.map((op,i)=>[op,nums[i]]).sort((a,b)=>b[0].length-a[0].length)
+     .forEach(([op,n]) => { expr = expr.split(op).join('('+n+')'); });
+  expr = expr.replace(/(\d[\d.,]*)\s*[가-힣A-Za-z]+/g,'$1')  // 상수 뒤 단위 제거 (3년→3, 12개월→12)
+             .replace(/[×✕]/g,'*').replace(/÷/g,'/').replace(/[−–]/g,'-').replace(/＋/g,'+').replace(/[%,]/g,'');
+  if(!/^[\d\s.+\-*/()]+$/.test(expr)) return null;          // 숫자·연산자만 남았는지 안전 확인
+  try{ const r = Function('"use strict";return ('+expr+')')(); return isFinite(r) ? r : null; }
+  catch(e){ return null; }
+}
 
 
 /* ══════════════ 벤치마크 자료 (feed_item) ══════════════ */
@@ -1539,6 +1566,7 @@ function viewDetail(){
     <a href="#" data-nav="list">과제 제안</a><span>/</span>
     <span class="mono" style="color:var(--t2);font-weight:600">OI-2026-${t.id}</span>
     <span>·</span><span>${esc(ver?ver.label:t.at||'')} 생성</span>
+    <button class="btn danger sm" id="taskDel" onclick="deleteTask()" style="margin-left:auto">과제 삭제</button>
   </div>
 
   <div class="page-h">
@@ -1555,7 +1583,6 @@ function viewDetail(){
            <span class="dot" style="background:${f.sev==='차단'?'var(--bad)':'var(--warn)'}"></span>
            <span><strong>${esc(f.sev||'경고')}</strong> — ${esc(f.msg||'')}</span></div>`).join('')}</div>`:''}
     </div>
-    <button class="btn danger" id="taskDel" onclick="deleteTask()">과제 삭제</button>
   </div>
 
   <div class="grid2">
@@ -1602,16 +1629,16 @@ function viewDetail(){
             : `<div class="fx-str ${on?'':'mod'}">${esc(fxText(t))}</div>`}
         </div>
 
-        <div class="${on?'':'dim-block'}">
+        <div>
           <div class="row-f" style="justify-content:space-between;margin-bottom:8px">
             <span class="fld-l">기준값 입력</span>
-            <span class="tag ${on?'wn':'nt'}">현업 작성 항목</span>
+            <span class="tag ${on?'wn':'nt'}">${on?'현업 작성 항목':'수정 산출식 항목'}</span>
           </div>
           <div class="fgrid">
-            ${L.fields.map(fd => `
+            ${fxFields(t).map(fd => `
               <div class="fld">
                 <label class="fld-l">${esc(fd.l)}${fd.u?` <span style="color:var(--t5);font-weight:500">(${esc(fd.u)})</span>`:''}</label>
-                <input class="inp num" data-f="${fd.k}" value="${esc(v[fd.k]||'')}" placeholder="${esc(fd.ph)}" ${on?'':'disabled'}>
+                <input class="inp num" data-f="${esc(fd.k)}" value="${esc(v[fd.k]||'')}" placeholder="${esc(fd.ph||'값 입력')}">
                 ${fd.hint?`<span class="fld-h">${esc(fd.hint)}</span>`:''}
               </div>`).join('')}
           </div>
@@ -1676,8 +1703,12 @@ function detailBody(t){
 }
 function resultInner(t){
   if (!sysOn(t)){
-    return `<span style="font-size:11px;font-weight:600;color:var(--edit)">순 기대효과</span>
-      <span class="result-v pending" style="color:var(--edit)">사용자 수식 기준</span>`;
+    const amt = fxCompute(t);
+    return `<span style="font-size:11px;font-weight:600;color:var(--edit)">순 기대효과</span>` +
+      (amt===null
+        ? `<span class="result-v pending" style="color:var(--edit)">값을 모두 입력하면 계산됩니다</span>`
+        : `<span class="result-v num" style="color:var(--edit)">${amt>=0?'+':''}${f1(amt)}억<span style="font-size:12px;font-weight:600;color:var(--t3);letter-spacing:0"> / 년</span></span>
+           <span class="note mono">${esc(fxText(t))}</span>`);
   }
   const net = netOf(t), f = fOf(t);
   return `<span style="font-size:11px;font-weight:600;color:var(--brand)">순 기대효과 (투자비 차감)</span>` +
