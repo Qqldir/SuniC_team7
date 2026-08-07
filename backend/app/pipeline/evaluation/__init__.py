@@ -26,9 +26,14 @@ from app.pipeline.evaluation.validator import validate_batch, validate_task
 
 __all__ = [
     "evaluate_tasks", "validate_task", "validate_batch",
-    "assess_impact", "assess_feasibility", "assess_roi", "prioritize",
     "criteria_text", "compute_priority", "grade_of", "rank", "WEIGHTS",
 ]
+
+
+# ★ 후보 풀 재사용 과제만 DUPLICATE 를 완화하는 예외 통로를 만들지 마라.
+#   validator 는 DUPLICATE 를 **항상 warn** 으로 낸다 — 낮출 block 이 애초에 없다.
+#   예외 경로가 있으면 "여기서는 중복이 차단될 수도 있다" 는 잘못된 인상을 주고,
+#   나중에 severity 를 block 으로 되돌릴 때 후보풀 과제만 조용히 다르게 동작한다.
 
 
 def evaluate_tasks(
@@ -39,15 +44,22 @@ def evaluate_tasks(
     use_llm: bool = True,
     check_saved: bool = True,
     aff_name: str = "",
+    self_ids: Sequence[Optional[int]] = (),
 ) -> List[EvaluatedTask]:
     """발굴 draft 목록을 검증·채점·정렬해 반환한다.
 
     blocked 과제는 채점을 건너뛰고, top_n 을 주면 통과 과제 상위 N건만 남긴다.
+
+    self_ids: tasks 와 같은 순서의 proposal.id 목록. **이미 저장된 proposal 을
+        재평가할 때는 반드시 넘겨라.** 안 넘기면 자기 자신이 중복 후보에 들어가
+        유사도 100% 로 전 과제가 중복 경고를 받는다(validate_batch 참조).
     """
     if not tasks:
         return []
 
-    validations = _validator.validate_batch(tasks, aff_code, check_saved=check_saved)
+    validations = _validator.validate_batch(
+        tasks, aff_code, check_saved=check_saved, self_ids=self_ids
+    )
 
     # 통과한 것만 채점 — 차단된 draft 에 토큰을 쓰지 않는다
     passable_idx = [i for i, v in enumerate(validations) if v.ok]
@@ -65,30 +77,6 @@ def evaluate_tasks(
     return _priority.rank(results, top_n)
 
 
-# ─────────── 단건 평가 (스텁 시그니처 호환) ───────────
-def _single(task: TaskDraft) -> dict:
-    i, f, r = _scorer._heuristic_one(task)
-    return {"impact": i, "feasibility": f, "roi": r}
-
-
-def assess_impact(task: TaskDraft) -> dict:
-    """비용절감·수익확대 관점의 임팩트 평가 (규칙 기반 단건)."""
-    s = _single(task)["impact"]
-    return {"score": s.score, "reason": s.reason}
-
-
-def assess_feasibility(task: TaskDraft) -> dict:
-    """기술 보유 현황·사전 단계 관점의 실현가능성 평가 (규칙 기반 단건)."""
-    s = _single(task)["feasibility"]
-    return {"score": s.score, "reason": s.reason}
-
-
-def assess_roi(task: TaskDraft) -> dict:
-    """투자 대비 효과(ROI) 산정 (규칙 기반 단건)."""
-    s = _single(task)["roi"]
-    return {"score": s.score, "reason": s.reason}
-
-
-def prioritize(tasks: List[TaskDraft]) -> List[TaskDraft]:
-    """평가 점수를 종합해 우선순위 정렬."""
-    return _priority.prioritize(tasks)
+# ★ 축 하나씩만 채점하는 진입점을 따로 만들지 마라. 그 경로에는 검증(validator)도
+#   grounding 도 없어 같은 과제에 다른 점수가 나온다. 축별 점수가 필요하면
+#   evaluate_tasks() 가 돌려주는 EvaluatedTask.evaluation.{impact,feasibility,roi} 를 읽어라.

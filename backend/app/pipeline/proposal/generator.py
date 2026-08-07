@@ -7,12 +7,15 @@ LLM 에도 '금액 대신 산정 방식과 범위를 쓰라'고 지시하고, �
 비워 둔 채 '(산정 필요)' 로 남긴다. 제안서의 신뢰도는 여기서 갈린다.
 """
 import json
-from typing import List, Optional, Sequence
+from typing import List, Sequence
 
 from app import llm_client
-from app.config import OI_LLM_PROVIDER, OI_MODEL
+# ★ provider 축은 OI_TASK_PROVIDER 다(과제 발굴 agent · 과제 평가 scorer 와 같은 축).
+#   OI_LLM_PROVIDER 는 **지식 파밍(farming/llm.py)** 전용 축이다. 여기서 그걸 쓰면
+#   "발굴·평가만 provider 를 바꿨는데 제안서만 옛 provider 로 돈다" 는 교차 사용이 된다.
+from app.config import OI_MODEL, OI_TASK_PROVIDER
 from app.db.database import get_connection
-from app.models import Proposal, ProposalPhase, TaskIn
+from app.models import ProposalDoc, ProposalPhase, ProposalDocIn
 
 PLACEHOLDER = "(산정 필요)"
 
@@ -39,7 +42,7 @@ def _evidence_text(ids: Sequence[str]) -> str:
 
 
 # ─────────── 폴백: 골격만 만든다 ───────────
-def build_skeleton(task: TaskIn) -> Proposal:
+def build_skeleton(task: ProposalDocIn) -> ProposalDoc:
     """LLM 없이 만드는 제안서 골격.
 
     과제 필드를 재배치할 뿐 새로운 사실을 만들어내지 않는다.
@@ -92,7 +95,7 @@ def build_skeleton(task: TaskIn) -> Proposal:
 
     risks = [task.risk.strip()] if (task.risk or "").strip() else []
 
-    return Proposal(
+    return ProposalDoc(
         taskId=task.id or "",
         title=task.title,
         definition=definition,
@@ -113,7 +116,7 @@ def build_skeleton(task: TaskIn) -> Proposal:
 
 
 # ─────────── LLM ───────────
-def _build_messages(task: TaskIn, aff_name: str):
+def _build_messages(task: ProposalDocIn, aff_name: str):
     system = "\n".join([
         f"너는 SK이노베이션 O/I추진단의 제안서 작성 담당이다. 승인된 O/I 과제를 {aff_name} 경영진에 보고할 실행 제안서로 확장한다.",
         "",
@@ -147,7 +150,7 @@ def _build_messages(task: TaskIn, aff_name: str):
     return system, user
 
 
-def _parse(text: str, task: TaskIn) -> Proposal:
+def _parse(text: str, task: ProposalDocIn) -> ProposalDoc:
     clean = text.replace("```json", "").replace("```", "").strip()
     start, end = clean.find("{"), clean.rfind("}")
     if start == -1 or end == -1:
@@ -168,7 +171,7 @@ def _parse(text: str, task: TaskIn) -> Proposal:
     def slist(key) -> List[str]:
         return [str(x) for x in (obj.get(key) or []) if str(x).strip()]
 
-    return Proposal(
+    return ProposalDoc(
         taskId=task.id or "",
         title=task.title,
         definition=str(obj.get("definition") or "").strip(),
@@ -185,16 +188,16 @@ def _parse(text: str, task: TaskIn) -> Proposal:
     )
 
 
-def generate_llm(task: TaskIn, aff_name: str = "") -> Proposal:
-    ready, why = llm_client.ready(OI_LLM_PROVIDER)
+def generate_llm(task: ProposalDocIn, aff_name: str = "") -> ProposalDoc:
+    ready, why = llm_client.ready(OI_TASK_PROVIDER)
     if not ready:
         raise RuntimeError(why)
     system, user = _build_messages(task, aff_name)
-    text = llm_client.call(user, system, OI_MODEL, OI_LLM_PROVIDER)
+    text = llm_client.call(user, system, OI_MODEL, OI_TASK_PROVIDER)
     return _parse(text, task)
 
 
-def generate(task: TaskIn, aff_name: str = "", *, use_llm: bool = True) -> Proposal:
+def generate(task: ProposalDocIn, aff_name: str = "", *, use_llm: bool = True) -> ProposalDoc:
     """제안서 생성. LLM 실패 시 골격으로 폴백한다."""
     if use_llm:
         try:

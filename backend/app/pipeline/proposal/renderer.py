@@ -1,8 +1,8 @@
 """제안서 → Markdown 직렬화 (내보내기·메신저 발송용)."""
-from typing import Optional, Sequence
+from typing import Sequence
 
 from app.db.database import get_connection
-from app.models import Proposal
+from app.models import ProposalDoc
 
 
 def _evidence_lines(ids: Sequence[str]) -> list:
@@ -30,7 +30,7 @@ def _evidence_lines(ids: Sequence[str]) -> list:
     return out
 
 
-def to_markdown(p: Proposal, aff_name: str = "") -> str:
+def to_markdown(p: ProposalDoc, aff_name: str = "") -> str:
     """제안서를 Markdown 문서로 만든다."""
     head = f"# {p.title}"
     if aff_name:

@@ -5,22 +5,15 @@
 - POST   /api/auth/change-password  (Bearer) {current,new}   → {ok}
 - DELETE /api/auth/me               (Bearer)                 → {ok}  (탈퇴)
 """
-from fastapi import APIRouter, Header, HTTPException
+from fastapi import APIRouter, Depends, HTTPException
 
+from app import store
+from app.api.deps import current_email
 from app.db.database import get_connection
 from app.models import LoginIn, ChangePwIn
-from app.security import hash_password, verify_password, make_token, verify_token
+from app.security import hash_password, verify_password, make_token
 
 router = APIRouter(prefix="/api/auth", tags=["auth"])
-
-
-def _current_email(authorization: str | None) -> str:
-    if not authorization or not authorization.lower().startswith("bearer "):
-        raise HTTPException(status_code=401, detail="인증이 필요합니다.")
-    email = verify_token(authorization.split(" ", 1)[1])
-    if not email:
-        raise HTTPException(status_code=401, detail="세션이 만료되었거나 올바르지 않습니다.")
-    return email
 
 
 @router.post("/login")
@@ -37,13 +30,12 @@ def login(body: LoginIn):
 
 
 @router.get("/me")
-def me(authorization: str | None = Header(default=None)):
-    return {"email": _current_email(authorization)}
+def me(email: str = Depends(current_email)):
+    return {"email": email}
 
 
 @router.post("/change-password")
-def change_password(body: ChangePwIn, authorization: str | None = Header(default=None)):
-    email = _current_email(authorization)
+def change_password(body: ChangePwIn, email: str = Depends(current_email)):
     if len(body.new_password) < 4:
         raise HTTPException(status_code=400, detail="새 비밀번호는 4자 이상이어야 합니다.")
     conn = get_connection()
@@ -62,12 +54,24 @@ def change_password(body: ChangePwIn, authorization: str | None = Header(default
 
 
 @router.delete("/me")
-def withdraw(authorization: str | None = Header(default=None)):
-    email = _current_email(authorization)
+def withdraw(email: str = Depends(current_email)):
+    """탈퇴 — 계정과 그 계정의 개인 데이터를 **한 트랜잭션으로** 함께 지운다.
+
+    삭제 범위는 store.purge_user 한 곳에 있다 — 관리자 삭제
+    (DELETE /api/admin/users/{email})와 같은 범위여야 하기 때문이다.
+    범위를 바꿀 일이 있으면 store.USER_TABLES 를 고쳐라.
+
+    ★ 한 트랜잭션이어야 한다. 중간에 실패하면 계정만 지워지고 개인 데이터가 남는
+      상태가 되므로, 전부 성공하거나 전부 되돌아가야 한다.
+    """
     conn = get_connection()
     try:
-        conn.execute("DELETE FROM app_user WHERE email = ?", (email,))
+        conn.execute("BEGIN IMMEDIATE")
+        store.purge_user(conn, email)
         conn.commit()
+    except Exception:
+        conn.rollback()
+        raise
     finally:
         conn.close()
     return {"ok": True}
