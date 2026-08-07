@@ -1337,6 +1337,21 @@ let S = {
   channels:{outlook:true, teams:true},
 };
 
+// 검색창·프롬프트 편집 등은 브라우저 메모리(S)에만 두어, 같은 세션 안에서 화면을
+// 옮겨 다녀도(=새로고침 없이) 입력이 유지된다. 새로고침하면 저장하지 않은 내용은
+// 버리고 마지막으로 "저장"한 값으로 돌아간다 — 생성 인스트럭션만 저장 버튼이 있으므로
+// 그 값만 localStorage 에 실제로 저장해 새로고침에도 남긴다.
+const SAVED_INSTRUCTION_KEY = 'oi-saved-instruction';
+function loadSavedInstruction(){
+  try{ const v = localStorage.getItem(SAVED_INSTRUCTION_KEY); return v===null ? DEFAULT_INSTRUCTION : v; }
+  catch(e){ return DEFAULT_INSTRUCTION; }
+}
+function persistSavedInstruction(v){
+  try{ localStorage.setItem(SAVED_INSTRUCTION_KEY, v); }catch(e){}
+}
+S.instruction = loadSavedInstruction();
+S.instrSaved = true;
+
 const NAV = [
   {g:'발굴', items:[{k:'list',label:'과제 제안',icon:'≡'},{k:'custom',label:'커스텀 생성',icon:'+'}]},
   {g:'활용', items:[{k:'trend',label:'트렌드룸',icon:'T'},{k:'export',label:'프롬프트 내보내기',icon:'>'},{k:'report',label:'AI Reporting',icon:'↗'}]},
@@ -1702,7 +1717,8 @@ function viewList(){
         ${OCS.map(o=>`<option value="${o.code}" ${o.code===S.oc?'selected':''}>${o.name}</option>`).join('')}
       </select>
       <span class="ctl-sep"></span>
-      <input class="inp" id="q" placeholder="과제명 · 벤치마크 회사 검색" value="${esc(S.q)}" style="width:200px">
+      <input class="inp" id="q" placeholder="과제명 · 벤치마크 회사 검색" value="${esc(S.q)}" style="width:200px"
+        autocomplete="off" data-lpignore="true" data-1p-ignore>
       <div style="margin-left:auto" class="row-f">
         <button class="btn" id="regen" ${S.regenerating?'disabled':''}>${S.regenerating?'생성 중…':'↻ 재생성'}</button>
         <button class="btn" id="csv">CSV 내려받기</button>
@@ -1949,7 +1965,8 @@ function viewCustom(){
   } else {
     panel = `<div class="stack" style="gap:12px">
       <div class="fld"><label class="fld-l">과제명 <span style="color:var(--bad)">*</span></label>
-        <input class="inp" id="cgName" value="${esc(c.name||'')}" placeholder="예: NCC 정기보수 공기 단축 — 공정 병렬화 적용"></div>
+        <input class="inp" id="cgName" value="${esc(c.name||'')}" placeholder="예: NCC 정기보수 공기 단축 — 공정 병렬화 적용"
+          autocomplete="off" data-lpignore="true" data-1p-ignore></div>
       <div class="fld"><label class="fld-l">요약 · 배경 <span class="note">(선택)</span></label>
         <textarea id="cgSum" style="height:76px" placeholder="과제 배경·핵심 내용을 직접 작성하세요">${esc(c.sum||'')}</textarea></div>
       <div class="hint"><span class="dot"></span>
@@ -2677,7 +2694,8 @@ function viewTrend(){
 
   <div class="card">
     <div class="ctlbar" style="border-radius:14px 14px 0 0">
-      <input class="inp" id="trQ" style="width:190px" placeholder="제목·요약·키워드 검색" value="${esc(S.trQ||'')}">
+      <input class="inp" id="trQ" style="width:190px" placeholder="제목·요약·키워드 검색" value="${esc(S.trQ||'')}"
+        autocomplete="off" data-lpignore="true" data-1p-ignore>
       <select class="sel" id="trSrc">
         ${srcList.map(s=>`<option ${S.trSrc===s?'selected':''}>${esc(s==='전체'?'출처 전체':s)}</option>`).join('')}
       </select>
@@ -2918,6 +2936,20 @@ function render(){
   document.getElementById('main').innerHTML = (VIEWS[S.screen]||viewList)();
 }
 
+// 앱 내 화면 전환을 브라우저 히스토리에 쌓아, 뒤로가기가 로그인 화면이 아니라
+// 직전에 보던 화면(예: 커스텀 생성 → 과제 제안)으로 돌아가게 한다.
+function navigate(screen, extra){
+  S.screen = screen;
+  if (extra) Object.assign(S, extra);
+  history.pushState({screen:S.screen, curId:S.curId}, '', '#'+screen);
+  render();
+}
+window.addEventListener('popstate', e=>{
+  const st = e.state || {screen:'list', curId:S.curId};
+  S.screen = st.screen; S.curId = st.curId;
+  render();
+});
+
 /* ══════════════ 동작 ══════════════ */
 function download(name,text,mime){
   const blob=new Blob(['\uFEFF'+text],{type:(mime||'text/plain')+';charset=utf-8'});
@@ -2962,8 +2994,8 @@ document.addEventListener('click', e=>{
   if(!el) return;
   const d=el.dataset;
   if(d.fxp){ return runFxPrompt(d.fxp); }
-  if(d.nav){e.preventDefault(); S.screen=d.nav; return render();}
-  if(d.open){S.curId=Number(d.open); S.screen='detail'; return render();}
+  if(d.nav){e.preventDefault(); return navigate(d.nav);}
+  if(d.open){return navigate('detail', {curId:Number(d.open)});}
   if(d.ver){S.ver=(S.ver===d.ver?'전체':d.ver); S.page=1; S.calOpen=false; return render();}
   if(d.monav){ const len=months().length;
     S.moIdx=Math.min(Math.max(0,S.moIdx+Number(d.monav)),len-1); return render(); }
@@ -2977,8 +3009,8 @@ document.addEventListener('click', e=>{
     const on=rs.length>0 && rs.every(t=>S.sel[t.id]);
     if(on) rs.forEach(t=>delete S.sel[t.id]); else rs.forEach(t=>S.sel[t.id]=true);
     return render(); }
-  if(d.goto){ S.screen=d.goto; return render(); }
-  if(d.cite){ S.screen='list'; S.q=EV[d.cite].src; S.oc='전체'; S.page=1; return render(); }
+  if(d.goto){ return navigate(d.goto); }
+  if(d.cite){ S.q=EV[d.cite].src; S.oc='전체'; S.page=1; return navigate('list'); }
   if(d.cnav){
     const total=VERSIONS.length;
     S.cOff = Math.min(Math.max(0, S.cOff + Number(d.cnav)*3), Math.max(0,total-CHART_N));
@@ -3075,8 +3107,8 @@ document.addEventListener('click', e=>{
     case 'exCopy':{const t=S.ex.editing?document.getElementById('exText').value:(S.ex.text!==null?S.ex.text:buildPrompt());
       try{const r=navigator.clipboard.writeText(t); if(r&&r.catch) r.catch(()=>{});}catch(err){}
       S.ex.copied=true; render(); setTimeout(()=>{S.ex.copied=false; render();},1600); return;}
-    case 'instrSave': S.instruction=document.getElementById('instr').value; S.instrSaved=true; return render();
-    case 'instrReset': S.instruction=DEFAULT_INSTRUCTION; S.instrSaved=true; return render();
+    case 'instrSave': S.instruction=document.getElementById('instr').value; persistSavedInstruction(S.instruction); S.instrSaved=true; return render();
+    case 'instrReset': S.instruction=DEFAULT_INSTRUCTION; persistSavedInstruction(S.instruction); S.instrSaved=true; return render();
     case 'rcAdd':{const v=(document.getElementById('rcInput')||{}).value;
       if(v&&v.trim()){S.recipients.push(v.trim()); render();} return;}
     case 'admAdd':{const v=(document.getElementById('admIn')||{}).value;
@@ -3121,6 +3153,10 @@ document.addEventListener('input', e=>{
   if(el.id==='instr'){S.instruction=el.value; S.instrSaved=false;
     const n=document.querySelector('.card-h .note'); if(n) n.textContent='저장되지 않은 변경'; return;}
   if(el.id==='exResearch'){S.ex.research=el.value; S.ex.text=null; return;}
+  // 프롬프트 편집 textarea — "편집 완료"를 누르기 전에 다른 화면으로 이동해도
+  // 입력한 내용이 사라지지 않도록(같은 세션 안에서는) 타이핑마다 바로 상태에 반영한다.
+  // 새로고침 시에는 저장 개념이 없는 필드라 자동으로 기본값으로 되돌아간다.
+  if(el.id==='exText'){S.ex.text=el.value; return;}
 });
 
 document.addEventListener('keydown', e=>{
@@ -3130,6 +3166,7 @@ document.addEventListener('keydown', e=>{
   if(e.target.id==='cgFree') document.getElementById('cgFreeGo').click();
 });
 
+history.replaceState({screen:S.screen, curId:S.curId}, '', '#'+S.screen);
 render();
 loadSavedTasks();   // 백엔드에 저장된 커스텀 과제를 불러와 목록에 반영
 
