@@ -67,7 +67,7 @@ export default function Login() {
       <header className="lp-header">
         <div className="lp-wrap lp-header-in">
           <a href="#top" className="lp-logo">
-            <span className="ski-logo" style={{ fontSize: 18 }}><b>SK</b><i>innovation</i></span>
+            <img className="ski-ci" src="/sk-innovation.png" alt="SK innovation" style={{ height: 26 }} />
             <span>
               <span className="lp-logo-t">O/I Spark Agent AI</span>
             </span>
@@ -87,9 +87,6 @@ export default function Login() {
           <div className="lp-cta-row">
             <button className="btn-grad" onClick={openModal}>로그인</button>
             <a className="btn-ghost" href="#work">서비스 개요 보기</a>
-          </div>
-          <div className="lp-demo" role="img" aria-label="O/I Spark 미리보기">
-            <span className="lp-demo-tag">3D · 인터랙티브 미리보기</span>
           </div>
         </section>
 
@@ -164,7 +161,7 @@ export default function Login() {
       <footer className="lp-footer">
         <div className="lp-wrap lp-footer-in">
           <a href="#top" className="lp-logo">
-            <span className="ski-logo" style={{ fontSize: 14 }}><b>SK</b><i>innovation</i></span>
+            <img className="ski-ci" src="/sk-innovation.png" alt="SK innovation" style={{ height: 20 }} />
             <span><span className="lp-logo-t sm">O/I Spark</span></span>
           </a>
           <div className="lp-foot-links">
@@ -270,6 +267,7 @@ const LP_CSS = `
 .ski-logo{font-family:Arial,'Helvetica Neue',sans-serif;font-weight:800;white-space:nowrap;letter-spacing:-.3px;line-height:1;display:inline-flex;align-items:baseline;gap:5px}
 .ski-logo b{color:#EA002C}
 .ski-logo i{color:#FF7A00;font-weight:700;font-style:normal}
+.ski-ci{width:auto;display:block;object-fit:contain}
 @font-face{font-family:'Chillax';src:url('/fonts/Chillax-Semibold.woff2') format('woff2'),url('/fonts/Chillax-Semibold.woff') format('woff');font-weight:600;font-style:normal;font-display:swap}
 .lp-logo-t{display:block;font-family:'Chillax',Arial,sans-serif;font-weight:600;font-size:19px;letter-spacing:-.02em;
   background:linear-gradient(100deg,#f5f3ff,#a855f7 45%,#38bdf8);-webkit-background-clip:text;
@@ -297,16 +295,6 @@ const LP_CSS = `
   padding:11px 20px;border-radius:999px;font-size:14.5px;font-weight:500;
   border:1px solid rgba(255,255,255,.14);transition:background .15s ease}
 .btn-ghost:hover{background:rgba(255,255,255,.06)}
-.lp-demo{margin:56px auto 0;max-width:760px;height:280px;border-radius:28px;position:relative;overflow:hidden;
-  background:radial-gradient(120% 140% at 20% 10%,rgba(168,85,247,.55) 0%,transparent 55%),
-    radial-gradient(120% 120% at 90% 20%,rgba(56,189,248,.5) 0%,transparent 50%),
-    radial-gradient(140% 140% at 50% 120%,rgba(56,189,248,.5) 0%,transparent 55%),
-    linear-gradient(135deg,#141026,#0b1226);
-  border:1px solid rgba(255,255,255,.1);
-  box-shadow:0 40px 90px -40px rgba(109,59,255,.55),inset 0 1px 0 rgba(255,255,255,.12)}
-.lp-demo-tag{position:absolute;left:50%;bottom:18px;transform:translateX(-50%);font-size:13px;
-  color:rgba(237,234,247,.75);background:rgba(10,10,20,.5);padding:6px 12px;border-radius:999px;
-  backdrop-filter:blur(6px);border:1px solid rgba(255,255,255,.08);white-space:nowrap}
 
 /* 섹션 공통 */
 .lp-section{padding:56px 24px}
