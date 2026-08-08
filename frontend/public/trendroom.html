@@ -8,36 +8,38 @@
 <style>
 /* ===== 디자인 시스템 토큰 (유지) ===== */
 :root{
-  --tmb1:#f2f6fe; --tmb2:#e2ecfd; --tmb3:#cbddfb; --tmb4:#abc7f8; --tmb5:#87acf3;
-  --tmt1:#eefaf8; --tmt2:#d7f1ed; --tmt3:#b2e4dc; --tmt4:#87d2c6; --tmt5:#59bdae;
-  --tmp1:#f5f2fe; --tmp2:#e8e1fd; --tmp3:#d5c6fb; --tmp4:#bda7f8; --tmp5:#a184f3;
-  --bg:#ebf1f3; --panel:#fff; --panel-sub:#fafbfc;
-  --brand:#2f4a57; --brand-hover:#1e3138; --brand-soft:#e9eff2; --brand-tint:#f4f8f9;
+  --tmb1:#eaf3fd; --tmb2:#cbe3fa; --tmb3:#a2cef4; --tmb4:#74b4ee; --tmb5:#4fa3e8;
+  --tmt1:#e7f5f2; --tmt2:#c6e9e2; --tmt3:#9bd7cc; --tmt4:#6ac1b2; --tmt5:#40ac99;
+  --tmp1:#f6eaf2; --tmp2:#e9cfe0; --tmp3:#d3a7c4; --tmp4:#bb84ac; --tmp5:#a06b98;
+  --bg:#e9f0f6; --panel:#fff; --panel-sub:#f8fafc;
+  --brand:#336591; --brand-hover:#284f73; --brand-soft:#e4eef7; --brand-tint:#eff6fb;
   --ink:#101c21; --t1:#3c4149; --t2:#4b5160; --t3:#6b7280; --t4:#9096a2; --t5:#b4b9c3;
   --line:#e8eaed; --line-soft:#f0f1f3; --line-faint:#f4f5f7; --line-mid:#e2e5e9;
   --fill:#f4f5f7; --fill2:#f2f4f7;
   --ok:#16a34a; --ok-bg:#eaf7ee;
   --warn:#d97706; --warn-bg:#fdf4e7;
   --bad:#dc2626; --bad-bg:#fdeceb;
-  --c1:#2f4a57; --c2:#9db3bd; --c3:#cfdbe1;
+  --c1:#3D7EAE; --c2:#a7c4d8; --c3:#d5e5f0;
   --edit:#2563eb;
+  --bar:#2196F3;
   color-scheme:light;
 }
 /* ===== 다크 테마 (랜딩 페이지 색상표 기반: 딥 네이비/퍼플 + 퍼플·블루 액센트) ===== */
 html[data-theme="dark"]{
-  --tmb1:#181a2c; --tmb2:#1c2440; --tmb3:#233158; --tmb4:#2c4079; --tmb5:#37519b;
-  --tmt1:#151f22; --tmt2:#16302f; --tmt3:#1a4541; --tmt4:#1e5c55; --tmt5:#24756b;
-  --tmp1:#1c1830; --tmp2:#241d47; --tmp3:#2f2465; --tmp4:#3d2d87; --tmp5:#4d38ab;
+  --tmb1:#15243f; --tmb2:#1b3763; --tmb3:#224d8a; --tmb4:#2c64b0; --tmb5:#3a7ad2;
+  --tmt1:#13251f; --tmt2:#163f37; --tmt3:#1a574c; --tmt4:#206f61; --tmt5:#26907a;
+  --tmp1:#201a34; --tmp2:#302453; --tmp3:#453672; --tmp4:#614a8e; --tmp5:#8b639b;
   --bg:#0a0912; --panel:#14121f; --panel-sub:#1a1730;
   --brand:#a855f7; --brand-hover:#9333ea; --brand-soft:#241a3f; --brand-tint:#1d1733;
   --ink:#edeaf7; --t1:#d6d2e8; --t2:#b3aecf; --t3:#8f8ab0; --t4:#6f6a8e; --t5:#544f6e;
-  --line:#262233; --line-soft:#201c2e; --line-faint:#1b1827; --line-mid:#2f2a42;
-  --fill:#1c1930; --fill2:#1a1730;
+  --line:#332f49; --line-soft:#2a2640; --line-faint:#231f30; --line-mid:#3f3958;
+  --fill:#211d38; --fill2:#1a1730;
   --ok:#34d399; --ok-bg:#12281f;
   --warn:#fbbf24; --warn-bg:#2a2113;
   --bad:#f87171; --bad-bg:#2a1618;
   --c1:#a855f7; --c2:#7c6ba8; --c3:#463f63;
   --edit:#60a5fa;
+  --bar:#8B639B;
   color-scheme:dark;
 }
 html[data-theme="dark"] ::-webkit-scrollbar-thumb{background:#2f2a42}
@@ -45,9 +47,14 @@ html[data-theme="dark"] .ctip,html[data-theme="dark"] .ptip{background:#241f38;b
 html{transition:background-color .22s ease}
 body{transition:background-color .22s ease,color .22s ease}
 *{box-sizing:border-box;margin:0;padding:0}
+/* ── 본문 한글 폰트: paybooc (4 weight) ── */
+@font-face{font-family:'paybooc';src:url('/fonts/paybooc-Light.woff2') format('woff2');font-weight:300;font-style:normal;font-display:swap}
+@font-face{font-family:'paybooc';src:url('/fonts/paybooc-Medium.woff2') format('woff2');font-weight:400 500;font-style:normal;font-display:swap}
+@font-face{font-family:'paybooc';src:url('/fonts/paybooc-Bold.woff2') format('woff2');font-weight:600 700;font-style:normal;font-display:swap}
+@font-face{font-family:'paybooc';src:url('/fonts/paybooc-ExtraBold.woff2') format('woff2');font-weight:800 900;font-style:normal;font-display:swap}
 html{background:var(--bg)}
 body{background:var(--bg);color:var(--ink);
-  font-family:"Pretendard Variable",Pretendard,-apple-system,system-ui,"Malgun Gothic",sans-serif;
+  font-family:'paybooc',"Pretendard Variable",Pretendard,-apple-system,system-ui,"Malgun Gothic",sans-serif;
   -webkit-font-smoothing:antialiased;min-width:1160px}
 a{color:var(--brand);text-decoration:none}
 button,input,select,textarea{font-family:inherit;color:inherit}
@@ -60,7 +67,7 @@ button,input,select,textarea{font-family:inherit;color:inherit}
 .app{display:flex;min-height:100vh}
 .side{width:236px;flex:none;background:var(--panel);border-right:1px solid var(--line);
   display:flex;flex-direction:column;position:sticky;top:0;height:100vh}
-.brand{height:60px;flex:none;display:flex;align-items:center;gap:10px;padding:0 18px;border-bottom:1px solid var(--line-soft)}
+.brand{height:60px;flex:none;display:flex;align-items:center;gap:10px;padding:0 18px}
 .brand-mk{width:26px;height:26px;border-radius:7px;background:var(--brand);color:#fff;
   display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;letter-spacing:-.4px}
 .brand-nm{font-size:13.5px;font-weight:700;letter-spacing:-.3px}
@@ -69,8 +76,8 @@ button,input,select,textarea{font-family:inherit;color:inherit}
 .ski-logo b{color:#EA002C}
 .ski-logo i{color:#FF7A00;font-weight:700;font-style:normal}
 @font-face{font-family:'Chillax';src:url('/fonts/Chillax-Semibold.woff2') format('woff2'),url('/fonts/Chillax-Semibold.woff') format('woff');font-weight:600;font-style:normal;font-display:swap}
-.oi-logo{font-family:'Chillax','Pretendard Variable',Arial,sans-serif;font-weight:600;letter-spacing:-.02em;white-space:nowrap;background:linear-gradient(100deg,#f5f3ff,#a855f7 45%,#38bdf8);-webkit-background-clip:text;background-clip:text;color:transparent}
-html[data-theme="light"] .oi-logo{background:linear-gradient(100deg,#7c3aed,#2563eb);-webkit-background-clip:text;background-clip:text}
+.oi-logo{font-family:'Chillax','Pretendard Variable',Arial,sans-serif;font-weight:600;letter-spacing:-.02em;white-space:nowrap;background:linear-gradient(100deg,#9a6ee0,#c9a6dd 50%,#f9efec);-webkit-background-clip:text;background-clip:text;color:transparent}
+html[data-theme="light"] .oi-logo{background:linear-gradient(100deg,#2f5d84,#3D7EAE 55%,#5fa0d0);-webkit-background-clip:text;background-clip:text}
 .logout-b{color:var(--t3)}
 .logout-b:hover{background:var(--fill);color:var(--bad)}
 .logout-b:hover .nav-i{border-color:var(--bad);color:var(--bad)}
@@ -93,6 +100,7 @@ html[data-theme="light"] .oi-logo{background:linear-gradient(100deg,#7c3aed,#256
 .pw-actions .btn{flex:1;justify-content:center}
 .nav{flex:1;overflow-y:auto;padding:14px 10px;display:flex;flex-direction:column;gap:18px}
 .nav-g{display:flex;flex-direction:column;gap:2px}
+.nav-g:not(:first-child){border-top:1px solid var(--line);padding-top:18px}
 .nav-t{font-size:10.5px;font-weight:600;color:var(--t4);letter-spacing:.4px;padding:0 10px 7px}
 .nav-b{display:flex;align-items:center;gap:9px;width:100%;padding:9px 10px;border:0;background:transparent;
   border-radius:8px;cursor:pointer;text-align:left;font-size:13px;color:var(--t1);font-weight:500}
@@ -109,14 +117,83 @@ html[data-theme="light"] .oi-logo{background:linear-gradient(100deg,#7c3aed,#256
 .pipe-r{display:flex;align-items:center;gap:8px;font-size:11px;color:var(--t3)}
 .dot{width:5px;height:5px;border-radius:50%;flex:none}
 
-.body{flex:1;min-width:0}
+.body{flex:1;min-width:0;display:flex;flex-direction:column}
 .main{padding:26px 26px 48px;display:flex;flex-direction:column;gap:18px}
+/* ===== 상단 네비게이션(토바) + 계정 드롭다운 ===== */
+.topbar{height:56px;flex:none;display:flex;align-items:center;gap:10px;padding:0 22px;
+  background:var(--panel);border-bottom:1px solid var(--line);position:sticky;top:0;z-index:40}
+.tb-theme{width:34px;height:34px;flex:none;display:flex;align-items:center;justify-content:center;
+  border:1px solid var(--line-mid);border-radius:9px;background:var(--panel-sub);color:var(--t1);cursor:pointer;font-size:15px;line-height:1}
+.tb-theme:hover{border-color:var(--brand);color:var(--brand)}
+.tb-acct{position:relative;margin-left:2px}
+.tb-trigger{display:flex;align-items:center;gap:9px;padding:5px 8px 5px 5px;border-radius:10px;cursor:pointer;border:1px solid transparent;background:none}
+.tb-trigger:hover{background:var(--fill);border-color:var(--line-mid)}
+.tb-av{width:34px;height:34px;border-radius:50%;background:var(--brand-soft);color:var(--brand);display:flex;align-items:center;justify-content:center;font-weight:800;font-size:14px;flex:none}
+.tb-meta{display:flex;flex-direction:column;line-height:1.25;text-align:left;min-width:0}
+.tb-name{font-size:13px;font-weight:700;color:var(--ink);white-space:nowrap}
+.tb-role{font-size:11px;color:var(--t3);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:170px}
+.tb-caret{color:var(--t4);font-size:10px;margin-left:2px;flex:none}
+.tb-menu{position:absolute;top:calc(100% + 7px);right:0;min-width:172px;background:var(--panel);border:1px solid var(--line);border-radius:12px;box-shadow:0 16px 40px -16px rgba(0,0,0,.35);padding:6px;display:none;flex-direction:column;gap:2px;z-index:50}
+.tb-menu.open{display:flex}
+.tb-mi{display:flex;align-items:center;gap:10px;padding:9px 11px;border:0;background:none;border-radius:8px;cursor:pointer;font-size:12.5px;font-weight:600;color:var(--t1);text-align:left;width:100%}
+.tb-mi:hover{background:var(--fill)}
+.tb-mi.danger{color:var(--bad)}
+.tb-mi .ic{width:16px;text-align:center;color:var(--t3);flex:none}
+.tb-mi.danger .ic{color:var(--bad)}
+/* ===== 마이페이지 ===== */
+.my-acct{display:flex;align-items:center;gap:14px;flex-wrap:wrap}
+.my-av{width:52px;height:52px;border-radius:50%;background:var(--brand-soft);color:var(--brand);display:flex;align-items:center;justify-content:center;font-weight:800;font-size:20px;flex:none}
+.my-em{font-size:15px;font-weight:700;color:var(--ink)}
+.my-btns{margin-left:auto;display:flex;gap:8px;flex-wrap:wrap}
+.btn.danger{color:var(--bad);border-color:var(--bad)}
+.btn.danger:hover{background:var(--bad-bg)}
+.mylist{display:flex;flex-direction:column;gap:8px}
+.mycard{display:flex;flex-direction:column;gap:6px;padding:12px 14px;border:1px solid var(--line);border-radius:11px;background:var(--panel);cursor:pointer;text-align:left;width:100%}
+.mycard:hover{border-color:var(--brand);background:var(--fill)}
+.myc-t{font-size:13px;font-weight:700;color:var(--ink)}
+.myc-m{display:flex;align-items:center;gap:7px;flex-wrap:wrap}
+.myc-fb{font-size:11.5px;color:var(--t2);font-weight:600}
+.myc-star{color:#e0a022;letter-spacing:1px}
+.my-empty{padding:18px;text-align:center;color:var(--t4);font-size:12.5px}
+.tr-pager{display:flex;align-items:center;justify-content:center;gap:16px;padding:15px 17px;border-top:1px solid var(--line-soft)}
+/* ===== 애니메이션 테마 스위치 (해/달) ===== */
+.theme-switch{
+  --toggle-size:10px;
+  --container-width:5.625em;--container-height:2.5em;--container-radius:6.25em;
+  --container-light-bg:#3D7EAE;--container-night-bg:#1D1F2C;
+  --circle-container-diameter:3.375em;--sun-moon-diameter:2.125em;
+  --sun-bg:#ECCA2F;--moon-bg:#C4C9D1;--spot-color:#959DB1;
+  --circle-container-offset:calc((var(--circle-container-diameter) - var(--container-height)) / 2 * -1);
+  --stars-color:#fff;--clouds-color:#F3FDFF;--back-clouds-color:#AACADF;
+  --transition:.5s cubic-bezier(0, -0.02, 0.4, 1.25);
+  --circle-transition:.3s cubic-bezier(0, -0.02, 0.35, 1.17);
+  display:inline-flex;flex:none}
+.theme-switch,.theme-switch *,.theme-switch *::before,.theme-switch *::after{box-sizing:border-box;margin:0;padding:0;font-size:var(--toggle-size)}
+.theme-switch__container{width:var(--container-width);height:var(--container-height);background-color:var(--container-light-bg);border-radius:var(--container-radius);overflow:hidden;cursor:pointer;box-shadow:0em -0.062em 0.062em rgba(0,0,0,0.25),0em 0.062em 0.125em rgba(255,255,255,0.94);transition:var(--transition);position:relative}
+.theme-switch__container::before{content:"";position:absolute;z-index:1;inset:0;box-shadow:0em 0.05em 0.187em rgba(0,0,0,0.25) inset,0em 0.05em 0.187em rgba(0,0,0,0.25) inset;border-radius:var(--container-radius)}
+.theme-switch__checkbox{display:none}
+.theme-switch__circle-container{width:var(--circle-container-diameter);height:var(--circle-container-diameter);background-color:transparent;position:absolute;left:var(--circle-container-offset);top:var(--circle-container-offset);border-radius:var(--container-radius);box-shadow:none;display:flex;transition:var(--circle-transition);pointer-events:none}
+.theme-switch__sun-moon-container{pointer-events:auto;position:relative;z-index:2;width:var(--sun-moon-diameter);height:var(--sun-moon-diameter);margin:auto;border-radius:var(--container-radius);background-color:var(--sun-bg);box-shadow:0.062em 0.062em 0.062em 0em rgba(254,255,239,0.61) inset,0em -0.062em 0.062em 0em #a1872a inset;filter:drop-shadow(0.062em 0.125em 0.125em rgba(0,0,0,0.25)) drop-shadow(0em 0.062em 0.125em rgba(0,0,0,0.25));overflow:hidden;transition:var(--transition)}
+.theme-switch__moon{transform:translateX(100%);width:100%;height:100%;background-color:var(--moon-bg);border-radius:inherit;box-shadow:0.062em 0.062em 0.062em 0em rgba(254,255,239,0.61) inset,0em -0.062em 0.062em 0em #969696 inset;transition:var(--transition);position:relative}
+.theme-switch__spot{position:absolute;top:0.75em;left:0.312em;width:0.75em;height:0.75em;border-radius:var(--container-radius);background-color:var(--spot-color);box-shadow:0em 0.0312em 0.062em rgba(0,0,0,0.25) inset}
+.theme-switch__spot:nth-of-type(2){width:0.375em;height:0.375em;top:0.937em;left:1.375em}
+.theme-switch__spot:nth-last-of-type(3){width:0.25em;height:0.25em;top:0.312em;left:0.812em}
+.theme-switch__clouds{width:1.25em;height:1.25em;background-color:var(--clouds-color);border-radius:var(--container-radius);position:absolute;bottom:-0.625em;left:0.312em;box-shadow:0.937em 0.312em var(--clouds-color),-0.312em -0.312em var(--back-clouds-color),1.437em 0.375em var(--clouds-color),0.5em -0.125em var(--back-clouds-color),2.187em 0 var(--clouds-color),1.25em -0.062em var(--back-clouds-color),2.937em 0.312em var(--clouds-color),2em -0.312em var(--back-clouds-color),3.625em -0.062em var(--clouds-color),2.625em 0em var(--back-clouds-color),4.5em -0.312em var(--clouds-color),3.375em -0.437em var(--back-clouds-color),4.625em -1.75em 0 0.437em var(--clouds-color),4em -0.625em var(--back-clouds-color),4.125em -2.125em 0 0.437em var(--back-clouds-color);transition:0.5s cubic-bezier(0, -0.02, 0.4, 1.25)}
+.theme-switch__stars-container{position:absolute;color:var(--stars-color);top:-100%;left:0.312em;width:2.75em;height:auto;transition:var(--transition)}
+.theme-switch__checkbox:checked + .theme-switch__container{background-color:var(--container-night-bg)}
+.theme-switch__checkbox:checked + .theme-switch__container .theme-switch__circle-container{left:calc(100% - var(--circle-container-offset) - var(--circle-container-diameter))}
+.theme-switch__checkbox:checked + .theme-switch__container .theme-switch__circle-container:hover{left:calc(100% - var(--circle-container-offset) - var(--circle-container-diameter) - 0.187em)}
+.theme-switch__circle-container:hover{left:calc(var(--circle-container-offset) + 0.187em)}
+.theme-switch__checkbox:checked + .theme-switch__container .theme-switch__moon{transform:translate(0)}
+.theme-switch__checkbox:checked + .theme-switch__container .theme-switch__clouds{bottom:-4.062em}
+.theme-switch__checkbox:checked + .theme-switch__container .theme-switch__stars-container{top:50%;transform:translateY(-50%)}
 
 /* ===== 공통 ===== */
 h1{font-size:21px;font-weight:700;letter-spacing:-.5px}
 h2{font-size:14px;font-weight:700;letter-spacing:-.3px}
 .lede{font-size:12.5px;color:var(--t3);line-height:1.6}
-.page-h{display:flex;align-items:flex-end;justify-content:space-between;gap:20px;flex-wrap:wrap}
+.page-h{display:flex;align-items:center;justify-content:space-between;gap:20px;flex-wrap:wrap;min-height:40px}
+.page-h h1::before{content:"\00a0"}
 .card{background:var(--panel);border:1px solid var(--line);border-radius:14px;
   box-shadow:0 1px 2px rgba(16,24,40,.04)}
 .card-h{display:flex;align-items:center;gap:10px;padding:14px 17px;border-bottom:1px solid var(--line-soft);flex-wrap:wrap}
@@ -124,7 +201,7 @@ h2{font-size:14px;font-weight:700;letter-spacing:-.3px}
 .btn{height:34px;padding:0 13px;border:1px solid var(--line-mid);background:var(--panel);border-radius:9px;
   font-size:12.5px;font-weight:600;color:var(--t1);cursor:pointer;display:inline-flex;align-items:center;gap:6px;
   white-space:nowrap}
-.btn:hover{background:#f7f8fa}
+.btn:hover{background:var(--fill)}
 .btn.pri{background:var(--brand);border-color:var(--brand);color:#fff}
 .btn.pri:hover{background:var(--brand-hover)}
 .btn.sm{height:29px;padding:0 10px;font-size:11.5px;border-radius:7px}
@@ -185,7 +262,7 @@ th:last-child,td:last-child{padding-right:17px}
 .calbtn{height:32px;padding:0 11px;border:1px solid var(--line-mid);border-radius:8px;background:var(--panel);
   font-size:12.5px;font-weight:600;color:var(--t1);cursor:pointer;display:inline-flex;align-items:center;gap:7px;
   white-space:nowrap}
-.calbtn:hover{background:#f7f8fa}
+.calbtn:hover{background:var(--fill)}
 .calbtn.act{border-color:var(--brand);color:var(--brand)}
 .cal{position:absolute;top:38px;left:0;z-index:40;width:272px;background:var(--panel);
   border:1px solid var(--line);border-radius:12px;box-shadow:0 8px 24px rgba(16,24,40,.14);padding:12px}
@@ -232,6 +309,7 @@ th:last-child,td:last-child{padding-right:17px}
 .cbox{width:17px;height:17px;border:1.5px solid var(--line-mid);border-radius:5px;display:flex;
   align-items:center;justify-content:center;font-size:10px;color:transparent;background:var(--panel)}
 .cbox.on{background:var(--brand);border-color:var(--brand);color:#fff;font-weight:700}
+.cbox.part{background:var(--brand-soft);border-color:var(--brand);color:var(--brand);font-weight:700}
 .icb{width:28px;height:28px;border:1px solid var(--line-mid);border-radius:7px;background:var(--panel);
   color:var(--t3);cursor:pointer;font-size:13px;display:flex;align-items:center;justify-content:center;flex:none}
 .icb:hover{border-color:var(--brand);color:var(--brand);background:var(--brand-tint)}
@@ -366,6 +444,9 @@ textarea{width:100%;border:1px solid var(--line-mid);border-radius:10px;padding:
 .cb{flex:1;min-width:0;display:flex;flex-direction:column;justify-content:flex-end;
   background:none;border:0;padding:0;cursor:pointer;height:100%;position:relative}
 .cbar{width:100%;background:var(--bar);min-height:3px;border-radius:5px 5px 0 0;transition:opacity .12s}
+/* 그래프 채도 부스트 — 텁텁함 완화 (다크가 더 물빠진 톤이라 강하게) */
+.pie svg,.cbar,.pl-d,.pl-fl{filter:saturate(1.28)}
+html[data-theme="dark"] .pie svg,html[data-theme="dark"] .cbar,html[data-theme="dark"] .pl-d,html[data-theme="dark"] .pl-fl{filter:saturate(1.5)}
 .cbars:hover .cbar{opacity:.4}
 .cb:hover .cbar{opacity:1}
 .cb.act .cbar{outline:2px solid var(--ink);outline-offset:2px;border-radius:5px 5px 1px 1px}
@@ -420,9 +501,16 @@ textarea{width:100%;border:1px solid var(--line-mid);border-radius:10px;padding:
 }
 
 /* 파이 조각 툴팁 */
-.ptip{display:none;position:fixed;z-index:200;background:#161616;color:#fff;border-radius:2px;
-  padding:9px 11px;min-width:150px;box-shadow:0 2px 12px rgba(0,0,0,.3);pointer-events:none;
+.ptip{display:none;position:fixed;z-index:200;background:#161616;color:#fff;border-radius:11px;
+  padding:12px 14px;min-width:200px;box-shadow:0 8px 24px rgba(0,0,0,.4);pointer-events:none;
   font-family:inherit}
+.pt-h{display:flex;align-items:center;gap:8px}
+.pt-s{width:11px;height:11px;border-radius:3px;flex:none}
+.pt-nm{font-size:14.5px;font-weight:700;letter-spacing:-.3px}
+.pt-v{margin-left:auto;padding-left:14px;font-size:14.5px;font-weight:700;font-variant-numeric:tabular-nums}
+.pt-bar{display:block;height:5px;border-radius:99px;background:rgba(255,255,255,.16);overflow:hidden;margin:9px 0 8px}
+.pt-fl{display:block;height:100%;border-radius:99px}
+.pt-f{display:block;font-size:11.5px;color:#b9b9c6;font-variant-numeric:tabular-nums}
 
 /* ═══════ 관심 종목 티커 ═══════ */
 .ticker{background:var(--panel);border:1px solid var(--line);border-radius:14px;
@@ -455,9 +543,13 @@ textarea{width:100%;border:1px solid var(--line-mid);border-radius:10px;padding:
 
 /* ═══════ 티커 오른쪽 트렌드룸 버튼 ═══════ */
 .tk-btn{flex:none;display:flex;align-items:center;justify-content:center;padding:0 22px;border:0;
-  background:#0f62fe;cursor:pointer;font-size:12.5px;font-weight:700;color:#fff;
+  background:var(--brand);cursor:pointer;font-size:12.5px;font-weight:700;color:#fff;
   white-space:nowrap;letter-spacing:-.2px;transition:background .12s}
-.tk-btn:hover{background:#0043ce}
+.tk-btn:hover{background:var(--brand-hover)}
+html[data-theme="light"] .tk-btn,html[data-theme="light"] .msave{background:#0D47A1}
+html[data-theme="light"] .tk-btn:hover,html[data-theme="light"] .msave:hover{background:#0a3a82}
+html[data-theme="dark"] .tk-btn,html[data-theme="dark"] .msave{background:#403D88}
+html[data-theme="dark"] .tk-btn:hover,html[data-theme="dark"] .msave:hover{background:#4d499e}
 
 /* ═══════ 트렌드룸 ═══════ */
 .tr-hero{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:16px}
@@ -501,6 +593,8 @@ textarea{width:100%;border:1px solid var(--line-mid);border-radius:10px;padding:
 
 .ai-mk{width:20px;height:20px;border-radius:6px;background:var(--brand);color:#fff;display:flex;
   align-items:center;justify-content:center;font-size:9.5px;font-weight:700;flex:none}
+.ai-img{width:22px;height:22px;flex:none;display:block;background-color:#FFB900;
+  -webkit-mask:url(/ai.png) center/contain no-repeat;mask:url(/ai.png) center/contain no-repeat}
 .ai-ctl{display:flex;flex-direction:column;gap:9px;padding:12px 15px;border-bottom:1px solid var(--line-soft);
   background:var(--panel-sub)}
 .ai-row{display:flex;align-items:center;gap:6px;flex-wrap:wrap}
@@ -626,6 +720,9 @@ html[data-theme="dark"] .bst:hover,html[data-theme="dark"] .bst:hover ~ .bst{col
 .tm:hover .tmc{opacity:.5}
 .tmc:hover{opacity:1 !important;z-index:5;box-shadow:0 2px 10px rgba(16,24,40,.12)}
 .tmc.sel{outline:2px solid var(--ink);outline-offset:-2px;z-index:4;opacity:1 !important}
+/* 다크: 셀 구분용 약한 보라 네온 */
+html[data-theme="dark"] .tmc{box-shadow:inset 0 0 0 1px rgba(168,85,247,.30), 0 0 6px rgba(168,85,247,.08)}
+html[data-theme="dark"] .tmc:hover{box-shadow:inset 0 0 0 1px rgba(168,85,247,.55), 0 0 11px rgba(168,85,247,.30)}
 .tmc-n{font-weight:600;line-height:1.2;opacity:.82;white-space:nowrap;overflow:hidden;
   text-overflow:ellipsis;max-width:100%}
 .tmc-v{font-weight:700;line-height:1;font-variant-numeric:tabular-nums}
@@ -640,7 +737,7 @@ html[data-theme="dark"] .bst:hover,html[data-theme="dark"] .bst:hover ~ .bst{col
 .kwr.on .kwr-n{color:var(--brand);font-weight:700}
 .kwr-n{font-size:11.5px;color:var(--t1);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .kwr-t{height:6px;background:var(--line-soft);border-radius:4px;overflow:hidden;display:block}
-.kwr-t i{display:block;height:100%;background:#0f62fe;border-radius:4px}
+.kwr-t i{display:block;height:100%;background:var(--bar);border-radius:4px}
 .kwr-v{font-size:11.5px;font-weight:700;text-align:right;font-variant-numeric:tabular-nums}
 .kwr-d{font-size:9.5px;font-weight:600;text-align:right;font-variant-numeric:tabular-nums}
 .kwr-d.up{color:#dc2626}
@@ -762,9 +859,9 @@ table.ttbl{width:100%;border-collapse:collapse;table-layout:fixed}
 .bst:hover,.bst:hover ~ .bst{color:#e0a022}
 
 /* 패널 액션 — 표의 상세 버튼과 구분되는 형태 */
-.msave{height:30px;padding:0 16px;border:0;border-radius:99px;background:#0f62fe;color:#fff;
+.msave{height:30px;padding:0 16px;border:0;border-radius:99px;background:var(--brand);color:#fff;
   font-size:12px;font-weight:700;cursor:pointer;white-space:nowrap;flex:none;transition:background .12s}
-.msave:hover{background:#0043ce}
+.msave:hover{background:var(--brand-hover)}
 .mclose{width:28px;height:28px;border:0;border-radius:50%;background:transparent;color:var(--t4);
   font-size:13px;cursor:pointer;display:flex;align-items:center;justify-content:center;flex:none;
   line-height:1;padding:0}
@@ -781,19 +878,48 @@ table.ttbl{width:100%;border-collapse:collapse;table-layout:fixed}
 <body>
 <div class="app">
   <aside class="side">
-    <div class="brand" style="flex-direction:column;align-items:flex-start;justify-content:center;gap:4px">
-      <div style="display:flex;align-items:center;gap:8px;width:100%">
-        <span class="oi-logo" style="font-size:19px">O/I Spark</span>
-        <button id="themeBtn" type="button" aria-label="다크/라이트 테마 전환" title="다크/라이트 전환"
-        style="margin-left:auto;width:30px;height:30px;flex:none;display:flex;align-items:center;justify-content:center;
-        border:1px solid var(--line-mid);border-radius:8px;background:var(--panel-sub);color:var(--t1);
-        cursor:pointer;font-size:14px;line-height:1">🌙</button>
-      </div>
-      <span class="brand-sb">SK이노베이션 O/I추진단</span>
+    <div class="brand" style="flex-direction:column;align-items:center;justify-content:center;gap:4px">
+      <span class="oi-logo" style="font-size:27px">OI SPARK</span>
     </div>
     <nav class="nav" id="nav"></nav>
   </aside>
-  <div class="body"><main class="main" id="main"></main></div>
+  <div class="body">
+    <header class="topbar">
+      <div style="margin-left:auto"></div>
+      <label class="theme-switch" title="다크/라이트 전환">
+        <input type="checkbox" class="theme-switch__checkbox" id="themeChk">
+        <div class="theme-switch__container">
+          <div class="theme-switch__clouds"></div>
+          <div class="theme-switch__stars-container">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 144 55" fill="none">
+              <path fill-rule="evenodd" clip-rule="evenodd" d="M135.831 3.00688C135.055 3.85027 134.111 4.29946 133 4.35447C134.111 4.40947 135.055 4.85867 135.831 5.71123C136.607 6.55462 136.996 7.56303 136.996 8.72727C136.996 7.95722 137.172 7.25134 137.525 6.59129C137.886 5.93124 138.372 5.39954 138.98 5.00535C139.598 4.60199 140.268 4.39114 141 4.35447C139.88 4.2903 138.936 3.85027 138.16 3.00688C137.384 2.16348 136.996 1.16425 136.996 0C136.996 1.16425 136.607 2.16348 135.831 3.00688ZM31 23.3545C32.1114 23.2995 33.0551 22.8503 33.8313 22.0069C34.6075 21.1635 34.9956 20.1642 34.9956 19C34.9956 20.1642 35.3837 21.1635 36.1599 22.0069C36.9361 22.8503 37.8798 23.2903 39 23.3545C38.2679 23.3911 37.5976 23.602 36.9802 24.0053C36.3716 24.3995 35.8864 24.9312 35.5248 25.5913C35.172 26.2513 34.9956 26.9572 34.9956 27.7273C34.9956 26.563 34.6075 25.5546 33.8313 24.7112C33.0551 23.8587 32.1114 23.4095 31 23.3545ZM0 36.3545C1.11136 36.2995 2.05513 35.8503 2.83131 35.0069C3.6075 34.1635 3.99559 33.1642 3.99559 32C3.99559 33.1642 4.38368 34.1635 5.15987 35.0069C5.93605 35.8503 6.87982 36.2903 8 36.3545C7.26792 36.3911 6.59757 36.602 5.98015 37.0053C5.37155 37.3995 4.88644 37.9312 4.52481 38.5913C4.172 39.2513 3.99559 39.9572 3.99559 40.7273C3.99559 39.563 3.6075 38.5546 2.83131 37.7112C2.05513 36.8587 1.11136 36.4095 0 36.3545ZM56.8313 24.0069C56.0551 24.8503 55.1114 25.2995 54 25.3545C55.1114 25.4095 56.0551 25.8587 56.8313 26.7112C57.6075 27.5546 57.9956 28.563 57.9956 29.7273C57.9956 28.9572 58.172 28.2513 58.5248 27.5913C58.8864 26.9312 59.3716 26.3995 59.9802 26.0053C60.5976 25.602 61.2679 25.3911 62 25.3545C60.8798 25.2903 59.9361 24.8503 59.1599 24.0069C58.3837 23.1635 57.9956 22.1642 57.9956 21C57.9956 22.1642 57.6075 23.1635 56.8313 24.0069ZM81 25.3545C82.1114 25.2995 83.0551 24.8503 83.8313 24.0069C84.6075 23.1635 84.9956 22.1642 84.9956 21C84.9956 22.1642 85.3837 23.1635 86.1599 24.0069C86.9361 24.8503 87.8798 25.2903 89 25.3545C88.2679 25.3911 87.5976 25.602 86.9802 26.0053C86.3716 26.3995 85.8864 26.9312 85.5248 27.5913C85.172 28.2513 84.9956 28.9572 84.9956 29.7273C84.9956 28.563 84.6075 27.5546 83.8313 26.7112C83.0551 25.8587 82.1114 25.4095 81 25.3545ZM136 36.3545C137.111 36.2995 138.055 35.8503 138.831 35.0069C139.607 34.1635 139.996 33.1642 139.996 32C139.996 33.1642 140.384 34.1635 141.16 35.0069C141.936 35.8503 142.88 36.2903 144 36.3545C143.268 36.3911 142.598 36.602 141.98 37.0053C141.372 37.3995 140.886 37.9312 140.525 38.5913C140.172 39.2513 139.996 39.9572 139.996 40.7273C139.996 39.563 139.607 38.5546 138.831 37.7112C138.055 36.8587 137.111 36.4095 136 36.3545ZM101.831 49.0069C101.055 49.8503 100.111 50.2995 99 50.3545C100.111 50.4095 101.055 50.8587 101.831 51.7112C102.607 52.5546 102.996 53.563 102.996 54.7273C102.996 53.9572 103.172 53.2513 103.525 52.5913C103.886 51.9312 104.372 51.3995 104.98 51.0053C105.598 50.602 106.268 50.3911 107 50.3545C105.88 50.2903 104.936 49.8503 104.16 49.0069C103.384 48.1635 102.996 47.1642 102.996 46C102.996 47.1642 102.607 48.1635 101.831 49.0069Z" fill="currentColor"></path>
+            </svg>
+          </div>
+          <div class="theme-switch__circle-container">
+            <div class="theme-switch__sun-moon-container">
+              <div class="theme-switch__moon">
+                <div class="theme-switch__spot"></div>
+                <div class="theme-switch__spot"></div>
+                <div class="theme-switch__spot"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </label>
+      <div class="tb-acct">
+        <button class="tb-trigger" id="tbTrigger" type="button" onclick="toggleAcctMenu(event)">
+          <span class="tb-av" id="tbAv">·</span>
+          <span class="tb-meta"><span class="tb-name" id="tbName">-</span><span class="tb-role" id="tbRole">-</span></span>
+          <span class="tb-caret">▼</span>
+        </button>
+        <div class="tb-menu" id="tbMenu">
+          <button class="tb-mi" type="button" onclick="closeAcctMenu();navigate('my')"><span class="ic">👤</span><span>마이페이지</span></button>
+          <button class="tb-mi danger" type="button" onclick="oiLogout()"><span class="ic">→</span><span>로그아웃</span></button>
+        </div>
+      </div>
+    </header>
+    <main class="main" id="main"></main>
+  </div>
 </div>
 
 <script>
@@ -896,6 +1022,33 @@ const userFx = t => S.fx[t.id];                       // {text, at}
 function fxText(t){
   return sysOn(t) ? LOGIC[t.lever].text : (userFx(t)?.text || LOGIC[t.lever].text);
 }
+/* 산출식 정리 — 단위 주석 괄호(연산자 없는 '(…)')는 제거. 그룹 괄호는 보존 */
+function fxClean(formula){ return (formula||'').replace(/\(([^()×✕*÷\/＋+\-−–]*)\)/g,' '); }
+function fxTokens(formula){ return fxClean(formula).split(/[×✕*÷\/＋+\-−–=%()]/).map(s=>s.trim()).filter(Boolean); }
+/* 입력이 필요한 값(피연산자) = 숫자로 시작하지 않는 항목만 (상수·단위 제외) */
+function fxOperands(formula){ return [...new Set(fxTokens(formula).filter(tk => !/^[\d.,]/.test(tk)))]; }
+/* 기준값 입력 필드 — 시스템 제안이면 레버 고정 필드, 수정 산출식이면 그 피연산자들 */
+function fxFields(t){
+  if(sysOn(t)) return LOGIC[t.lever].fields || [];
+  return fxOperands(fxText(t)).map(op => ({k:op, l:op, ph:'값 입력'}));
+}
+/* 커스텀 산출식 계산 — 피연산자가 모두 유효 숫자로 채워지면 금액 반환, 아니면 null */
+const fxNum = v => { if(v===''||v==null) return null; const n=Number(String(v).replace(/,/g,'')); return isNaN(n)?null:n; };
+function fxCompute(t){
+  if(sysOn(t)) return null;
+  const ops = fxOperands(fxText(t));
+  const vals = S.fields[t.id] || {};
+  const nums = ops.map(op => fxNum(vals[op]));
+  if(nums.some(n => n===null)) return null;                 // 채울 값이 남아 있으면 계산 안 함
+  let expr = fxClean(fxText(t));
+  ops.map((op,i)=>[op,nums[i]]).sort((a,b)=>b[0].length-a[0].length)
+     .forEach(([op,n]) => { expr = expr.split(op).join('('+n+')'); });
+  expr = expr.replace(/(\d[\d.,]*)\s*[가-힣A-Za-z]+/g,'$1')  // 상수 뒤 단위 제거 (3년→3, 12개월→12)
+             .replace(/[×✕]/g,'*').replace(/÷/g,'/').replace(/[−–]/g,'-').replace(/＋/g,'+').replace(/[%,]/g,'');
+  if(!/^[\d\s.+\-*/()]+$/.test(expr)) return null;          // 숫자·연산자만 남았는지 안전 확인
+  try{ const r = Function('"use strict";return ('+expr+')')(); return isFinite(r) ? r : null; }
+  catch(e){ return null; }
+}
 
 
 /* ══════════════ 벤치마크 자료 (feed_item) ══════════════ */
@@ -931,6 +1084,7 @@ let S = {
   fb:{},             // 평가·피드백 {id:{s,t}}
   memoOpen:null,     // 열린 피드백 패널 (하나만)
   userEmail:'',      // 토큰 주인 — applyBootstrap 이 서버 d.user.email 로 채운다
+  isAdmin:false,     // 토큰 주인의 관리자 여부 — 서버 d.user.is_admin. 사이드바 '관리자' 노출 결정
   users:[], usersLoaded:false, usersErr:'', usersMsg:'',   // 관리자 계정 관리
   sel:{},            // 스크리닝 체크박스
   trBiz:'전체',       // 트렌드룸 분야 필터
@@ -951,12 +1105,18 @@ let S = {
   regenerating:false,
   cg:{step:0, oc:null, ev:null, lever:null, plan:null, name:'', sum:'', err:'', dupId:null, saving:false, phase:'', done:false},
   ex:{oc:'전체', days:30, research:'', editing:false, text:null, copied:false},
-  admTab:'prompt',
+  admTab:'prompt',   // 관리자 페이지 탭 (prompt·users)
+  dbTab:'sources',   // DB 관리 페이지 탭 (sources·uploads)
   upNow:false, upMsg:'', upErr:'',   // 내부 자료 업로드
   instruction:'',    // 서버 app_setting.instruction
   instrSaved:true,
-  send:{ freq:'매일', time:'08:00', lastAt:'' },   // 서버 state.send 가 덮는다
+  send:{ freq:'발송 안함', time:'08:00', lastAt:'' },   // 서버 state.send 가 덮는다
   sendOff:{},        // 발송 제외 과제 id (기본은 전체 포함)
+  rpQ:'',            // 발송 대상 검색어
+  rpPage:1,          // 발송 대상 목록 페이지 (10건씩)
+  rpOc:'전체',        // 발송 대상 OC 필터
+  rpSort:'new',      // 발송 대상 정렬 (new·old·name·oc)
+  sendSel:null,      // 발송 포함 과제 id set (null=기본: 최근 3일)
   recipients:[],
   channels:{outlook:true, teams:true},
 };
@@ -971,7 +1131,7 @@ let S = {
 const NAV = [
   {g:'발굴', items:[{k:'list',label:'과제 제안',icon:'≡'},{k:'custom',label:'커스텀 생성',icon:'+'}]},
   {g:'활용', items:[{k:'trend',label:'트렌드룸',icon:'T'},{k:'export',label:'프롬프트 내보내기',icon:'>'},{k:'report',label:'AI Reporting',icon:'↗'}]},
-  {g:'관리', items:[{k:'admin',label:'관리자',icon:'⚙'}]},
+  {g:'관리', items:[{k:'admin',label:'관리자',icon:'⚙',adminOnly:true},{k:'dbadmin',label:'DB 관리',icon:'▤'}]},
 ];
 
 /* ══════════════ 유틸 ══════════════ */
@@ -1092,22 +1252,18 @@ function pipePanel(){
 }
 function renderNav(){
   document.getElementById('nav').innerHTML =
-    NAV.map(g => `<div class="nav-g"><div class="nav-t">${g.g}</div>` +
-      g.items.map(it => {
-        const on = S.screen===it.k || (it.k==='list' && S.screen==='detail');
-        const c = it.k==='list' ? `<span class="nav-c num">${TASKS.length}</span>` : '';
-        return `<button class="nav-b ${on?'on':''}" data-nav="${it.k}">
-          <span class="nav-i">${it.icon}</span><span>${it.label}</span>${c}</button>`;
-      }).join('') + `</div>`).join('') + `
-    ${pipePanel()}
-    <div class="acct">
-      <div class="acct-u"><span class="acct-av">👤</span><span class="acct-em">${esc(S.userEmail || localStorage.getItem('oi-user') || '')}</span></div>
-      <div class="acct-row">
-        <button class="acct-b" onclick="oiChangePw()">비밀번호 변경</button>
-        <button class="acct-b danger" onclick="oiWithdraw()">탈퇴</button>
-      </div>
-      <button class="nav-b logout-b" onclick="oiLogout()"><span class="nav-i">→</span><span>로그아웃</span></button>
-    </div>`;
+    NAV.map(g => {
+      // adminOnly 항목은 관리자에게만 — 필터 결과가 비면 그룹(제목·구분선)째로 감춘다
+      const items = g.items.filter(it => !it.adminOnly || S.isAdmin);
+      if(!items.length) return '';
+      return `<div class="nav-g"><div class="nav-t">${g.g}</div>` +
+        items.map(it => {
+          const on = S.screen===it.k || (it.k==='list' && S.screen==='detail');
+          const c = it.k==='list' ? `<span class="nav-c num">${TASKS.length}</span>` : '';
+          return `<button class="nav-b ${on?'on':''}" data-nav="${it.k}">
+            <span class="nav-i">${it.icon}</span><span>${it.label}</span>${c}</button>`;
+        }).join('') + `</div>`;
+    }).join('') + pipePanel();
 }
 
 /* ---------- 캘린더 ---------- */
@@ -1169,7 +1325,7 @@ function bigStars(id){
 function chartDaily(){
   const W=chartWindow();
   const barT=ticks(Math.max(1,...W.list.map(v=>v.n)));
-  return `<div class="card" style="--bar:${BAR_C}">
+  return `<div class="card">
     <div class="card-h">
       <h2>일별 생성 건수</h2>
       <span class="note">총 ${TASKS.length}건</span>
@@ -1205,20 +1361,29 @@ function chartDaily(){
 }
 
 /* ---------- 차트 2 — OC별 구성 ---------- */
+/* 라이트 모드 도넛/범례: Material Blue 스케일(진→연). 막대(#2196F3)와 같은 블루 계열로 묶는다.
+   다크 모드는 OC 고유색(OC_C) 유지. */
+const PIE_LIGHT = ['#0D47A1','#1976D2','#2196F3','#64B5F6','#BBDEFB','#1565C0','#42A5F5','#90CAF9','#E3F2FD'];
+const PIE_DARK  = ['#403D88','#8B639B','#AF719D','#D492A8','#F8B2B2','#5E4A90','#9C6B9C','#C285A8','#E7A6B0'];
+function pieCol(oc, i){
+  const pal = document.documentElement.getAttribute('data-theme')==='light' ? PIE_LIGHT : PIE_DARK;
+  return pal[Math.min(i, pal.length-1)];
+}
 function chartPie(){
   const MS=months();
   const i=Math.min(Math.max(0,S.moIdx),MS.length-1);
   const ym=MS[i];
   const D=pieData(ym);
   let acc=0;
-  const slices=D.rows.map(r=>{
+  const slices=D.rows.map((r,i)=>{
     const pct=r.c/D.tot*100;
+    const col=pieCol(r.oc,i);
     const el=`<circle class="psl" r="15.915" cx="21" cy="21" fill="transparent"
-      stroke="${OC_C[r.oc]}" stroke-width="6"
+      stroke="${col}" stroke-width="6"
       stroke-dasharray="${pct.toFixed(3)} ${(100-pct).toFixed(3)}"
       stroke-dashoffset="${(-acc).toFixed(3)}"
       data-slice="${r.oc}" data-nm="${esc(OC[r.oc].name)}" data-cnt="${r.c}" data-pct="${r.p}"
-      data-col="${OC_C[r.oc]}" data-tot="${D.tot}" data-ym="${ym.replace('-','.')}"></circle>`;
+      data-col="${col}" data-tot="${D.tot}" data-ym="${ym.replace('-','.')}"></circle>`;
     acc+=pct; return el;
   }).join('');
 
@@ -1238,11 +1403,11 @@ function chartPie(){
           <div class="pie-c"><span class="pie-n">${D.tot}</span><span class="pie-u">${ym.replace('-','.')}</span></div>
         </div>
         <div class="pie-lg">
-          ${D.rows.map(r=>`<button class="pl ${S.oc===r.oc?'sel':''}" data-slice="${r.oc}"
+          ${D.rows.map((r,i)=>`<button class="pl ${S.oc===r.oc?'sel':''}" data-slice="${r.oc}"
             title="${esc(OC[r.oc].name)} ${r.c}건 (${r.p}%)">
-            <span class="pl-d" style="background:${OC_C[r.oc]}"></span>
+            <span class="pl-d" style="background:${pieCol(r.oc,i)}"></span>
             <span class="pl-n">${esc(OC[r.oc].name)}</span>
-            <span class="pl-tr"><span class="pl-fl" style="width:${(r.c/D.rows[0].c*100).toFixed(1)}%;background:${OC_C[r.oc]}"></span></span>
+            <span class="pl-tr"><span class="pl-fl" style="width:${(r.c/D.rows[0].c*100).toFixed(1)}%;background:${pieCol(r.oc,i)}"></span></span>
             <span class="pl-v">${r.c}</span>
             <span class="pl-p">${r.p}%</span>
           </button>`).join('')}
@@ -1403,6 +1568,15 @@ function gradeTag(t){
 }
 
 /* ---------- 2. 과제 상세 ---------- */
+async function deleteTask(){
+  const t = TASKS.find(x=>x.id===S.curId);
+  if(!t) return;
+  if(!confirm(`이 과제를 삭제할까요?\n\n${t.name}\n\n삭제하면 되돌릴 수 없습니다.`)) return;
+  try{ await api('/api/proposals/'+t.id, {method:'DELETE'}); }
+  catch(e){ alert('과제 삭제에 실패했습니다: '+(e.message||'')); return; }
+  const i=TASKS.findIndex(x=>x.id===t.id); if(i>=0) TASKS.splice(i,1);
+  navigate('list');
+}
 function viewDetail(){
   const t = curTask(), v = fOf(t), L = LOGIC[t.lever], ver = verOf(t.ver);
   const on = sysOn(t), uf = userFx(t), drafting = S.fxDraft === t.id, asking = S.fxAsk === t.id;
@@ -1411,6 +1585,7 @@ function viewDetail(){
     <a href="#" data-nav="list">과제 제안</a><span>/</span>
     <span class="mono" style="color:var(--t2);font-weight:600">OI-2026-${t.id}</span>
     <span>·</span><span>${esc(ver?ver.label:t.at||'')} 생성</span>
+    <button class="btn danger sm" id="taskDel" onclick="deleteTask()" style="margin-left:auto">과제 삭제</button>
   </div>
 
   <div class="page-h">
@@ -1473,16 +1648,16 @@ function viewDetail(){
             : `<div class="fx-str ${on?'':'mod'}">${esc(fxText(t))}</div>`}
         </div>
 
-        <div class="${on?'':'dim-block'}">
+        <div>
           <div class="row-f" style="justify-content:space-between;margin-bottom:8px">
             <span class="fld-l">기준값 입력</span>
-            <span class="tag ${on?'wn':'nt'}">현업 작성 항목</span>
+            <span class="tag ${on?'wn':'nt'}">${on?'현업 작성 항목':'수정 산출식 항목'}</span>
           </div>
           <div class="fgrid">
-            ${L.fields.map(fd => `
+            ${fxFields(t).map(fd => `
               <div class="fld">
                 <label class="fld-l">${esc(fd.l)}${fd.u?` <span style="color:var(--t5);font-weight:500">(${esc(fd.u)})</span>`:''}</label>
-                <input class="inp num" data-f="${fd.k}" value="${esc(v[fd.k]||'')}" placeholder="${esc(fd.ph)}" ${on?'':'disabled'}>
+                <input class="inp num" data-f="${esc(fd.k)}" value="${esc(v[fd.k]||'')}" placeholder="${esc(fd.ph||'값 입력')}">
                 ${fd.hint?`<span class="fld-h">${esc(fd.hint)}</span>`:''}
               </div>`).join('')}
           </div>
@@ -1547,8 +1722,12 @@ function detailBody(t){
 }
 function resultInner(t){
   if (!sysOn(t)){
-    return `<span style="font-size:11px;font-weight:600;color:var(--edit)">순 기대효과</span>
-      <span class="result-v pending" style="color:var(--edit)">사용자 수식 기준</span>`;
+    const amt = fxCompute(t);
+    return `<span style="font-size:11px;font-weight:600;color:var(--edit)">순 기대효과</span>` +
+      (amt===null
+        ? `<span class="result-v pending" style="color:var(--edit)">값을 모두 입력하면 계산됩니다</span>`
+        : `<span class="result-v num" style="color:var(--edit)">${amt>=0?'+':''}${f1(amt)}억<span style="font-size:12px;font-weight:600;color:var(--t3);letter-spacing:0"> / 년</span></span>
+           <span class="note mono">${esc(fxText(t))}</span>`);
   }
   const net = netOf(t), f = fOf(t);
   return `<span style="font-size:11px;font-weight:600;color:var(--brand)">순 기대효과 (투자비 차감)</span>` +
@@ -1789,7 +1968,7 @@ function viewExport(){
   </div>
   <div class="grid-a">
     <div class="card">
-      <div class="card-h"><h2>조립된 프롬프트</h2>
+      <div class="card-h"><h2>프롬프트 미리보기</h2>
         <span class="note" style="margin-left:auto">${S.ex.editing?'마크다운 원문 · ':''}${text.length.toLocaleString()}자 · 약 ${Math.round(text.length/1.6).toLocaleString()} 토큰</span></div>
       <div class="card-b">
         ${S.ex.editing
@@ -1798,7 +1977,7 @@ function viewExport(){
       </div>
     </div>
     <div class="col">
-      <div class="card"><div class="card-h"><h2>범위</h2></div>
+      <div class="card"><div class="card-h"><h2>벤치마크 자료 범위</h2></div>
         <div class="card-b stack" style="gap:12px">
           <div class="fld"><label class="fld-l">대상 OC</label>
             <select class="sel" id="exOc">
@@ -1811,7 +1990,7 @@ function viewExport(){
       <div class="card"><div class="card-h"><h2>추가 자료 붙여넣기</h2></div>
         <div class="card-b stack" style="gap:9px">
           <textarea id="exResearch" placeholder="증권사 리서치·사내 자료 등 자동 수집되지 않는 내용을 붙여넣으면 프롬프트에 함께 포함됩니다" style="height:150px;font-family:inherit;font-size:12.5px;line-height:1.6">${esc(S.ex.research)}</textarea>
-          <span class="note">붙여넣은 내용은 브라우저 안에서만 처리되며 외부로 전송되지 않습니다.</span>
+          <span class="note">입력하면 왼쪽 '프롬프트 미리보기'에 실시간 반영됩니다. 브라우저 안에서만 처리되며 외부로 전송되지 않습니다.</span>
         </div></div>
       <div class="card"><div class="card-h"><h2>파일로 내려받기</h2></div>
         <div class="card-b row-f" style="gap:8px">
@@ -1840,12 +2019,40 @@ function sendTargets(){
   if(!last) return TASKS.slice();
   return TASKS.filter(t => tsKey(t.at || (verOf(t.ver)||{}).at || '') > last);
 }
-const sendIncluded = () => sendTargets().filter(t => !S.sendOff[t.id]);
+/* 발송 포함 판정 — 기본값은 '최근 3일 생성 과제', 검색으로 다른 과제도 추가 가능 */
+function rpTaskDate(t){
+  const s=(t.at || (verOf(t.ver)||{}).label || '').slice(0,10).replace(/-/g,'.');
+  const p=s.split('.').map(Number);
+  return (p.length===3 && p.every(n=>!isNaN(n))) ? new Date(p[0],p[1]-1,p[2]) : null;
+}
+function rpIsRecent(t, days){
+  const d=rpTaskDate(t); if(!d) return false;
+  const cut=new Date(TR_TODAY.getFullYear(),TR_TODAY.getMonth(),TR_TODAY.getDate()-(days-1));
+  return d>=cut;
+}
+function rpIncluded(t){ return S.sendSel ? !!S.sendSel[t.id] : rpIsRecent(t,3); }
+function rpMaterialize(){ if(!S.sendSel){ S.sendSel={}; TASKS.forEach(t=>{ if(rpIsRecent(t,3)) S.sendSel[t.id]=true; }); } }
+const sendIncluded = () => TASKS.filter(rpIncluded);
 
 function viewReport(){
-  const targets = sendTargets();
   const inc = sendIncluded();
-  const FREQ = ['매일','주 3회','주 1회'];
+  const rpq = (S.rpQ||'').trim().toLowerCase();
+  let rpList = (rpq ? TASKS.filter(t=>(t.name||'').toLowerCase().includes(rpq)) : TASKS.filter(t=>rpIsRecent(t,3)));
+  if(S.rpOc!=='전체') rpList = rpList.filter(t=>ocNm(t.oc)===S.rpOc);
+  rpList = rpList.slice().sort((a,b)=>{
+    if(S.rpSort==='old')  return (rpTaskDate(a)||0)-(rpTaskDate(b)||0);
+    if(S.rpSort==='name') return (a.name||'').localeCompare(b.name||'','ko');
+    if(S.rpSort==='oc')   return ocNm(a.oc).localeCompare(ocNm(b.oc),'ko') || (rpTaskDate(b)||0)-(rpTaskDate(a)||0);
+    return (rpTaskDate(b)||0)-(rpTaskDate(a)||0);   // new = 생성일 최신순 (기본)
+  });
+  // 발송 대상 목록 10건씩 페이지네이션 + 헤더 전체선택 상태
+  const RP_PER = 10;
+  const rpPages = Math.max(1, Math.ceil(rpList.length / RP_PER));
+  const rpP = Math.min(S.rpPage || 1, rpPages);
+  const rpSlice = rpList.slice((rpP - 1) * RP_PER, rpP * RP_PER);
+  const rpAllOn = rpList.length > 0 && rpList.every(rpIncluded);
+  const rpPartOn = !rpAllOn && rpList.some(rpIncluded);
+  const FREQ = ['발송 안함','매일','주 3회','주 1회'];
   return `
   <div class="page-h">
     <div class="stack" style="gap:5px">
@@ -1859,27 +2066,34 @@ function viewReport(){
       <div class="card">
         <div class="card-h">
           <h2>발송 대상</h2>
-          <span class="note">${S.send.lastAt?`지난 발송 ${esc(S.send.lastAt)} 이후 `:''}${targets.length}건 · 선택 ${inc.length}건</span>
-          <div style="margin-left:auto" class="row-f" style="gap:6px">
-            <button class="btn sm" id="selAll">전체 선택</button>
-            <button class="btn sm" id="selNone">전체 해제</button>
-          </div>
+          <span class="note" style="margin-left:auto">${rpq?`검색 ${rpList.length}건`:`최근 3일 ${rpList.length}건`} · 발송 선택 ${inc.length}건</span>
         </div>
-        ${targets.length===0 ? `
+        <div class="ctlbar" style="border-bottom:1px solid var(--line-soft)">
+          <input class="inp" id="rpSearch" style="flex:1;min-width:140px" placeholder="과제명 검색" value="${esc(S.rpQ||'')}" autocomplete="off" data-1p-ignore data-lpignore="true">
+          <select class="sel" id="rpOcSel">
+            <option ${S.rpOc==='전체'?'selected':''}>전체 OC</option>
+            ${OCS.map(o=>`<option ${S.rpOc===o.name?'selected':''}>${esc(o.name)}</option>`).join('')}
+          </select>
+          <select class="sel" id="rpSortSel">
+            ${[['new','생성일 최신순'],['old','생성일 오래된순'],['name','과제명순'],['oc','OC순']].map(([k,l])=>`<option value="${k}" ${S.rpSort===k?'selected':''}>${esc(l)}</option>`).join('')}
+          </select>
+        </div>
+        ${rpList.length===0 ? `
           <div class="empty">
-            <span style="font-size:14px;font-weight:700">지난 발송 이후 새로 생성된 과제가 없습니다</span>
+            <span style="font-size:14px;font-weight:700">${rpq?'검색 결과가 없습니다':'최근 3일 내 생성된 과제가 없습니다'}</span>
+            ${rpq?'':'<span class="note" style="margin-top:6px;display:block">위 검색으로 과제를 찾아 추가하세요.</span>'}
           </div>` : `
         <table>
           <thead><tr>
-            <th style="width:42px"></th>
+            <th style="width:42px"><span class="cbox ${rpAllOn?'on':(rpPartOn?'part':'')}" data-rpckall="1" style="cursor:pointer">${rpAllOn?'✓':(rpPartOn?'−':'')}</span></th>
             <th style="min-width:200px">과제명</th>
             <th style="width:120px">OC</th>
             <th style="width:86px">레버</th>
             <th style="width:96px">생성일</th>
           </tr></thead>
           <tbody>
-          ${targets.map(t => {
-            const ck = !S.sendOff[t.id];
+          ${rpSlice.map(t => {
+            const ck = rpIncluded(t);
             return `<tr class="r-hover" style="cursor:pointer" data-sendtog="${t.id}">
               <td><span class="cbox ${ck?'on':''}">${ck?'✓':''}</span></td>
               <td><div class="tt" style="${ck?'':'color:var(--t4)'}">${esc(t.name)}</div></td>
@@ -1889,7 +2103,15 @@ function viewReport(){
             </tr>`;
           }).join('')}
           </tbody>
-        </table>`}
+        </table>
+        ${rpPages>1?`<div class="pager">
+          <span class="tot">총 ${rpList.length}건</span>
+          <div style="margin-left:auto" class="row-f" style="gap:5px">
+            <button class="pg" data-rppg="${rpP-1}" ${rpP<=1?'disabled':''}>‹</button>
+            ${Array.from({length:rpPages},(_,i)=>i+1).map(i=>`<button class="pg ${i===rpP?'on':''}" data-rppg="${i}">${i}</button>`).join('')}
+            <button class="pg" data-rppg="${rpP+1}" ${rpP>=rpPages?'disabled':''}>›</button>
+          </div>
+        </div>`:''}`}
       </div>
 
       <div class="card">
@@ -1898,7 +2120,7 @@ function viewReport(){
         <div class="card-b">
           <div class="card" style="box-shadow:none;background:var(--panel-sub)">
             <div class="card-h" style="background:var(--panel);border-radius:14px 14px 0 0">
-              <span class="oi-logo" style="font-size:14px">O/I Spark</span>
+              <span class="oi-logo" style="font-size:14px">OI SPARK</span>
               <span class="note">신규 과제 제안 ${inc.length}건</span></div>
             <div style="padding:14px">
               ${inc.length===0 ? `<span class="note">선택된 과제가 없습니다.</span>` :
@@ -2136,9 +2358,17 @@ function viewTrend(){
     ? (evRefs(b).length-evRefs(a).length) || (trPd(EV[b].date)-trPd(EV[a].date))
     : trPd(EV[b].date)-trPd(EV[a].date));
 
-  /* ── 주차 그룹핑 ── */
+  /* ── 페이지네이션 (10건씩) — 필터·검색·정렬이 바뀌면 1페이지로 되돌린다 ── */
+  const TR_PAGE=10;
+  const trSig=[S.trKw,S.trOc,S.trSrc,S.trKind,S.trNew,S.trUnl,q,S.trSort,S.trBiz,S.trPeriod,S.trFrom,S.trTo].join('|');
+  if(trSig!==S._trSig){ S._trSig=trSig; S.trPage=1; }
+  const trPages=Math.max(1, Math.ceil(rows.length/TR_PAGE));
+  const trPg=Math.min(Math.max(1, S.trPage||1), trPages);
+  const pageRows=rows.slice((trPg-1)*TR_PAGE, trPg*TR_PAGE);
+
+  /* ── 주차 그룹핑 (현재 페이지 기준) ── */
   const groups=[];
-  rows.forEach(k=>{
+  pageRows.forEach(k=>{
     const d=trPd(EV[k].date), m0=trMon(d), key=trIso(m0);
     let g=groups.find(x=>x.key===key);
     if(!g){
@@ -2150,15 +2380,14 @@ function viewTrend(){
   });
 
   const rowHtml = k=>{
-    const e=EV[k], bz=evBiz(k)[0], n=evRefs(k).length;
+    const e=EV[k], n=evRefs(k).length;
     return `<div class="tr2-row">
       <div class="tr2-d">
         <span class="tr2-dd">${esc(trMD(trPd(e.date)))}</span>
-        ${EV_NEW[k]?'<span class="nb">NEW</span>':''}
+        ${trIso(trPd(e.date))===trIso(TR_TODAY)?'<span class="nb">NEW</span>':''}
       </div>
       <div class="tr2-m">
         <div class="row-f" style="gap:7px">
-          <span class="bizdot" style="background:${BIZ_C[bz]||'var(--c2)'}"></span>
           <span style="font-size:11.5px;font-weight:700">${esc(e.src)}</span>
           <span style="font-size:11px;color:var(--t5)">·</span>
           <span style="font-size:11px;color:var(--t3)">${esc(evKind(k))}</span>
@@ -2170,14 +2399,13 @@ function viewTrend(){
           `<button class="kwmini ${S.trKw===w?'on':''}" data-tr="kw:${esc(w)}">${esc(w)}</button>`).join('')}</div>
       </div>
       <div class="tr2-a">
-        <button class="citep" style="background:${n?'var(--brand-soft)':'#fdf4e7'};color:${n?'var(--brand)':'#a06a08'}"
-          ${n?`data-cite="${k}"`:''}>${n?`인용 과제 ${n}건`:'미연결'}</button>
+        ${n?`<button class="citep" style="background:var(--brand-soft);color:var(--brand)" data-cite="${k}">인용 과제 ${n}건</button>`:''}
         <a class="tr-lk" href="${esc(e.url)}" target="_blank" rel="noopener">원문 ↗</a>
       </div>
     </div>`;
   };
   const groupHtml = S.trSort==='cite'
-    ? rows.map(rowHtml).join('')
+    ? pageRows.map(rowHtml).join('')
     : groups.map(g=>`
     <div class="g-h"><span class="g-l">${esc(g.label)}</span><span class="g-s">${esc(g.sub)}</span>
       <span class="g-s" style="margin-left:auto">${g.rows.length}건</span></div>
@@ -2253,7 +2481,7 @@ function viewTrend(){
 
   <div class="card">
     <div class="card-h" style="padding:13px 17px">
-      <span class="ai-mk">AI</span>
+      <span class="ai-img" role="img" aria-label="AI"></span>
       <h2>데일리 브리핑</h2>
       <div style="margin-left:auto" class="row-f" style="gap:7px">
         <select class="sel" id="trBizSel">
@@ -2318,6 +2546,11 @@ function viewTrend(){
     ${rows.length? groupHtml : `<div class="empty2">
       <span style="font-size:14px;font-weight:700">조건에 맞는 자료가 없습니다</span>
       <span class="note">기간을 넓히거나 필터를 해제해 보세요.</span></div>`}
+    ${trPages>1?`<div class="tr-pager">
+      <button class="btn sm" data-tr="pg:${trPg-1}" ${trPg<=1?'disabled':''}>‹ 이전</button>
+      <span class="note num">${(trPg-1)*TR_PAGE+1}–${Math.min(trPg*TR_PAGE,rows.length)} / ${rows.length}건 · ${trPg}/${trPages}p</span>
+      <button class="btn sm" data-tr="pg:${trPg+1}" ${trPg>=trPages?'disabled':''}>다음 ›</button>
+    </div>`:''}
   </div>
   `;
 }
@@ -2336,6 +2569,7 @@ document.addEventListener('click', e=>{
   if(k==='biz'){ S.trBiz=v; render(); return trBump(); }
   if(k==='period'){ S.trPeriod=v; render(); return trBump(); }
   if(k==='regen'){ return trBump(); }
+  if(k==='pg'){ S.trPage=Math.max(1,Number(v)); return render(); }
   if(k==='kw'){ S.trKw = (S.trKw===v?null:v); return render(); }
   if(k==='oc'){ S.trOc = (S.trOc===v?null:v); return render(); }
   if(k==='new'){ S.trNew=!S.trNew; return render(); }
@@ -2350,14 +2584,28 @@ document.addEventListener('change', e=>{
   if(el.id==='trSrc'){ S.trSrc = el.value==='출처 전체'?'전체':el.value; return render(); }
   if(el.id==='trKind'){ S.trKind = el.value==='종류 전체' ? '전체' : el.value; return render(); }
   if(el.id==='trSort'){ S.trSort=el.value; return render(); }
+  if(el.id==='rpOcSel'){ S.rpOc = el.value==='전체 OC'?'전체':el.value; S.rpPage=1; return render(); }
+  if(el.id==='rpSortSel'){ S.rpSort = el.value; S.rpPage=1; return render(); }
   if(el.id==='trFrom'){ S.trFrom=el.value; render(); return trBump(); }
   if(el.id==='trTo'){ S.trTo=el.value; render(); return trBump(); }
 });
+function rerenderSearch(id){
+  render();
+  const n=document.getElementById(id);
+  if(n){ n.focus(); n.setSelectionRange(n.value.length, n.value.length); }
+}
 document.addEventListener('input', e=>{
   if(e.target.id!=='trQ') return;
-  S.trQ=e.target.value; render();
-  const n=document.getElementById('trQ');
-  if(n){ n.focus(); n.setSelectionRange(n.value.length, n.value.length); }
+  S.trQ=e.target.value;
+  if(e.isComposing) return;        // 한글 조합(IME) 중엔 렌더로 입력창을 재생성하지 않는다
+  rerenderSearch('trQ');
+});
+/* 조합이 끝나면(음절 완성/확정) 그때 목록을 갱신한다 — trQ·q 공통 */
+document.addEventListener('compositionend', e=>{
+  const id=e.target && e.target.id;
+  if(id==='trQ'){ S.trQ=e.target.value; rerenderSearch('trQ'); }
+  else if(id==='q'){ S.q=e.target.value; S.page=1; rerenderSearch('q'); }
+  else if(id==='rpSearch'){ S.rpQ=e.target.value; S.rpPage=1; rerenderSearch('rpSearch'); }
 });
 
 /* ═══════════════ 파이 조각 툴팁 ═══════════════ */
@@ -2368,10 +2616,10 @@ function ptip(){
 }
 function ptShow(s,e){
   const t=ptip();
-  t.innerHTML = `<span class="ctip-d">${esc(s.dataset.ym)} · 전체 ${s.dataset.tot}건</span>
-    <span class="ctip-r"><span class="ctip-s" style="background:${s.dataset.col}"></span>
-      ${esc(s.dataset.nm)}<span class="ctip-v">${s.dataset.cnt}건</span></span>
-    <span class="ctip-f"><span>비중 ${s.dataset.pct}%</span></span>`;
+  t.innerHTML = `<span class="pt-h"><span class="pt-s" style="background:${s.dataset.col}"></span>
+      <span class="pt-nm">${esc(s.dataset.nm)}</span><span class="pt-v">${s.dataset.cnt}건</span></span>
+    <span class="pt-bar"><span class="pt-fl" style="width:${s.dataset.pct}%;background:${s.dataset.col}"></span></span>
+    <span class="pt-f">비중 ${s.dataset.pct}%</span>`;
   t.style.display='block';
   ptMove(e);
 }
@@ -2431,13 +2679,24 @@ async function adminDelUser(email){
     S.usersMsg=`${email} 삭제됨`; loadAdminUsers();
   }catch(e){ alert('서버 연결 오류'); }
 }
+async function adminSetAdmin(email, makeAdmin){
+  if(!confirm(makeAdmin ? `${email} 에 관리자 권한을 부여할까요?` : `${email} 의 관리자 권한을 해제할까요?`)) return;
+  try{
+    const r=await fetch(`/api/admin/users/${encodeURIComponent(email)}/admin`,{method:'POST',
+      headers:{'Content-Type':'application/json',...admAuth()}, body:JSON.stringify({is_admin:makeAdmin})});
+    const d=await r.json().catch(()=>({}));
+    if(!r.ok){ alert(d.detail||'권한 변경 실패'); return; }
+    loadAdminUsers();
+  }catch(e){ alert('서버 연결 오류'); }
+}
 
-/* ---------- 6. 관리자 ---------- */
-function viewAdmin(){
-  const tabs=[['prompt','생성 인스트럭션'],['sources','크롤링 소스'],['uploads','내부 자료'],['users','계정 관리']];
-  let body='';
-  if (S.admTab==='prompt'){
-    body=`<div class="card">
+/* ---------- 6. 관리자 · DB 관리 ----------
+   한 화면이던 관리자 페이지를 둘로 나눴다:
+     · 관리자   = 생성 인스트럭션 + 계정 관리 (adminBodyPrompt·adminBodyUsers) — 관리자 전용
+     · DB 관리  = 크롤링 소스 + 내부 자료   (dbBodySources·dbBodyUploads)
+   탭 본문은 아래 4개 빌더가 만들고, 두 뷰가 각자 탭 셋만 얹어 재사용한다. */
+function adminBodyPrompt(){
+  return `<div class="card">
       <div class="card-h"><h2>과제 생성 인스트럭션</h2>
         <span class="note" style="margin-left:auto">${S.instrSaved?'저장됨':'저장되지 않은 변경'}</span></div>
       <div class="card-b stack" style="gap:11px">
@@ -2445,9 +2704,35 @@ function viewAdmin(){
         <div class="row-f"><button class="btn pri" id="instrSave">저장</button>
           <button class="btn" id="instrReset">초기값 복원</button></div>
       </div></div>`;
-  }
-  if (S.admTab==='sources'){
-    body=`<div class="card">
+}
+function adminBodyUsers(){
+  if(!S.usersLoaded){ setTimeout(loadAdminUsers,0); }
+  return `<div class="grid-a">
+      <div class="card"><div class="card-h"><h2>계정 목록</h2><span class="note num">${S.users.length}명</span>
+        <button class="btn sm" style="margin-left:auto" onclick="loadAdminUsers()">↻ 새로고침</button></div>
+        ${S.usersErr?`<div class="hint" style="margin:12px 17px"><span class="dot" style="background:var(--bad)"></span><span>${esc(S.usersErr)}</span></div>`:''}
+        <table><thead><tr><th style="min-width:200px">이메일 (로그인 ID)</th><th style="width:84px">권한</th><th style="width:72px">상태</th><th style="width:250px" class="tr"></th></tr></thead>
+        <tbody>${S.users.map(u=>`<tr class="r-hover">
+          <td class="mono" style="font-size:12px">${esc(u.email)}</td>
+          <td><span class="tag ${u.is_admin?'lv':'nt'}">${u.is_admin?'관리자':'일반'}</span></td>
+          <td><span class="tag ${u.is_active?'ok':'wn'}">${u.is_active?'활성':'비활성'}</span></td>
+          <td class="tr"><button class="btn sm" onclick="adminSetAdmin('${esc(u.email)}',${u.is_admin?'false':'true'})">${u.is_admin?'권한 해제':'관리자 지정'}</button>
+            <button class="btn sm" onclick="adminResetPw('${esc(u.email)}')">비번 초기화</button>
+            <button class="btn sm" onclick="adminDelUser('${esc(u.email)}')">삭제</button></td></tr>`).join('')
+          || `<tr><td colspan="4" class="note" style="padding:16px 17px">${S.usersLoaded?'계정이 없습니다.':'불러오는 중…'}</td></tr>`}</tbody></table>
+      </div>
+      <div class="card"><div class="card-h"><h2>계정 추가</h2></div>
+        <div class="card-b stack" style="gap:11px">
+          ${S.usersMsg?`<div class="hint" style="background:var(--ok-bg);border-color:var(--ok)"><span>${esc(S.usersMsg)}</span></div>`:''}
+          <div class="fld"><label class="fld-l">Outlook 메일 주소</label>
+            <input class="inp" id="nuEmail" placeholder="name@sk.com"></div>
+          <label class="row-f" style="gap:8px;font-size:12.5px;color:var(--t1)"><input type="checkbox" id="nuAdmin"> 관리자 권한 부여</label>
+          <button class="btn pri" onclick="adminAddUser()">추가 (초기 비밀번호 1111)</button>
+        </div></div>
+    </div>`;
+}
+function dbBodySources(){
+  return `<div class="card">
       <div class="card-h"><h2>크롤링 소스</h2><span class="note">${SOURCES.length}건</span>
         <button class="btn sm" style="margin-left:auto">+ 소스 추가</button></div>
       <table><thead><tr>
@@ -2463,9 +2748,9 @@ function viewAdmin(){
         <td><span class="tag ${SRC_ST[s.st]}">${esc(s.st)}</span></td>
         <td class="tr"><button class="btn sm">편집</button></td></tr>`).join('')}</tbody></table>
     </div>`;
-  }
-  if (S.admTab==='uploads'){
-    body=`<div class="grid-a">
+}
+function dbBodyUploads(){
+  return `<div class="grid-a">
       <div class="card"><div class="card-h"><h2>업로드된 내부 자료</h2><span class="note">${UPLOADS.length}건</span></div>
         <table><thead><tr><th style="min-width:250px">파일</th><th style="width:130px">귀속 OC</th><th style="width:104px">업로드</th><th style="width:92px">상태</th></tr></thead>
         <tbody>${UPLOADS.map(u=>`<tr class="r-hover">
@@ -2485,38 +2770,17 @@ function viewAdmin(){
           </div>
           <div class="fld"><label class="fld-l">귀속 OC</label>
             <select class="sel" id="upOc"><option>전사</option>${OCS.map(o=>`<option>${esc(o.name)}</option>`).join('')}</select></div>
-          <label class="row-f" style="gap:8px;font-size:12.5px;color:var(--t1)">
-            <input type="checkbox" id="upNow" ${S.upNow?'checked':''}> 바로 사용 (검수 완료로 등록해 생성 프롬프트에 투입)</label>
+          <label class="row-f" style="gap:8px;font-size:12.5px;color:var(--t1);white-space:nowrap">
+            <input type="checkbox" id="upNow" ${S.upNow?'checked':''}>바로 사용 <span class="note" style="font-size:11px">(검수 완료·프롬프트 투입)</span></label>
           ${S.upMsg?`<div class="hint"><span class="dot"></span><span>${esc(S.upMsg)}</span></div>`:''}
           ${S.upErr?`<div class="hint" style="border-color:var(--bad)"><span class="dot" style="background:var(--bad)"></span><span>${esc(S.upErr)}</span></div>`:''}
         </div></div>
     </div>`;
-  }
-  if (S.admTab==='users'){
-    if(!S.usersLoaded){ setTimeout(loadAdminUsers,0); }
-    body=`<div class="grid-a">
-      <div class="card"><div class="card-h"><h2>계정 목록</h2><span class="note num">${S.users.length}명</span>
-        <button class="btn sm" style="margin-left:auto" onclick="loadAdminUsers()">↻ 새로고침</button></div>
-        ${S.usersErr?`<div class="hint" style="margin:12px 17px"><span class="dot" style="background:var(--bad)"></span><span>${esc(S.usersErr)}</span></div>`:''}
-        <table><thead><tr><th style="min-width:200px">이메일 (로그인 ID)</th><th style="width:84px">권한</th><th style="width:72px">상태</th><th style="width:158px" class="tr"></th></tr></thead>
-        <tbody>${S.users.map(u=>`<tr class="r-hover">
-          <td class="mono" style="font-size:12px">${esc(u.email)}</td>
-          <td><span class="tag ${u.is_admin?'lv':'nt'}">${u.is_admin?'관리자':'일반'}</span></td>
-          <td><span class="tag ${u.is_active?'ok':'wn'}">${u.is_active?'활성':'비활성'}</span></td>
-          <td class="tr"><button class="btn sm" onclick="adminResetPw('${esc(u.email)}')">비번 초기화</button>
-            <button class="btn sm" onclick="adminDelUser('${esc(u.email)}')">삭제</button></td></tr>`).join('')
-          || `<tr><td colspan="4" class="note" style="padding:16px 17px">${S.usersLoaded?'계정이 없습니다.':'불러오는 중…'}</td></tr>`}</tbody></table>
-      </div>
-      <div class="card"><div class="card-h"><h2>계정 추가</h2></div>
-        <div class="card-b stack" style="gap:11px">
-          ${S.usersMsg?`<div class="hint" style="background:var(--ok-bg);border-color:var(--ok)"><span>${esc(S.usersMsg)}</span></div>`:''}
-          <div class="fld"><label class="fld-l">Outlook 메일 주소</label>
-            <input class="inp" id="nuEmail" placeholder="name@sk.com"></div>
-          <label class="row-f" style="gap:8px;font-size:12.5px;color:var(--t1)"><input type="checkbox" id="nuAdmin"> 관리자 권한 부여</label>
-          <button class="btn pri" onclick="adminAddUser()">추가 (초기 비밀번호 1111)</button>
-        </div></div>
-    </div>`;
-  }
+}
+function viewAdmin(){
+  const tabs=[['prompt','생성 인스트럭션'],['users','계정 관리']];
+  if(!tabs.some(([k])=>k===S.admTab)) S.admTab='prompt';
+  const body = S.admTab==='users' ? adminBodyUsers() : adminBodyPrompt();
   return `
   <div class="page-h"><div class="stack" style="gap:5px">
     <h1>관리자</h1>
@@ -2524,12 +2788,84 @@ function viewAdmin(){
   <div class="tabs">${tabs.map(([k,l])=>`<button class="tab ${S.admTab===k?'on':''}" data-atab="${k}">${esc(l)}</button>`).join('')}</div>
   ${body}`;
 }
+function viewDbAdmin(){
+  const tabs=[['sources','크롤링 소스'],['uploads','내부 자료']];
+  if(!tabs.some(([k])=>k===S.dbTab)) S.dbTab='sources';
+  const body = S.dbTab==='uploads' ? dbBodyUploads() : dbBodySources();
+  return `
+  <div class="page-h"><div class="stack" style="gap:5px">
+    <h1>DB 관리</h1>
+  </div></div>
+  <div class="tabs">${tabs.map(([k,l])=>`<button class="tab ${S.dbTab===k?'on':''}" data-dbtab="${k}">${esc(l)}</button>`).join('')}</div>
+  ${body}`;
+}
 
 /* ══════════════ 라우팅 ══════════════ */
-const VIEWS={list:viewList, detail:viewDetail, trend:viewTrend, custom:viewCustom, export:viewExport, report:viewReport, admin:viewAdmin};
+/* ---------- 상단 토바(계정) ---------- */
+function syncTopbar(){
+  const em = S.userEmail || localStorage.getItem('oi-user') || '';
+  const local = (em.split('@')[0]) || '계정';
+  const set = (id,v)=>{ const el=document.getElementById(id); if(el) el.textContent=v; };
+  set('tbName', local);
+  set('tbRole', em);
+  set('tbAv', (local[0]||'·').toUpperCase());
+}
+function toggleAcctMenu(e){ e.stopPropagation(); const m=document.getElementById('tbMenu'); if(m) m.classList.toggle('open'); }
+function closeAcctMenu(){ const m=document.getElementById('tbMenu'); if(m) m.classList.remove('open'); }
+document.addEventListener('click', e=>{
+  const m=document.getElementById('tbMenu');
+  if(m && m.classList.contains('open') && !e.target.closest('.tb-acct')) m.classList.remove('open');
+});
+
+/* ---------- 마이페이지 ---------- */
+function myTaskCard(t, extra){
+  return `<button class="mycard" type="button" onclick="navigate('detail',{curId:${t.id}})">
+    <span class="myc-t">${esc(t.name)}</span>
+    <span class="myc-m"><span class="tag oc">${esc((OC[t.oc]||{}).name||t.oc)}</span><span class="tag lv">${esc(t.lever)}</span>${extra||''}</span>
+  </button>`;
+}
+function viewMy(){
+  const em = S.userEmail || localStorage.getItem('oi-user') || '';
+  const initial = ((em.split('@')[0]||'')[0]||'·').toUpperCase();
+  const fbTasks = TASKS.filter(t => { const f=S.fb[t.id]; return f && ((f.s||0)>0 || (f.t||'').trim()); });
+  const myCustom = TASKS.filter(t => t.origin==='커스텀');
+  const fbHtml = fbTasks.length ? `<div class="mylist">${fbTasks.map(t=>{
+      const f=S.fb[t.id]||{}; const s=f.s||0;
+      const stars = `<span class="myc-fb"><span class="myc-star">${'★'.repeat(s)}${'☆'.repeat(5-s)}</span>${(f.t||'').trim()?' · '+esc(f.t):''}</span>`;
+      return myTaskCard(t, stars);
+    }).join('')}</div>` : `<div class="my-empty">아직 피드백을 남긴 과제가 없습니다.</div>`;
+  const csHtml = myCustom.length ? `<div class="mylist">${myCustom.map(t=>myTaskCard(t)).join('')}</div>`
+    : `<div class="my-empty">아직 커스텀 생성한 과제가 없습니다.</div>`;
+  return `
+  <div class="page-h"><div class="stack" style="gap:5px"><h1>마이페이지</h1></div></div>
+  <div class="card"><div class="card-b">
+    <div class="my-acct">
+      <div class="my-av">${esc(initial)}</div>
+      <div><div class="my-em">${esc(em)}</div><div class="note">SK이노베이션 O/I추진단</div></div>
+      <div class="my-btns">
+        <button class="btn" type="button" onclick="oiChangePw()">비밀번호 변경</button>
+        <button class="btn" type="button" onclick="oiLogout()">로그아웃</button>
+        <button class="btn danger" type="button" onclick="oiWithdraw()">탈퇴</button>
+      </div>
+    </div>
+  </div></div>
+  <div class="card">
+    <div class="card-h"><h2>내가 피드백한 과제</h2><span class="note num" style="margin-left:auto">${fbTasks.length}건</span></div>
+    <div class="card-b">${fbHtml}</div>
+  </div>
+  <div class="card">
+    <div class="card-h"><h2>커스텀 생성한 과제</h2><span class="note num" style="margin-left:auto">${myCustom.length}건</span></div>
+    <div class="card-b">${csHtml}</div>
+  </div>`;
+}
+
+const VIEWS={list:viewList, detail:viewDetail, trend:viewTrend, custom:viewCustom, export:viewExport, report:viewReport, admin:viewAdmin, dbadmin:viewDbAdmin, my:viewMy};
 function render(){
+  // 관리자 페이지는 관리자만 — 히스토리 복원·직접 해시 진입 등 어떤 경로로 와도 여기서 막는다
+  if(S.screen==='admin' && !S.isAdmin) S.screen='list';
   renderNav();
   document.getElementById('main').innerHTML = (VIEWS[S.screen]||viewList)();
+  syncTopbar();
 }
 
 // 앱 내 화면 전환을 브라우저 히스토리에 쌓아, 뒤로가기가 로그인 화면이 아니라
@@ -2595,7 +2931,7 @@ async function regenerate(){
 }
 
 document.addEventListener('click', e=>{
-  const el=e.target.closest('[data-nav],[data-open],[data-lv],[data-ver],[data-pg],[data-atab],[data-tn],[data-ch],[data-ex-d],[data-dl],[data-rm-rc],[data-cg-oc],[data-cg-ev],[data-cg-lv],[data-cg-plan],[data-cal-d],[data-cal-m],[data-cnav],[data-fxp],[data-sendtog],[data-freq],[data-monav],[data-slice],[data-memo],[data-star],[data-msave],[data-ck],[data-ckall],[data-goto],[data-tr],[data-cite],button');
+  const el=e.target.closest('[data-nav],[data-open],[data-lv],[data-ver],[data-pg],[data-atab],[data-dbtab],[data-rpckall],[data-rppg],[data-tn],[data-ch],[data-ex-d],[data-dl],[data-rm-rc],[data-cg-oc],[data-cg-ev],[data-cg-lv],[data-cg-plan],[data-cal-d],[data-cal-m],[data-cnav],[data-fxp],[data-sendtog],[data-freq],[data-monav],[data-slice],[data-memo],[data-star],[data-msave],[data-ck],[data-ckall],[data-goto],[data-tr],[data-cite],button');
   // 캘린더 외부 클릭 시 닫기
   if(S.calOpen && !e.target.closest('#cal') && el && el.id!=='calBtn'){ S.calOpen=false; }
   if(S.calOpen && !el){ S.calOpen=false; return render(); }
@@ -2650,8 +2986,17 @@ document.addEventListener('click', e=>{
   }
   if(d.pg){const n=Number(d.pg); if(n>=1){S.page=n; render();} return;}
   if(d.atab){S.admTab=d.atab; return render();}
+  if(d.dbtab){S.dbTab=d.dbtab; return render();}
   if(d.sendtog){const id=Number(d.sendtog);
-    if(S.sendOff[id]) delete S.sendOff[id]; else S.sendOff[id]=true; saveReport(); return render();}
+    rpMaterialize(); S.sendSel[id]=!S.sendSel[id]; saveReport(); return render();}
+  if(d.rppg){const n=Number(d.rppg); if(n>=1){S.rpPage=n; render();} return;}
+  if(d.rpckall){ rpMaterialize();
+    const rpq=(S.rpQ||'').trim().toLowerCase();
+    const list = rpq ? TASKS.filter(t=>(t.name||'').toLowerCase().includes(rpq)) : TASKS.filter(t=>rpIsRecent(t,3));
+    const allOn = list.length>0 && list.every(rpIncluded);
+    list.forEach(t=>{ S.sendSel[t.id] = !allOn; });   // 전부 선택돼 있으면 전체 해제, 아니면 전체 선택
+    saveReport(); return render();
+  }
   if(d.freq){S.send.freq=d.freq; saveReport(); return render();}
   if(d.ch){S.channels[d.ch]=!S.channels[d.ch]; saveReport(); return render();}
   if(d.exD){S.ex.days=Number(d.exD); S.ex.text=null; return render();}
@@ -2664,8 +3009,6 @@ document.addEventListener('click', e=>{
   if(d.cgPlan){S.cg.plan=d.cgPlan; S.cg.step=4; return render();}
 
   switch(el.id){
-    case 'selAll': S.sendOff={}; saveReport(); return render();
-    case 'selNone': sendTargets().forEach(t=>S.sendOff[t.id]=true); saveReport(); return render();
     case 'fxCopy':{
       const t=curTask();
       try{ const r=navigator.clipboard.writeText(fxText(t)); if(r&&r.catch) r.catch(()=>{}); }catch(err){}
@@ -2774,11 +3117,26 @@ document.addEventListener('input', e=>{
     saveFields(t.id);                     // 타이핑마다 보내지 않도록 500ms 디바운스
     return;
   }
-  if(el.id==='q'){S.q=el.value; S.page=1; const p=el.selectionStart; render();
+  if(el.id==='q'){S.q=el.value; S.page=1;
+    if(e.isComposing) return;      // 한글 조합 중엔 렌더 스킵 (compositionend 에서 갱신)
+    const p=el.selectionStart; render();
     const n=document.getElementById('q'); if(n){n.focus(); n.setSelectionRange(p,p);} return;}
+  if(el.id==='rpSearch'){S.rpQ=el.value; S.rpPage=1;
+    if(e.isComposing) return;                        // 한글 조합 중 렌더 스킵
+    const p=el.selectionStart; render();
+    const n=document.getElementById('rpSearch'); if(n){n.focus(); n.setSelectionRange(p,p);} return;}
   if(el.id==='instr'){S.instruction=el.value; S.instrSaved=false;
     const n=document.querySelector('.card-h .note'); if(n) n.textContent='저장되지 않은 변경'; return;}
-  if(el.id==='exResearch'){S.ex.research=el.value; S.ex.text=null; return;}
+  if(el.id==='exResearch'){
+    S.ex.research=el.value; S.ex.text=null;
+    if(!S.ex.editing){                              // 미리보기(.pp)만 부분 갱신 — textarea 재생성 안 함(한글 조합·포커스 유지)
+      const t=buildPrompt();
+      const pp=document.querySelector('.pp'); if(pp) pp.innerHTML=promptHtml(t);
+      const note=document.querySelector('.grid-a .card .card-h .note');
+      if(note) note.textContent=`${t.length.toLocaleString()}자 · 약 ${Math.round(t.length/1.6).toLocaleString()} 토큰`;
+    }
+    return;
+  }
   // 프롬프트 편집 textarea — "편집 완료"를 누르기 전에 다른 화면으로 이동해도
   // 입력한 내용이 사라지지 않도록(같은 세션 안에서는) 타이핑마다 바로 상태에 반영한다.
   // 새로고침 시에는 저장 개념이 없는 필드라 자동으로 기본값으로 되돌아간다.
@@ -2845,7 +3203,7 @@ function saveFormula(t){
 function saveReport(){
   return api('/api/report/settings', {method:'PUT', body:{
     freq:S.send.freq, time:S.send.time, channels:S.channels,
-    recipients:S.recipients, sendOff:Object.keys(S.sendOff).map(Number),
+    recipients:S.recipients, sendOff:TASKS.filter(t=>!rpIncluded(t)).map(t=>t.id),
   }}).then(()=>true).catch(e=>{ apiWarn(e); return false; });
 }
 /* 생성 인스트럭션 — DB app_setting 이 유일한 저장소다(발굴 LLM 이 읽는 곳). */
@@ -2903,6 +3261,7 @@ function applyBootstrap(d){
   // 한 번 심기는 값이라 다른 탭의 oiClear()·탈퇴로 토큰과 어긋날 수 있고, 그러면 화면에
   // 보이는 계정과 실제로 저장되는 계정이 갈라진다. 서버 응답을 진실의 원천으로 삼는다.
   S.userEmail = (d.user && d.user.email) || '';
+  S.isAdmin = !!(d.user && d.user.is_admin);   // 사이드바 '관리자' 노출 판단
   if(S.userEmail) localStorage.setItem('oi-user', S.userEmail);
 
   fill(OCS, d.ocs); fill(OC_COLOR, d.ocColor); fill(BIZ_C, d.bizColor);
@@ -2981,22 +3340,17 @@ async function loadQuotes(){
 history.replaceState({screen:S.screen, curId:S.curId}, '', '#'+S.screen);
 boot();
 
-/* ===== 테마 토글 ===== */
+/* ===== 테마 토글 (해/달 스위치) — 체크=다크(밤) ===== */
 (function(){
-  var btn = document.getElementById('themeBtn');
-  if(!btn) return;
-  function sync(){
-    var dark = document.documentElement.getAttribute('data-theme') !== 'light';
-    btn.textContent = dark ? '🌙' : '☀️';
-    btn.title = dark ? '라이트 모드로 전환' : '다크 모드로 전환';
-  }
-  sync();
-  btn.addEventListener('click', function(){
-    var dark = document.documentElement.getAttribute('data-theme') !== 'light';
-    var next = dark ? 'light' : 'dark';
+  var chk = document.getElementById('themeChk');
+  if(!chk) return;
+  chk.checked = document.documentElement.getAttribute('data-theme') !== 'light';
+  chk.addEventListener('change', function(){
+    var next = chk.checked ? 'dark' : 'light';
     document.documentElement.setAttribute('data-theme', next);
     try{ localStorage.setItem('oi-theme', next); }catch(e){}
-    sync();
+    // 도넛 등 렌더 시점에 테마색이 정해지는 요소를 다시 칠한다 (부트 완료 후에만)
+    try{ if(S && S.userEmail && typeof render==='function') render(); }catch(e){}
   });
 })();
 </script>

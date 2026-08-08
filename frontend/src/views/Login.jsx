@@ -4,14 +4,17 @@ import { useMemo, useState } from "react";
  * 항상 다크(퍼플/블루 · 별 배경). 회원가입/로그인 버튼 → 대시보드(/) 이동. */
 
 /* 별 배경 box-shadow 문자열 생성 (레이어별) */
-function makeStars(n) {
-  let s = "";
+function makeStars(n, glow = 0) {
+  // 선명한 흰 코어(blur 0) + 넓게 번지는 글로우 헤일로를 겹쳐, 하얗고 또렷하면서 빛나게.
+  // blur 만 키우면 빛이 퍼져 중심이 흐려지므로(=먼지처럼) 코어를 항상 따로 둔다.
+  const parts = [];
   for (let i = 0; i < n; i++) {
     const x = Math.floor(Math.random() * 2000);
     const y = Math.floor(Math.random() * 2000);
-    s += `${x}px ${y}px #fff${i < n - 1 ? "," : ""}`;
+    parts.push(`${x}px ${y}px 0 #fff`);
+    if (glow > 0) parts.push(`${x}px ${y}px ${glow}px rgba(255,255,255,.55)`);
   }
-  return s;
+  return parts.join(",");
 }
 
 export default function Login() {
@@ -47,9 +50,9 @@ export default function Login() {
   };
 
   const stars = useMemo(() => ({
-    s1: makeStars(700),
-    s2: makeStars(200),
-    s3: makeStars(100),
+    s1: makeStars(420, 0),
+    s2: makeStars(150, 3),
+    s3: makeStars(80, 7),
   }), []);
 
   return (
@@ -67,14 +70,14 @@ export default function Login() {
       <header className="lp-header">
         <div className="lp-wrap lp-header-in">
           <a href="#top" className="lp-logo">
-            <span className="ski-logo" style={{ fontSize: 18 }}><b>SK</b><i>innovation</i></span>
+            <img className="ski-ci" src="/sk-innovation.png" alt="SK innovation" style={{ height: 34 }} />
             <span>
-              <span className="lp-logo-t">O/I Spark Agent AI</span>
+              <span className="lp-logo-t">OI SPARK</span>
             </span>
           </a>
           <nav className="lp-nav">
             <a href="#work">개요</a>
-            <a href="#services">사용 설명</a>
+            <a style={{ cursor: "default" }}>사용 설명</a>
           </nav>
         </div>
       </header>
@@ -82,14 +85,18 @@ export default function Login() {
       <main id="top" className="lp-main">
         {/* 히어로 */}
         <section className="lp-hero lp-wrap">
+          <span className="hero-eyebrow"><span className="hero-dot" />SK이노베이션 O/I추진단 · AI 과제 발굴</span>
           <h1 className="lp-h1">흩어진 외부 자료를<br />계열사 맞춤 혁신 과제로</h1>
-          <p className="lp-hero-sub">O/I Spark 에이전트가 여러분의 모든 리서치를 도와드립니다.</p>
+          <p className="lp-hero-sub">외부 벤치마킹부터 계열사 맞춤 O/I 과제 발굴까지, OI SPARK 에이전트가 리서치 전 과정을 함께합니다.</p>
           <div className="lp-cta-row">
             <button className="btn-grad" onClick={openModal}>로그인</button>
             <a className="btn-ghost" href="#work">서비스 개요 보기</a>
           </div>
-          <div className="lp-demo" role="img" aria-label="O/I Spark 미리보기">
-            <span className="lp-demo-tag">3D · 인터랙티브 미리보기</span>
+          <div className="hero-tags">
+            <span>실시간 외부자료 통합</span>
+            <span>계열사 맞춤 발굴</span>
+            <span>피드백 학습</span>
+            <span>다크·라이트 지원</span>
           </div>
         </section>
 
@@ -97,12 +104,15 @@ export default function Login() {
         <section id="work" className="lp-section lp-wrap">
           <div className="lp-sec-head">
             <div className="lp-eyebrow">서비스 개요</div>
-            <h2 className="lp-h2">주요 기능과 외부자료 DB</h2>
+            <h2 className="lp-h2">주요 페이지와 외부자료 DB</h2>
           </div>
           <div className="ov-grid">
             {OVERVIEW.map((o) => (
-              <div key={o.label} className="ov-card" style={{ background: o.bg }}>
-                <span className="ov-label">{o.label}</span>
+              <div key={o.label} className="ov-card" style={{ backgroundImage: `url(${o.img})` }}>
+                <div className="ov-foot">
+                  <span className="ov-label">{o.label}</span>
+                  <span className="ov-desc">{o.desc}</span>
+                </div>
               </div>
             ))}
           </div>
@@ -133,28 +143,35 @@ export default function Login() {
           </div>
           <div className="price-wrap">
             <div>
-              <span className="price-badge">룰루</span>
-              <h3 className="price-h3">n개의 외부 자료 종류</h3>
-              <p className="price-p">다양한 곳에서 가져오는 외부 자료를<br />연결해서 DB만들고 어쩌구 저쩌구</p>
+              <span className="price-badge">실시간 통합 DB</span>
+              <h3 className="price-h3">매일 갱신되는 외부자료 통합 DB</h3>
+              <p className="price-p">여러 소스에서 자동 수집한 외부 자료를 계열사·개선 레버 축으로 정리합니다. 필요하면 새로운 소스도 언제든 연결할 수 있습니다.</p>
               <ul className="feat-list">
                 {FEATURES.map((f) => (
                   <li key={f}><span className="feat-ico">✓</span>{f}</li>
                 ))}
               </ul>
             </div>
-            <div className="price-card">
-              <div className="price-num">999<small>/ 1일</small></div>
-              <div className="price-note">!</div>
-              <button className="btn-grad btn-block" onClick={openModal}>로그인</button>
+            <div className="stat-card">
+              <div className="stat-grid">
+                {STATS.map((s) => (
+                  <div key={s.label} className="stat-cell">
+                    <div className="stat-num">{s.num}<small>{s.unit}</small></div>
+                    <div className="stat-label">{s.label}</div>
+                  </div>
+                ))}
+              </div>
+              <div className="stat-foot">매일 자동 업데이트 · 새로운 소스 연결 가능</div>
+              <button className="btn-grad btn-block" onClick={openModal}>로그인하고 시작하기</button>
             </div>
           </div>
         </section>
 
         {/* 하단 CTA */}
-        <section className="lp-wrap" style={{ padding: "56px 24px" }}>
+        <section className="lp-section lp-wrap">
           <div className="cta-box">
             <h2 className="cta-h2">새로운 과제 아이디어를<br />생성할 준비가 됐나요?</h2>
-            <p className="cta-p">Chill Guys 팀에 점수 많이 주시고 이 서비스 많이많이 활용해주세염~</p>
+            <p className="cta-p">지금 로그인하고 계열사 맞춤 O/I 과제를 발굴해 보세요.</p>
             <button className="btn-grad" onClick={openModal}>로그인</button>
           </div>
         </section>
@@ -164,13 +181,9 @@ export default function Login() {
       <footer className="lp-footer">
         <div className="lp-wrap lp-footer-in">
           <a href="#top" className="lp-logo">
-            <span className="ski-logo" style={{ fontSize: 14 }}><b>SK</b><i>innovation</i></span>
-            <span><span className="lp-logo-t sm">O/I Spark</span></span>
+            <img className="ski-ci" src="/sk-innovation.png" alt="SK innovation" style={{ height: 20 }} />
+            <span><span className="lp-logo-t sm">OI SPARK</span></span>
           </a>
-          <div className="lp-foot-links">
-            <a href="#top">개인정보 처리방침</a>
-            <a href="#top">이용약관</a>
-          </div>
           <div className="lp-copy">© 2026 SUNIC 5기 Chill Guys</div>
         </div>
       </footer>
@@ -208,48 +221,59 @@ export default function Login() {
 }
 
 const OVERVIEW = [
-  { label: "과제 제안", bg: "linear-gradient(140deg,#1b1436,#4c2fa8)" },
-  { label: "커스텀 과제 제안", bg: "linear-gradient(140deg,#2a1b4d,#7c5cff)" },
-  { label: "트렌드룸", bg: "linear-gradient(140deg,#101b3d,#3b6ef5)" },
-  { label: "프롬프트 내보내기", bg: "linear-gradient(140deg,#0d1226,#2b4b8f)" },
-  { label: "AI 리포팅", bg: "linear-gradient(140deg,#3a1160,#9b4dff)" },
-  { label: "비지니스 DB", bg: "linear-gradient(140deg,#131320,#3d3d5c)" },
-  { label: "과제 DB / 학습 Logic", bg: "linear-gradient(140deg,#1a2b8a,#6f8bff)" },
+  { label: "과제 제안", desc: "외부 벤치마킹 기반 O/I 과제 자동 발굴", img: "/ov/list.png" },
+  { label: "커스텀 과제 제안", desc: "OC·레버·근거를 지정해 직접 생성", img: "/ov/custom.png" },
+  { label: "트렌드룸", desc: "Biz별 동향·키워드·시세를 한눈에", img: "/ov/trend.png" },
+  { label: "프롬프트 내보내기", desc: "과제·근거를 프롬프트로 정리해 내보내기", img: "/ov/export.png" },
+  { label: "AI 리포팅", desc: "선별한 과제를 Outlook·Teams로 발송", img: "/ov/report.png" },
+  { label: "비즈니스 DB", desc: "계열사·개선 레버 축으로 구조화", img: "/ov/dbadmin.png" },
+  { label: "과제 DB / 학습 Logic", desc: "피드백으로 발굴 정확도 개선", img: "/ov/detail.png" },
 ];
 
 const P = { iconBg: "rgba(139,92,246,.14)", iconBd: "rgba(139,92,246,.28)" };
 const B = { iconBg: "rgba(59,110,245,.16)", iconBd: "rgba(59,110,245,.3)" };
 const DETAIL = [
-  { icon: "🖥️", title: "과제 제안", desc: "과제 제안 잘하죠~", ...P },
-  { icon: "📱", title: "커스텀 과제 제안", desc: "~~~~~~", ...P },
-  { icon: "🧩", title: "최근 사업 동향", desc: "Biz별 최근 산업 시장을 키워드로 구분하고 업데이트. 새로운 키워드면 과거 자료까지 소급 적용", ...B },
-  { icon: "✦", title: "외부자료 실시간 통합 DB", desc: "수많은 외부자료를 실시간으로 통합하고, 고정된 축으로 분리 및 정리", ...B },
-  { icon: "📣", title: "사용자의 피드백 수용", desc: "생성된 과제에 피드백 한 줄이 주는 성능 개선 효과", ...P },
-  { icon: "⚡", title: "내부자료 활용 용이", desc: "프롬프트 내보내기 쉽고, csv·pdf 파일로 서비스 DB와 내부 자료를 쉽게 통합", ...B },
+  { icon: "🖥️", title: "과제 제안", desc: "외부 벤치마킹 자료를 분석해 계열사별 O/I 과제를 자동으로 발굴합니다. 대상 OC·개선 레버·벤치마크·기대효과까지 정리해 제안합니다.", ...P },
+  { icon: "🎯", title: "커스텀 과제 제안", desc: "대상 계열사와 개선 레버, 근거 자료를 직접 지정해 원하는 조건의 과제를 즉시 생성합니다.", ...P },
+  { icon: "🧩", title: "최근 사업 동향", desc: "Biz별 최근 산업·시장 흐름을 키워드로 구분해 업데이트하고, 새로 등장한 키워드는 과거 자료까지 소급 반영합니다.", ...B },
+  { icon: "✦", title: "외부자료 실시간 통합 DB", desc: "공시·IR·실적발표·협회·뉴스 등 흩어진 외부 자료를 실시간으로 수집해 계열사·레버 축으로 정리합니다.", ...B },
+  { icon: "📣", title: "사용자의 피드백 수용", desc: "생성된 과제에 남긴 피드백 한 줄이 다음 발굴의 정확도를 높입니다.", ...P },
+  { icon: "⚡", title: "내부자료 활용 용이", desc: "과제와 근거를 프롬프트로 내보내고, csv·pdf 내부 자료를 서비스 DB와 손쉽게 통합합니다.", ...B },
 ];
 
 const FEATURES = [
-  "실시간 크롤링으로 어쩌구",
-  "산업별 혁신 과제를 정리한 DB",
-  "하루 평균 신규 추가되는 외부자료 n개",
-  "내부자료나 새로운 소스 생기면 추가하삼",
-  "n8n 어쩌구~",
-  "관리자 기능에서 어쩌구",
+  "실시간 크롤링으로 외부 자료를 자동 수집",
+  "계열사·개선 레버 축으로 구조화한 과제 DB",
+  "공시·IR·실적발표·협회·뉴스 등 6종 자료원",
+  "새로운 소스와 내부 자료를 자유롭게 추가",
+  "수집 파이프라인 상태를 실시간 모니터링",
+  "관리자 화면에서 소스·생성 인스트럭션 직접 관리",
+];
+
+/* DB 섹션 우측 지표 카드 — 실제 서비스 데이터 규모 기준 */
+const STATS = [
+  { num: "12", unit: "종", label: "외부 크롤링 소스" },
+  { num: "6",  unit: "종", label: "자료 유형" },
+  { num: "9",  unit: "곳", label: "대상 계열사(OC)" },
+  { num: "70", unit: "건+", label: "발굴된 과제" },
 ];
 
 const LP_CSS = `
-.lp{--acc:#a855f7;--acc2:#38bdf8;--acc-glow:rgba(168,85,247,.6);
+.lp{--acc:#8B639B;--acc2:#403D88;--acc-glow:rgba(64,61,136,.45);
   min-height:100vh;position:relative;overflow-x:hidden;color:#edeaf7;line-height:1.5;
   background:radial-gradient(ellipse at bottom,#140f2b 0%,#07070c 70%);
-  font-family:'Pretendard Variable',Pretendard,-apple-system,'Noto Sans KR',sans-serif}
+  font-family:'paybooc','Pretendard Variable',Pretendard,-apple-system,'Noto Sans KR',sans-serif;
+  word-break:keep-all;overflow-wrap:break-word}
+/* 제목·설명은 줄 길이를 균형 있게(고아 단어 방지) */
+.lp-h1,.lp-h2,.lp-hero-sub,.cta-h2,.cta-p,.price-p,.sd-desc,.ov-desc{text-wrap:balance}
 .lp a{color:inherit;text-decoration:none}
 .lp ::selection{background:#6d3bff;color:#fff}
 .lp-wrap{max-width:1080px;margin:0 auto;padding-left:24px;padding-right:24px}
 
 /* 별 배경 */
 .lp-stars{position:fixed;inset:0;z-index:0;overflow:hidden;pointer-events:none}
-.lp .stars{position:absolute;top:0;left:0;background:transparent;box-shadow:var(--sh)}
-.lp .stars::after{content:" ";position:absolute;top:2000px;left:0;background:transparent;box-shadow:var(--sh)}
+.lp .stars{position:absolute;top:0;left:0;background:transparent;box-shadow:var(--sh);border-radius:50%}
+.lp .stars::after{content:" ";position:absolute;top:2000px;left:0;background:transparent;box-shadow:var(--sh);border-radius:50%}
 .lp .s1{width:1px;height:1px;animation:lpstar 50s linear infinite}
 .lp .s1::after{width:1px;height:1px}
 .lp .s2{width:2px;height:2px;animation:lpstar 100s linear infinite}
@@ -270,9 +294,10 @@ const LP_CSS = `
 .ski-logo{font-family:Arial,'Helvetica Neue',sans-serif;font-weight:800;white-space:nowrap;letter-spacing:-.3px;line-height:1;display:inline-flex;align-items:baseline;gap:5px}
 .ski-logo b{color:#EA002C}
 .ski-logo i{color:#FF7A00;font-weight:700;font-style:normal}
+.ski-ci{width:auto;display:block;object-fit:contain}
 @font-face{font-family:'Chillax';src:url('/fonts/Chillax-Semibold.woff2') format('woff2'),url('/fonts/Chillax-Semibold.woff') format('woff');font-weight:600;font-style:normal;font-display:swap}
-.lp-logo-t{display:block;font-family:'Chillax',Arial,sans-serif;font-weight:600;font-size:19px;letter-spacing:-.02em;
-  background:linear-gradient(100deg,#f5f3ff,#a855f7 45%,#38bdf8);-webkit-background-clip:text;
+.lp-logo-t{display:block;font-family:'Chillax',Arial,sans-serif;font-weight:600;font-size:24px;letter-spacing:-.02em;
+  background:linear-gradient(100deg,#9a6ee0,#c9a6dd 50%,#f9efec);-webkit-background-clip:text;
   background-clip:text;color:transparent}
 .lp-logo-t.sm{font-size:15px}
 .lp-logo-s{display:block;color:#8b87a8;font-weight:400;font-size:12px}
@@ -282,7 +307,18 @@ const LP_CSS = `
 .lp-main{position:relative;z-index:1}
 
 /* 히어로 */
-.lp-hero{padding:72px 24px 56px;text-align:center}
+.lp-hero{padding:96px 24px 104px;text-align:center;position:relative}
+.lp-hero::before{content:"";position:absolute;top:-40px;left:50%;transform:translateX(-50%);
+  width:min(680px,90%);height:340px;pointer-events:none;z-index:0;
+  background:radial-gradient(60% 60% at 50% 40%,rgba(139,92,246,.28),transparent 70%)}
+.lp-hero > *{position:relative;z-index:1}
+.hero-eyebrow{display:inline-flex;align-items:center;gap:8px;margin-bottom:22px;
+  padding:7px 14px;border-radius:999px;font-size:13px;color:#cbc3f0;
+  background:rgba(139,92,246,.12);border:1px solid rgba(139,92,246,.32)}
+.hero-dot{width:7px;height:7px;border-radius:50%;background:#a855f7;box-shadow:0 0 8px 1px rgba(168,85,247,.85)}
+.hero-tags{display:flex;flex-wrap:wrap;gap:8px;justify-content:center;margin-top:26px}
+.hero-tags span{font-size:12.5px;color:#9e9abb;padding:6px 12px;border-radius:999px;
+  background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.10)}
 .lp-h1{font-size:clamp(38px,8vw,70px);line-height:1.02;letter-spacing:-.03em;font-weight:600;
   max-width:18ch;margin:0 auto 22px;color:#f6f4ff}
 .lp-hero-sub{font-size:clamp(17px,2.4vw,21px);color:#8b87a8;max-width:46ch;margin:0 auto 34px}
@@ -297,28 +333,30 @@ const LP_CSS = `
   padding:11px 20px;border-radius:999px;font-size:14.5px;font-weight:500;
   border:1px solid rgba(255,255,255,.14);transition:background .15s ease}
 .btn-ghost:hover{background:rgba(255,255,255,.06)}
-.lp-demo{margin:56px auto 0;max-width:760px;height:280px;border-radius:28px;position:relative;overflow:hidden;
-  background:radial-gradient(120% 140% at 20% 10%,rgba(168,85,247,.55) 0%,transparent 55%),
-    radial-gradient(120% 120% at 90% 20%,rgba(56,189,248,.5) 0%,transparent 50%),
-    radial-gradient(140% 140% at 50% 120%,rgba(56,189,248,.5) 0%,transparent 55%),
-    linear-gradient(135deg,#141026,#0b1226);
-  border:1px solid rgba(255,255,255,.1);
-  box-shadow:0 40px 90px -40px rgba(109,59,255,.55),inset 0 1px 0 rgba(255,255,255,.12)}
-.lp-demo-tag{position:absolute;left:50%;bottom:18px;transform:translateX(-50%);font-size:13px;
-  color:rgba(237,234,247,.75);background:rgba(10,10,20,.5);padding:6px 12px;border-radius:999px;
-  backdrop-filter:blur(6px);border:1px solid rgba(255,255,255,.08);white-space:nowrap}
 
-/* 섹션 공통 */
-.lp-section{padding:56px 24px}
-.lp-sec-head{text-align:center;margin-bottom:40px}
+/* 섹션 공통 + 스크롤 스냅 (섹션이 착착 자리잡게) */
+html{scroll-snap-type:y proximity;scroll-padding-top:74px;scroll-behavior:smooth}
+.lp-hero,.lp-section{scroll-snap-align:start}
+@media (prefers-reduced-motion:reduce){html{scroll-snap-type:none;scroll-behavior:auto}}
+.lp-section{padding:112px 24px}
+.lp-sec-head{text-align:center;margin-bottom:48px}
 .lp-eyebrow{font-size:13.5px;letter-spacing:.14em;text-transform:uppercase;color:#8b87a8;margin-bottom:14px}
 .lp-h2{font-size:clamp(28px,4.4vw,42px);letter-spacing:-.02em;font-weight:600;color:#f6f4ff;margin:0}
 
 /* 개요 카드 */
 .ov-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:18px}
-.ov-card{border-radius:22px;aspect-ratio:4/3;border:1px solid rgba(255,255,255,.09);position:relative;
-  overflow:hidden;box-shadow:0 24px 50px -34px rgba(0,0,0,.9)}
-.ov-label{position:absolute;left:16px;bottom:14px;font-size:13.5px;color:rgba(255,255,255,.92);font-weight:500}
+.ov-card{position:relative;border-radius:22px;min-height:196px;overflow:hidden;
+  border:1px solid rgba(255,255,255,.10);box-shadow:0 24px 50px -34px rgba(0,0,0,.9);
+  background-color:#0e0e18;background-size:cover;background-position:top center;background-repeat:no-repeat;
+  display:flex;flex-direction:column;justify-content:flex-end;
+  transition:transform .16s ease,border-color .16s ease,box-shadow .16s ease}
+.ov-card::before{content:"";position:absolute;inset:0;pointer-events:none;
+  background:linear-gradient(180deg,rgba(10,10,20,.05) 0%,rgba(9,9,17,.55) 46%,rgba(8,8,15,.93) 100%)}
+.ov-card:hover{transform:translateY(-4px);border-color:rgba(139,92,246,.5);
+  box-shadow:0 30px 62px -28px rgba(0,0,0,.95)}
+.ov-foot{position:relative;z-index:1;padding:16px 18px;display:flex;flex-direction:column;gap:5px}
+.ov-label{font-size:15.5px;color:#fff;font-weight:600;letter-spacing:-.01em}
+.ov-desc{font-size:12px;color:rgba(255,255,255,.82);line-height:1.45}
 
 /* 상세 카드 */
 .sd-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:16px}
@@ -343,11 +381,14 @@ const LP_CSS = `
 .feat-list li{display:flex;gap:10px;align-items:flex-start;font-size:15px;color:#d7d3ea}
 .feat-ico{width:18px;height:18px;flex:0 0 18px;margin-top:2px;border-radius:50%;display:grid;place-items:center;
   background:linear-gradient(135deg,#8b5cf6,#3b6ef5);color:#fff;font-size:11px;font-weight:700}
-.price-card{background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.12);border-radius:20px;
-  padding:30px;text-align:center}
-.price-num{font-size:44px;font-weight:600;letter-spacing:-.02em;color:#f6f4ff}
-.price-num small{font-size:16px;color:#8b87a8;font-weight:400;margin-left:4px}
-.price-note{font-size:13.5px;color:#8b87a8;margin:8px 0 22px}
+/* DB 지표 카드 (가격표 대체) */
+.stat-card{background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.12);border-radius:20px;padding:30px}
+.stat-grid{display:grid;grid-template-columns:1fr 1fr;gap:22px 18px}
+.stat-num{font-size:36px;font-weight:600;letter-spacing:-.02em;color:#f6f4ff;line-height:1}
+.stat-num small{font-size:15px;color:#8b87a8;font-weight:400;margin-left:3px}
+.stat-label{font-size:13px;color:#9e9abb;margin-top:8px}
+.stat-foot{font-size:12.5px;color:#8b87a8;text-align:center;margin:24px 0 16px;
+  padding-top:20px;border-top:1px solid rgba(255,255,255,.08)}
 
 /* CTA */
 .cta-box{text-align:center;border:1px solid rgba(139,92,246,.24);border-radius:28px;padding:56px 32px;

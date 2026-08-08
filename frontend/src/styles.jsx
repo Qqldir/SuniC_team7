@@ -37,9 +37,13 @@ export default function StyleBlock() {
         color-scheme:light;
       }
 
+      @font-face{font-family:'paybooc';src:url('/fonts/paybooc-Light.woff2') format('woff2');font-weight:300;font-style:normal;font-display:swap}
+      @font-face{font-family:'paybooc';src:url('/fonts/paybooc-Medium.woff2') format('woff2');font-weight:400 500;font-style:normal;font-display:swap}
+      @font-face{font-family:'paybooc';src:url('/fonts/paybooc-Bold.woff2') format('woff2');font-weight:600 700;font-style:normal;font-display:swap}
+      @font-face{font-family:'paybooc';src:url('/fonts/paybooc-ExtraBold.woff2') format('woff2');font-weight:800 900;font-style:normal;font-display:swap}
       html{background:var(--paper);transition:background-color .22s ease}
       body{margin:0;background:var(--paper);color:var(--ink);
-        font-family:'Pretendard Variable',Pretendard,-apple-system,'Apple SD Gothic Neo','Noto Sans KR',sans-serif;
+        font-family:'paybooc','Pretendard Variable',Pretendard,-apple-system,'Apple SD Gothic Neo','Noto Sans KR',sans-serif;
         font-size:14px;line-height:1.55;-webkit-font-smoothing:antialiased;
         transition:background-color .22s ease,color .22s ease}
       *,*::before,*::after{box-sizing:border-box}
