@@ -172,7 +172,7 @@ html[data-theme="light"] .oi-logo{background:linear-gradient(100deg,#2f5d84,#3D7
 .theme-switch__container{width:var(--container-width);height:var(--container-height);background-color:var(--container-light-bg);border-radius:var(--container-radius);overflow:hidden;cursor:pointer;box-shadow:0em -0.062em 0.062em rgba(0,0,0,0.25),0em 0.062em 0.125em rgba(255,255,255,0.94);transition:var(--transition);position:relative}
 .theme-switch__container::before{content:"";position:absolute;z-index:1;inset:0;box-shadow:0em 0.05em 0.187em rgba(0,0,0,0.25) inset,0em 0.05em 0.187em rgba(0,0,0,0.25) inset;border-radius:var(--container-radius)}
 .theme-switch__checkbox{display:none}
-.theme-switch__circle-container{width:var(--circle-container-diameter);height:var(--circle-container-diameter);background-color:rgba(255,255,255,0.1);position:absolute;left:var(--circle-container-offset);top:var(--circle-container-offset);border-radius:var(--container-radius);box-shadow:inset 0 0 0 3.375em rgba(255,255,255,0.1),inset 0 0 0 3.375em rgba(255,255,255,0.1),0 0 0 0.625em rgba(255,255,255,0.1),0 0 0 1.25em rgba(255,255,255,0.1);display:flex;transition:var(--circle-transition);pointer-events:none}
+.theme-switch__circle-container{width:var(--circle-container-diameter);height:var(--circle-container-diameter);background-color:transparent;position:absolute;left:var(--circle-container-offset);top:var(--circle-container-offset);border-radius:var(--container-radius);box-shadow:none;display:flex;transition:var(--circle-transition);pointer-events:none}
 .theme-switch__sun-moon-container{pointer-events:auto;position:relative;z-index:2;width:var(--sun-moon-diameter);height:var(--sun-moon-diameter);margin:auto;border-radius:var(--container-radius);background-color:var(--sun-bg);box-shadow:0.062em 0.062em 0.062em 0em rgba(254,255,239,0.61) inset,0em -0.062em 0.062em 0em #a1872a inset;filter:drop-shadow(0.062em 0.125em 0.125em rgba(0,0,0,0.25)) drop-shadow(0em 0.062em 0.125em rgba(0,0,0,0.25));overflow:hidden;transition:var(--transition)}
 .theme-switch__moon{transform:translateX(100%);width:100%;height:100%;background-color:var(--moon-bg);border-radius:inherit;box-shadow:0.062em 0.062em 0.062em 0em rgba(254,255,239,0.61) inset,0em -0.062em 0.062em 0em #969696 inset;transition:var(--transition);position:relative}
 .theme-switch__spot{position:absolute;top:0.75em;left:0.312em;width:0.75em;height:0.75em;border-radius:var(--container-radius);background-color:var(--spot-color);box-shadow:0em 0.0312em 0.062em rgba(0,0,0,0.25) inset}
@@ -309,6 +309,7 @@ th:last-child,td:last-child{padding-right:17px}
 .cbox{width:17px;height:17px;border:1.5px solid var(--line-mid);border-radius:5px;display:flex;
   align-items:center;justify-content:center;font-size:10px;color:transparent;background:var(--panel)}
 .cbox.on{background:var(--brand);border-color:var(--brand);color:#fff;font-weight:700}
+.cbox.part{background:var(--brand-soft);border-color:var(--brand);color:var(--brand);font-weight:700}
 .icb{width:28px;height:28px;border:1px solid var(--line-mid);border-radius:7px;background:var(--panel);
   color:var(--t3);cursor:pointer;font-size:13px;display:flex;align-items:center;justify-content:center;flex:none}
 .icb:hover{border-color:var(--brand);color:var(--brand);background:var(--brand-tint)}
@@ -500,9 +501,16 @@ html[data-theme="dark"] .pie svg,html[data-theme="dark"] .cbar,html[data-theme="
 }
 
 /* 파이 조각 툴팁 */
-.ptip{display:none;position:fixed;z-index:200;background:#161616;color:#fff;border-radius:2px;
-  padding:9px 11px;min-width:150px;box-shadow:0 2px 12px rgba(0,0,0,.3);pointer-events:none;
+.ptip{display:none;position:fixed;z-index:200;background:#161616;color:#fff;border-radius:11px;
+  padding:12px 14px;min-width:200px;box-shadow:0 8px 24px rgba(0,0,0,.4);pointer-events:none;
   font-family:inherit}
+.pt-h{display:flex;align-items:center;gap:8px}
+.pt-s{width:11px;height:11px;border-radius:3px;flex:none}
+.pt-nm{font-size:14.5px;font-weight:700;letter-spacing:-.3px}
+.pt-v{margin-left:auto;padding-left:14px;font-size:14.5px;font-weight:700;font-variant-numeric:tabular-nums}
+.pt-bar{display:block;height:5px;border-radius:99px;background:rgba(255,255,255,.16);overflow:hidden;margin:9px 0 8px}
+.pt-fl{display:block;height:100%;border-radius:99px}
+.pt-f{display:block;font-size:11.5px;color:#b9b9c6;font-variant-numeric:tabular-nums}
 
 /* ═══════ 관심 종목 티커 ═══════ */
 .ticker{background:var(--panel);border:1px solid var(--line);border-radius:14px;
@@ -585,7 +593,8 @@ html[data-theme="dark"] .tk-btn:hover,html[data-theme="dark"] .msave:hover{backg
 
 .ai-mk{width:20px;height:20px;border-radius:6px;background:var(--brand);color:#fff;display:flex;
   align-items:center;justify-content:center;font-size:9.5px;font-weight:700;flex:none}
-.ai-img{width:22px;height:22px;flex:none;object-fit:contain;display:block}
+.ai-img{width:22px;height:22px;flex:none;display:block;background-color:#FFB900;
+  -webkit-mask:url(/ai.png) center/contain no-repeat;mask:url(/ai.png) center/contain no-repeat}
 .ai-ctl{display:flex;flex-direction:column;gap:9px;padding:12px 15px;border-bottom:1px solid var(--line-soft);
   background:var(--panel-sub)}
 .ai-row{display:flex;align-items:center;gap:6px;flex-wrap:wrap}
@@ -1104,6 +1113,9 @@ let S = {
   send:{ freq:'발송 안함', time:'08:00', lastAt:'' },   // 서버 state.send 가 덮는다
   sendOff:{},        // 발송 제외 과제 id (기본은 전체 포함)
   rpQ:'',            // 발송 대상 검색어
+  rpPage:1,          // 발송 대상 목록 페이지 (10건씩)
+  rpOc:'전체',        // 발송 대상 OC 필터
+  rpSort:'new',      // 발송 대상 정렬 (new·old·name·oc)
   sendSel:null,      // 발송 포함 과제 id set (null=기본: 최근 3일)
   recipients:[],
   channels:{outlook:true, teams:true},
@@ -2025,8 +2037,21 @@ const sendIncluded = () => TASKS.filter(rpIncluded);
 function viewReport(){
   const inc = sendIncluded();
   const rpq = (S.rpQ||'').trim().toLowerCase();
-  const rpList = (rpq ? TASKS.filter(t=>(t.name||'').toLowerCase().includes(rpq)) : TASKS.filter(t=>rpIsRecent(t,3)))
-    .sort((a,b)=>(rpTaskDate(b)||0)-(rpTaskDate(a)||0));
+  let rpList = (rpq ? TASKS.filter(t=>(t.name||'').toLowerCase().includes(rpq)) : TASKS.filter(t=>rpIsRecent(t,3)));
+  if(S.rpOc!=='전체') rpList = rpList.filter(t=>ocNm(t.oc)===S.rpOc);
+  rpList = rpList.slice().sort((a,b)=>{
+    if(S.rpSort==='old')  return (rpTaskDate(a)||0)-(rpTaskDate(b)||0);
+    if(S.rpSort==='name') return (a.name||'').localeCompare(b.name||'','ko');
+    if(S.rpSort==='oc')   return ocNm(a.oc).localeCompare(ocNm(b.oc),'ko') || (rpTaskDate(b)||0)-(rpTaskDate(a)||0);
+    return (rpTaskDate(b)||0)-(rpTaskDate(a)||0);   // new = 생성일 최신순 (기본)
+  });
+  // 발송 대상 목록 10건씩 페이지네이션 + 헤더 전체선택 상태
+  const RP_PER = 10;
+  const rpPages = Math.max(1, Math.ceil(rpList.length / RP_PER));
+  const rpP = Math.min(S.rpPage || 1, rpPages);
+  const rpSlice = rpList.slice((rpP - 1) * RP_PER, rpP * RP_PER);
+  const rpAllOn = rpList.length > 0 && rpList.every(rpIncluded);
+  const rpPartOn = !rpAllOn && rpList.some(rpIncluded);
   const FREQ = ['발송 안함','매일','주 3회','주 1회'];
   return `
   <div class="page-h">
@@ -2041,14 +2066,17 @@ function viewReport(){
       <div class="card">
         <div class="card-h">
           <h2>발송 대상</h2>
-          <span class="note">${rpq?`검색 ${rpList.length}건`:`최근 3일 ${rpList.length}건`} · 발송 선택 ${inc.length}건</span>
-          <div style="margin-left:auto" class="row-f" style="gap:6px">
-            <button class="btn sm" id="selAll">전체 선택</button>
-            <button class="btn sm" id="selNone">전체 해제</button>
-          </div>
+          <span class="note" style="margin-left:auto">${rpq?`검색 ${rpList.length}건`:`최근 3일 ${rpList.length}건`} · 발송 선택 ${inc.length}건</span>
         </div>
         <div class="ctlbar" style="border-bottom:1px solid var(--line-soft)">
-          <input class="inp" id="rpSearch" style="width:100%" placeholder="과제명 검색 — 다른 과제도 찾아 체크하세요" value="${esc(S.rpQ||'')}" autocomplete="off" data-1p-ignore data-lpignore="true">
+          <input class="inp" id="rpSearch" style="flex:1;min-width:140px" placeholder="과제명 검색" value="${esc(S.rpQ||'')}" autocomplete="off" data-1p-ignore data-lpignore="true">
+          <select class="sel" id="rpOcSel">
+            <option ${S.rpOc==='전체'?'selected':''}>전체 OC</option>
+            ${OCS.map(o=>`<option ${S.rpOc===o.name?'selected':''}>${esc(o.name)}</option>`).join('')}
+          </select>
+          <select class="sel" id="rpSortSel">
+            ${[['new','생성일 최신순'],['old','생성일 오래된순'],['name','과제명순'],['oc','OC순']].map(([k,l])=>`<option value="${k}" ${S.rpSort===k?'selected':''}>${esc(l)}</option>`).join('')}
+          </select>
         </div>
         ${rpList.length===0 ? `
           <div class="empty">
@@ -2057,14 +2085,14 @@ function viewReport(){
           </div>` : `
         <table>
           <thead><tr>
-            <th style="width:42px"></th>
+            <th style="width:42px"><span class="cbox ${rpAllOn?'on':(rpPartOn?'part':'')}" data-rpckall="1" style="cursor:pointer">${rpAllOn?'✓':(rpPartOn?'−':'')}</span></th>
             <th style="min-width:200px">과제명</th>
             <th style="width:120px">OC</th>
             <th style="width:86px">레버</th>
             <th style="width:96px">생성일</th>
           </tr></thead>
           <tbody>
-          ${rpList.map(t => {
+          ${rpSlice.map(t => {
             const ck = rpIncluded(t);
             return `<tr class="r-hover" style="cursor:pointer" data-sendtog="${t.id}">
               <td><span class="cbox ${ck?'on':''}">${ck?'✓':''}</span></td>
@@ -2075,7 +2103,15 @@ function viewReport(){
             </tr>`;
           }).join('')}
           </tbody>
-        </table>`}
+        </table>
+        ${rpPages>1?`<div class="pager">
+          <span class="tot">총 ${rpList.length}건</span>
+          <div style="margin-left:auto" class="row-f" style="gap:5px">
+            <button class="pg" data-rppg="${rpP-1}" ${rpP<=1?'disabled':''}>‹</button>
+            ${Array.from({length:rpPages},(_,i)=>i+1).map(i=>`<button class="pg ${i===rpP?'on':''}" data-rppg="${i}">${i}</button>`).join('')}
+            <button class="pg" data-rppg="${rpP+1}" ${rpP>=rpPages?'disabled':''}>›</button>
+          </div>
+        </div>`:''}`}
       </div>
 
       <div class="card">
@@ -2445,7 +2481,7 @@ function viewTrend(){
 
   <div class="card">
     <div class="card-h" style="padding:13px 17px">
-      <img class="ai-img" src="/ai.png" alt="AI">
+      <span class="ai-img" role="img" aria-label="AI"></span>
       <h2>데일리 브리핑</h2>
       <div style="margin-left:auto" class="row-f" style="gap:7px">
         <select class="sel" id="trBizSel">
@@ -2548,6 +2584,8 @@ document.addEventListener('change', e=>{
   if(el.id==='trSrc'){ S.trSrc = el.value==='출처 전체'?'전체':el.value; return render(); }
   if(el.id==='trKind'){ S.trKind = el.value==='종류 전체' ? '전체' : el.value; return render(); }
   if(el.id==='trSort'){ S.trSort=el.value; return render(); }
+  if(el.id==='rpOcSel'){ S.rpOc = el.value==='전체 OC'?'전체':el.value; S.rpPage=1; return render(); }
+  if(el.id==='rpSortSel'){ S.rpSort = el.value; S.rpPage=1; return render(); }
   if(el.id==='trFrom'){ S.trFrom=el.value; render(); return trBump(); }
   if(el.id==='trTo'){ S.trTo=el.value; render(); return trBump(); }
 });
@@ -2567,7 +2605,7 @@ document.addEventListener('compositionend', e=>{
   const id=e.target && e.target.id;
   if(id==='trQ'){ S.trQ=e.target.value; rerenderSearch('trQ'); }
   else if(id==='q'){ S.q=e.target.value; S.page=1; rerenderSearch('q'); }
-  else if(id==='rpSearch'){ S.rpQ=e.target.value; rerenderSearch('rpSearch'); }
+  else if(id==='rpSearch'){ S.rpQ=e.target.value; S.rpPage=1; rerenderSearch('rpSearch'); }
 });
 
 /* ═══════════════ 파이 조각 툴팁 ═══════════════ */
@@ -2578,10 +2616,10 @@ function ptip(){
 }
 function ptShow(s,e){
   const t=ptip();
-  t.innerHTML = `<span class="ctip-d">${esc(s.dataset.ym)} · 전체 ${s.dataset.tot}건</span>
-    <span class="ctip-r"><span class="ctip-s" style="background:${s.dataset.col}"></span>
-      ${esc(s.dataset.nm)}<span class="ctip-v">${s.dataset.cnt}건</span></span>
-    <span class="ctip-f"><span>비중 ${s.dataset.pct}%</span></span>`;
+  t.innerHTML = `<span class="pt-h"><span class="pt-s" style="background:${s.dataset.col}"></span>
+      <span class="pt-nm">${esc(s.dataset.nm)}</span><span class="pt-v">${s.dataset.cnt}건</span></span>
+    <span class="pt-bar"><span class="pt-fl" style="width:${s.dataset.pct}%;background:${s.dataset.col}"></span></span>
+    <span class="pt-f">비중 ${s.dataset.pct}%</span>`;
   t.style.display='block';
   ptMove(e);
 }
@@ -2893,7 +2931,7 @@ async function regenerate(){
 }
 
 document.addEventListener('click', e=>{
-  const el=e.target.closest('[data-nav],[data-open],[data-lv],[data-ver],[data-pg],[data-atab],[data-dbtab],[data-tn],[data-ch],[data-ex-d],[data-dl],[data-rm-rc],[data-cg-oc],[data-cg-ev],[data-cg-lv],[data-cg-plan],[data-cal-d],[data-cal-m],[data-cnav],[data-fxp],[data-sendtog],[data-freq],[data-monav],[data-slice],[data-memo],[data-star],[data-msave],[data-ck],[data-ckall],[data-goto],[data-tr],[data-cite],button');
+  const el=e.target.closest('[data-nav],[data-open],[data-lv],[data-ver],[data-pg],[data-atab],[data-dbtab],[data-rpckall],[data-rppg],[data-tn],[data-ch],[data-ex-d],[data-dl],[data-rm-rc],[data-cg-oc],[data-cg-ev],[data-cg-lv],[data-cg-plan],[data-cal-d],[data-cal-m],[data-cnav],[data-fxp],[data-sendtog],[data-freq],[data-monav],[data-slice],[data-memo],[data-star],[data-msave],[data-ck],[data-ckall],[data-goto],[data-tr],[data-cite],button');
   // 캘린더 외부 클릭 시 닫기
   if(S.calOpen && !e.target.closest('#cal') && el && el.id!=='calBtn'){ S.calOpen=false; }
   if(S.calOpen && !el){ S.calOpen=false; return render(); }
@@ -2951,6 +2989,14 @@ document.addEventListener('click', e=>{
   if(d.dbtab){S.dbTab=d.dbtab; return render();}
   if(d.sendtog){const id=Number(d.sendtog);
     rpMaterialize(); S.sendSel[id]=!S.sendSel[id]; saveReport(); return render();}
+  if(d.rppg){const n=Number(d.rppg); if(n>=1){S.rpPage=n; render();} return;}
+  if(d.rpckall){ rpMaterialize();
+    const rpq=(S.rpQ||'').trim().toLowerCase();
+    const list = rpq ? TASKS.filter(t=>(t.name||'').toLowerCase().includes(rpq)) : TASKS.filter(t=>rpIsRecent(t,3));
+    const allOn = list.length>0 && list.every(rpIncluded);
+    list.forEach(t=>{ S.sendSel[t.id] = !allOn; });   // 전부 선택돼 있으면 전체 해제, 아니면 전체 선택
+    saveReport(); return render();
+  }
   if(d.freq){S.send.freq=d.freq; saveReport(); return render();}
   if(d.ch){S.channels[d.ch]=!S.channels[d.ch]; saveReport(); return render();}
   if(d.exD){S.ex.days=Number(d.exD); S.ex.text=null; return render();}
@@ -2963,8 +3009,6 @@ document.addEventListener('click', e=>{
   if(d.cgPlan){S.cg.plan=d.cgPlan; S.cg.step=4; return render();}
 
   switch(el.id){
-    case 'selAll': S.sendSel={}; TASKS.forEach(t=>S.sendSel[t.id]=true); saveReport(); return render();
-    case 'selNone': S.sendSel={}; saveReport(); return render();
     case 'fxCopy':{
       const t=curTask();
       try{ const r=navigator.clipboard.writeText(fxText(t)); if(r&&r.catch) r.catch(()=>{}); }catch(err){}
@@ -3077,7 +3121,7 @@ document.addEventListener('input', e=>{
     if(e.isComposing) return;      // 한글 조합 중엔 렌더 스킵 (compositionend 에서 갱신)
     const p=el.selectionStart; render();
     const n=document.getElementById('q'); if(n){n.focus(); n.setSelectionRange(p,p);} return;}
-  if(el.id==='rpSearch'){S.rpQ=el.value;
+  if(el.id==='rpSearch'){S.rpQ=el.value; S.rpPage=1;
     if(e.isComposing) return;                        // 한글 조합 중 렌더 스킵
     const p=el.selectionStart; render();
     const n=document.getElementById('rpSearch'); if(n){n.focus(); n.setSelectionRange(p,p);} return;}
