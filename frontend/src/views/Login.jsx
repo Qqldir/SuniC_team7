@@ -4,14 +4,17 @@ import { useMemo, useState } from "react";
  * 항상 다크(퍼플/블루 · 별 배경). 회원가입/로그인 버튼 → 대시보드(/) 이동. */
 
 /* 별 배경 box-shadow 문자열 생성 (레이어별) */
-function makeStars(n) {
-  let s = "";
+function makeStars(n, glow = 0) {
+  // 선명한 흰 코어(blur 0) + 넓게 번지는 글로우 헤일로를 겹쳐, 하얗고 또렷하면서 빛나게.
+  // blur 만 키우면 빛이 퍼져 중심이 흐려지므로(=먼지처럼) 코어를 항상 따로 둔다.
+  const parts = [];
   for (let i = 0; i < n; i++) {
     const x = Math.floor(Math.random() * 2000);
     const y = Math.floor(Math.random() * 2000);
-    s += `${x}px ${y}px #fff${i < n - 1 ? "," : ""}`;
+    parts.push(`${x}px ${y}px 0 #fff`);
+    if (glow > 0) parts.push(`${x}px ${y}px ${glow}px rgba(255,255,255,.55)`);
   }
-  return s;
+  return parts.join(",");
 }
 
 export default function Login() {
@@ -47,9 +50,9 @@ export default function Login() {
   };
 
   const stars = useMemo(() => ({
-    s1: makeStars(420),
-    s2: makeStars(150),
-    s3: makeStars(80),
+    s1: makeStars(420, 0),
+    s2: makeStars(150, 3),
+    s3: makeStars(80, 7),
   }), []);
 
   return (
@@ -101,7 +104,7 @@ export default function Login() {
         <section id="work" className="lp-section lp-wrap">
           <div className="lp-sec-head">
             <div className="lp-eyebrow">서비스 개요</div>
-            <h2 className="lp-h2">주요 기능과 외부자료 DB</h2>
+            <h2 className="lp-h2">주요 페이지와 외부자료 DB</h2>
           </div>
           <div className="ov-grid">
             {OVERVIEW.map((o) => (
@@ -269,8 +272,8 @@ const LP_CSS = `
 
 /* 별 배경 */
 .lp-stars{position:fixed;inset:0;z-index:0;overflow:hidden;pointer-events:none}
-.lp .stars{position:absolute;top:0;left:0;background:transparent;box-shadow:var(--sh)}
-.lp .stars::after{content:" ";position:absolute;top:2000px;left:0;background:transparent;box-shadow:var(--sh)}
+.lp .stars{position:absolute;top:0;left:0;background:transparent;box-shadow:var(--sh);border-radius:50%}
+.lp .stars::after{content:" ";position:absolute;top:2000px;left:0;background:transparent;box-shadow:var(--sh);border-radius:50%}
 .lp .s1{width:1px;height:1px;animation:lpstar 50s linear infinite}
 .lp .s1::after{width:1px;height:1px}
 .lp .s2{width:2px;height:2px;animation:lpstar 100s linear infinite}
