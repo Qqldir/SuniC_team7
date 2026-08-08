@@ -47,9 +47,9 @@ export default function Login() {
   };
 
   const stars = useMemo(() => ({
-    s1: makeStars(700),
-    s2: makeStars(200),
-    s3: makeStars(100),
+    s1: makeStars(420),
+    s2: makeStars(150),
+    s3: makeStars(80),
   }), []);
 
   return (
@@ -67,14 +67,14 @@ export default function Login() {
       <header className="lp-header">
         <div className="lp-wrap lp-header-in">
           <a href="#top" className="lp-logo">
-            <img className="ski-ci" src="/sk-innovation.png" alt="SK innovation" style={{ height: 26 }} />
+            <img className="ski-ci" src="/sk-innovation.png" alt="SK innovation" style={{ height: 34 }} />
             <span>
-              <span className="lp-logo-t">OI SPARK Agent AI</span>
+              <span className="lp-logo-t">OI SPARK</span>
             </span>
           </a>
           <nav className="lp-nav">
             <a href="#work">개요</a>
-            <a href="#services">사용 설명</a>
+            <a style={{ cursor: "default" }}>사용 설명</a>
           </nav>
         </div>
       </header>
@@ -82,11 +82,18 @@ export default function Login() {
       <main id="top" className="lp-main">
         {/* 히어로 */}
         <section className="lp-hero lp-wrap">
+          <span className="hero-eyebrow"><span className="hero-dot" />SK이노베이션 O/I추진단 · AI 과제 발굴</span>
           <h1 className="lp-h1">흩어진 외부 자료를<br />계열사 맞춤 혁신 과제로</h1>
           <p className="lp-hero-sub">외부 벤치마킹부터 계열사 맞춤 O/I 과제 발굴까지, OI SPARK 에이전트가 리서치 전 과정을 함께합니다.</p>
           <div className="lp-cta-row">
             <button className="btn-grad" onClick={openModal}>로그인</button>
             <a className="btn-ghost" href="#work">서비스 개요 보기</a>
+          </div>
+          <div className="hero-tags">
+            <span>실시간 외부자료 통합</span>
+            <span>계열사 맞춤 발굴</span>
+            <span>피드백 학습</span>
+            <span>다크·라이트 지원</span>
           </div>
         </section>
 
@@ -98,8 +105,11 @@ export default function Login() {
           </div>
           <div className="ov-grid">
             {OVERVIEW.map((o) => (
-              <div key={o.label} className="ov-card" style={{ background: o.bg }}>
-                <span className="ov-label">{o.label}</span>
+              <div key={o.label} className="ov-card" style={{ backgroundImage: `url(${o.img})` }}>
+                <div className="ov-foot">
+                  <span className="ov-label">{o.label}</span>
+                  <span className="ov-desc">{o.desc}</span>
+                </div>
               </div>
             ))}
           </div>
@@ -155,7 +165,7 @@ export default function Login() {
         </section>
 
         {/* 하단 CTA */}
-        <section className="lp-wrap" style={{ padding: "56px 24px" }}>
+        <section className="lp-section lp-wrap">
           <div className="cta-box">
             <h2 className="cta-h2">새로운 과제 아이디어를<br />생성할 준비가 됐나요?</h2>
             <p className="cta-p">지금 로그인하고 계열사 맞춤 O/I 과제를 발굴해 보세요.</p>
@@ -171,10 +181,6 @@ export default function Login() {
             <img className="ski-ci" src="/sk-innovation.png" alt="SK innovation" style={{ height: 20 }} />
             <span><span className="lp-logo-t sm">OI SPARK</span></span>
           </a>
-          <div className="lp-foot-links">
-            <a href="#top">개인정보 처리방침</a>
-            <a href="#top">이용약관</a>
-          </div>
           <div className="lp-copy">© 2026 SUNIC 5기 Chill Guys</div>
         </div>
       </footer>
@@ -212,13 +218,13 @@ export default function Login() {
 }
 
 const OVERVIEW = [
-  { label: "과제 제안", bg: "linear-gradient(140deg,#1b1436,#4c2fa8)" },
-  { label: "커스텀 과제 제안", bg: "linear-gradient(140deg,#2a1b4d,#7c5cff)" },
-  { label: "트렌드룸", bg: "linear-gradient(140deg,#101b3d,#3b6ef5)" },
-  { label: "프롬프트 내보내기", bg: "linear-gradient(140deg,#0d1226,#2b4b8f)" },
-  { label: "AI 리포팅", bg: "linear-gradient(140deg,#3a1160,#9b4dff)" },
-  { label: "비즈니스 DB", bg: "linear-gradient(140deg,#131320,#3d3d5c)" },
-  { label: "과제 DB / 학습 Logic", bg: "linear-gradient(140deg,#1a2b8a,#6f8bff)" },
+  { label: "과제 제안", desc: "외부 벤치마킹 기반 O/I 과제 자동 발굴", img: "/ov/list.png" },
+  { label: "커스텀 과제 제안", desc: "OC·레버·근거를 지정해 직접 생성", img: "/ov/custom.png" },
+  { label: "트렌드룸", desc: "Biz별 동향·키워드·시세를 한눈에", img: "/ov/trend.png" },
+  { label: "프롬프트 내보내기", desc: "과제·근거를 프롬프트로 정리해 내보내기", img: "/ov/export.png" },
+  { label: "AI 리포팅", desc: "선별한 과제를 Outlook·Teams로 발송", img: "/ov/report.png" },
+  { label: "비즈니스 DB", desc: "계열사·개선 레버 축으로 구조화", img: "/ov/dbadmin.png" },
+  { label: "과제 DB / 학습 Logic", desc: "피드백으로 발굴 정확도 개선", img: "/ov/detail.png" },
 ];
 
 const P = { iconBg: "rgba(139,92,246,.14)", iconBd: "rgba(139,92,246,.28)" };
@@ -250,10 +256,13 @@ const STATS = [
 ];
 
 const LP_CSS = `
-.lp{--acc:#a855f7;--acc2:#38bdf8;--acc-glow:rgba(168,85,247,.6);
+.lp{--acc:#8B639B;--acc2:#403D88;--acc-glow:rgba(64,61,136,.45);
   min-height:100vh;position:relative;overflow-x:hidden;color:#edeaf7;line-height:1.5;
   background:radial-gradient(ellipse at bottom,#140f2b 0%,#07070c 70%);
-  font-family:'paybooc','Pretendard Variable',Pretendard,-apple-system,'Noto Sans KR',sans-serif}
+  font-family:'paybooc','Pretendard Variable',Pretendard,-apple-system,'Noto Sans KR',sans-serif;
+  word-break:keep-all;overflow-wrap:break-word}
+/* 제목·설명은 줄 길이를 균형 있게(고아 단어 방지) */
+.lp-h1,.lp-h2,.lp-hero-sub,.cta-h2,.cta-p,.price-p,.sd-desc,.ov-desc{text-wrap:balance}
 .lp a{color:inherit;text-decoration:none}
 .lp ::selection{background:#6d3bff;color:#fff}
 .lp-wrap{max-width:1080px;margin:0 auto;padding-left:24px;padding-right:24px}
@@ -284,8 +293,8 @@ const LP_CSS = `
 .ski-logo i{color:#FF7A00;font-weight:700;font-style:normal}
 .ski-ci{width:auto;display:block;object-fit:contain}
 @font-face{font-family:'Chillax';src:url('/fonts/Chillax-Semibold.woff2') format('woff2'),url('/fonts/Chillax-Semibold.woff') format('woff');font-weight:600;font-style:normal;font-display:swap}
-.lp-logo-t{display:block;font-family:'Chillax',Arial,sans-serif;font-weight:600;font-size:19px;letter-spacing:-.02em;
-  background:linear-gradient(100deg,#f5f3ff,#a855f7 45%,#38bdf8);-webkit-background-clip:text;
+.lp-logo-t{display:block;font-family:'Chillax',Arial,sans-serif;font-weight:600;font-size:24px;letter-spacing:-.02em;
+  background:linear-gradient(100deg,#9a6ee0,#c9a6dd 50%,#f9efec);-webkit-background-clip:text;
   background-clip:text;color:transparent}
 .lp-logo-t.sm{font-size:15px}
 .lp-logo-s{display:block;color:#8b87a8;font-weight:400;font-size:12px}
@@ -295,7 +304,18 @@ const LP_CSS = `
 .lp-main{position:relative;z-index:1}
 
 /* 히어로 */
-.lp-hero{padding:72px 24px 56px;text-align:center}
+.lp-hero{padding:96px 24px 104px;text-align:center;position:relative}
+.lp-hero::before{content:"";position:absolute;top:-40px;left:50%;transform:translateX(-50%);
+  width:min(680px,90%);height:340px;pointer-events:none;z-index:0;
+  background:radial-gradient(60% 60% at 50% 40%,rgba(139,92,246,.28),transparent 70%)}
+.lp-hero > *{position:relative;z-index:1}
+.hero-eyebrow{display:inline-flex;align-items:center;gap:8px;margin-bottom:22px;
+  padding:7px 14px;border-radius:999px;font-size:13px;color:#cbc3f0;
+  background:rgba(139,92,246,.12);border:1px solid rgba(139,92,246,.32)}
+.hero-dot{width:7px;height:7px;border-radius:50%;background:#a855f7;box-shadow:0 0 8px 1px rgba(168,85,247,.85)}
+.hero-tags{display:flex;flex-wrap:wrap;gap:8px;justify-content:center;margin-top:26px}
+.hero-tags span{font-size:12.5px;color:#9e9abb;padding:6px 12px;border-radius:999px;
+  background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.10)}
 .lp-h1{font-size:clamp(38px,8vw,70px);line-height:1.02;letter-spacing:-.03em;font-weight:600;
   max-width:18ch;margin:0 auto 22px;color:#f6f4ff}
 .lp-hero-sub{font-size:clamp(17px,2.4vw,21px);color:#8b87a8;max-width:46ch;margin:0 auto 34px}
@@ -311,17 +331,29 @@ const LP_CSS = `
   border:1px solid rgba(255,255,255,.14);transition:background .15s ease}
 .btn-ghost:hover{background:rgba(255,255,255,.06)}
 
-/* 섹션 공통 */
-.lp-section{padding:56px 24px}
-.lp-sec-head{text-align:center;margin-bottom:40px}
+/* 섹션 공통 + 스크롤 스냅 (섹션이 착착 자리잡게) */
+html{scroll-snap-type:y proximity;scroll-padding-top:74px;scroll-behavior:smooth}
+.lp-hero,.lp-section{scroll-snap-align:start}
+@media (prefers-reduced-motion:reduce){html{scroll-snap-type:none;scroll-behavior:auto}}
+.lp-section{padding:112px 24px}
+.lp-sec-head{text-align:center;margin-bottom:48px}
 .lp-eyebrow{font-size:13.5px;letter-spacing:.14em;text-transform:uppercase;color:#8b87a8;margin-bottom:14px}
 .lp-h2{font-size:clamp(28px,4.4vw,42px);letter-spacing:-.02em;font-weight:600;color:#f6f4ff;margin:0}
 
 /* 개요 카드 */
 .ov-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:18px}
-.ov-card{border-radius:22px;aspect-ratio:4/3;border:1px solid rgba(255,255,255,.09);position:relative;
-  overflow:hidden;box-shadow:0 24px 50px -34px rgba(0,0,0,.9)}
-.ov-label{position:absolute;left:16px;bottom:14px;font-size:13.5px;color:rgba(255,255,255,.92);font-weight:500}
+.ov-card{position:relative;border-radius:22px;min-height:196px;overflow:hidden;
+  border:1px solid rgba(255,255,255,.10);box-shadow:0 24px 50px -34px rgba(0,0,0,.9);
+  background-color:#0e0e18;background-size:cover;background-position:top center;background-repeat:no-repeat;
+  display:flex;flex-direction:column;justify-content:flex-end;
+  transition:transform .16s ease,border-color .16s ease,box-shadow .16s ease}
+.ov-card::before{content:"";position:absolute;inset:0;pointer-events:none;
+  background:linear-gradient(180deg,rgba(10,10,20,.05) 0%,rgba(9,9,17,.55) 46%,rgba(8,8,15,.93) 100%)}
+.ov-card:hover{transform:translateY(-4px);border-color:rgba(139,92,246,.5);
+  box-shadow:0 30px 62px -28px rgba(0,0,0,.95)}
+.ov-foot{position:relative;z-index:1;padding:16px 18px;display:flex;flex-direction:column;gap:5px}
+.ov-label{font-size:15.5px;color:#fff;font-weight:600;letter-spacing:-.01em}
+.ov-desc{font-size:12px;color:rgba(255,255,255,.82);line-height:1.45}
 
 /* 상세 카드 */
 .sd-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:16px}
