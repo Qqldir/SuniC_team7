@@ -83,7 +83,7 @@ export default function Login() {
         {/* 히어로 */}
         <section className="lp-hero lp-wrap">
           <h1 className="lp-h1">흩어진 외부 자료를<br />계열사 맞춤 혁신 과제로</h1>
-          <p className="lp-hero-sub">OI SPARK 에이전트가 여러분의 모든 리서치를 도와드립니다.</p>
+          <p className="lp-hero-sub">외부 벤치마킹부터 계열사 맞춤 O/I 과제 발굴까지, OI SPARK 에이전트가 리서치 전 과정을 함께합니다.</p>
           <div className="lp-cta-row">
             <button className="btn-grad" onClick={openModal}>로그인</button>
             <a className="btn-ghost" href="#work">서비스 개요 보기</a>
@@ -130,19 +130,26 @@ export default function Login() {
           </div>
           <div className="price-wrap">
             <div>
-              <span className="price-badge">룰루</span>
-              <h3 className="price-h3">n개의 외부 자료 종류</h3>
-              <p className="price-p">다양한 곳에서 가져오는 외부 자료를<br />연결해서 DB만들고 어쩌구 저쩌구</p>
+              <span className="price-badge">실시간 통합 DB</span>
+              <h3 className="price-h3">매일 갱신되는 외부자료 통합 DB</h3>
+              <p className="price-p">여러 소스에서 자동 수집한 외부 자료를 계열사·개선 레버 축으로 정리합니다. 필요하면 새로운 소스도 언제든 연결할 수 있습니다.</p>
               <ul className="feat-list">
                 {FEATURES.map((f) => (
                   <li key={f}><span className="feat-ico">✓</span>{f}</li>
                 ))}
               </ul>
             </div>
-            <div className="price-card">
-              <div className="price-num">999<small>/ 1일</small></div>
-              <div className="price-note">!</div>
-              <button className="btn-grad btn-block" onClick={openModal}>로그인</button>
+            <div className="stat-card">
+              <div className="stat-grid">
+                {STATS.map((s) => (
+                  <div key={s.label} className="stat-cell">
+                    <div className="stat-num">{s.num}<small>{s.unit}</small></div>
+                    <div className="stat-label">{s.label}</div>
+                  </div>
+                ))}
+              </div>
+              <div className="stat-foot">매일 자동 업데이트 · 새로운 소스 연결 가능</div>
+              <button className="btn-grad btn-block" onClick={openModal}>로그인하고 시작하기</button>
             </div>
           </div>
         </section>
@@ -151,7 +158,7 @@ export default function Login() {
         <section className="lp-wrap" style={{ padding: "56px 24px" }}>
           <div className="cta-box">
             <h2 className="cta-h2">새로운 과제 아이디어를<br />생성할 준비가 됐나요?</h2>
-            <p className="cta-p">Chill Guys 팀에 점수 많이 주시고 이 서비스 많이많이 활용해주세염~</p>
+            <p className="cta-p">지금 로그인하고 계열사 맞춤 O/I 과제를 발굴해 보세요.</p>
             <button className="btn-grad" onClick={openModal}>로그인</button>
           </div>
         </section>
@@ -210,28 +217,36 @@ const OVERVIEW = [
   { label: "트렌드룸", bg: "linear-gradient(140deg,#101b3d,#3b6ef5)" },
   { label: "프롬프트 내보내기", bg: "linear-gradient(140deg,#0d1226,#2b4b8f)" },
   { label: "AI 리포팅", bg: "linear-gradient(140deg,#3a1160,#9b4dff)" },
-  { label: "비지니스 DB", bg: "linear-gradient(140deg,#131320,#3d3d5c)" },
+  { label: "비즈니스 DB", bg: "linear-gradient(140deg,#131320,#3d3d5c)" },
   { label: "과제 DB / 학습 Logic", bg: "linear-gradient(140deg,#1a2b8a,#6f8bff)" },
 ];
 
 const P = { iconBg: "rgba(139,92,246,.14)", iconBd: "rgba(139,92,246,.28)" };
 const B = { iconBg: "rgba(59,110,245,.16)", iconBd: "rgba(59,110,245,.3)" };
 const DETAIL = [
-  { icon: "🖥️", title: "과제 제안", desc: "과제 제안 잘하죠~", ...P },
-  { icon: "📱", title: "커스텀 과제 제안", desc: "~~~~~~", ...P },
-  { icon: "🧩", title: "최근 사업 동향", desc: "Biz별 최근 산업 시장을 키워드로 구분하고 업데이트. 새로운 키워드면 과거 자료까지 소급 적용", ...B },
-  { icon: "✦", title: "외부자료 실시간 통합 DB", desc: "수많은 외부자료를 실시간으로 통합하고, 고정된 축으로 분리 및 정리", ...B },
-  { icon: "📣", title: "사용자의 피드백 수용", desc: "생성된 과제에 피드백 한 줄이 주는 성능 개선 효과", ...P },
-  { icon: "⚡", title: "내부자료 활용 용이", desc: "프롬프트 내보내기 쉽고, csv·pdf 파일로 서비스 DB와 내부 자료를 쉽게 통합", ...B },
+  { icon: "🖥️", title: "과제 제안", desc: "외부 벤치마킹 자료를 분석해 계열사별 O/I 과제를 자동으로 발굴합니다. 대상 OC·개선 레버·벤치마크·기대효과까지 정리해 제안합니다.", ...P },
+  { icon: "🎯", title: "커스텀 과제 제안", desc: "대상 계열사와 개선 레버, 근거 자료를 직접 지정해 원하는 조건의 과제를 즉시 생성합니다.", ...P },
+  { icon: "🧩", title: "최근 사업 동향", desc: "Biz별 최근 산업·시장 흐름을 키워드로 구분해 업데이트하고, 새로 등장한 키워드는 과거 자료까지 소급 반영합니다.", ...B },
+  { icon: "✦", title: "외부자료 실시간 통합 DB", desc: "공시·IR·실적발표·협회·뉴스 등 흩어진 외부 자료를 실시간으로 수집해 계열사·레버 축으로 정리합니다.", ...B },
+  { icon: "📣", title: "사용자의 피드백 수용", desc: "생성된 과제에 남긴 피드백 한 줄이 다음 발굴의 정확도를 높입니다.", ...P },
+  { icon: "⚡", title: "내부자료 활용 용이", desc: "과제와 근거를 프롬프트로 내보내고, csv·pdf 내부 자료를 서비스 DB와 손쉽게 통합합니다.", ...B },
 ];
 
 const FEATURES = [
-  "실시간 크롤링으로 어쩌구",
-  "산업별 혁신 과제를 정리한 DB",
-  "하루 평균 신규 추가되는 외부자료 n개",
-  "내부자료나 새로운 소스 생기면 추가하삼",
-  "n8n 어쩌구~",
-  "관리자 기능에서 어쩌구",
+  "실시간 크롤링으로 외부 자료를 자동 수집",
+  "계열사·개선 레버 축으로 구조화한 과제 DB",
+  "공시·IR·실적발표·협회·뉴스 등 6종 자료원",
+  "새로운 소스와 내부 자료를 자유롭게 추가",
+  "수집 파이프라인 상태를 실시간 모니터링",
+  "관리자 화면에서 소스·생성 인스트럭션 직접 관리",
+];
+
+/* DB 섹션 우측 지표 카드 — 실제 서비스 데이터 규모 기준 */
+const STATS = [
+  { num: "12", unit: "종", label: "외부 크롤링 소스" },
+  { num: "6",  unit: "종", label: "자료 유형" },
+  { num: "9",  unit: "곳", label: "대상 계열사(OC)" },
+  { num: "70", unit: "건+", label: "발굴된 과제" },
 ];
 
 const LP_CSS = `
@@ -331,11 +346,14 @@ const LP_CSS = `
 .feat-list li{display:flex;gap:10px;align-items:flex-start;font-size:15px;color:#d7d3ea}
 .feat-ico{width:18px;height:18px;flex:0 0 18px;margin-top:2px;border-radius:50%;display:grid;place-items:center;
   background:linear-gradient(135deg,#8b5cf6,#3b6ef5);color:#fff;font-size:11px;font-weight:700}
-.price-card{background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.12);border-radius:20px;
-  padding:30px;text-align:center}
-.price-num{font-size:44px;font-weight:600;letter-spacing:-.02em;color:#f6f4ff}
-.price-num small{font-size:16px;color:#8b87a8;font-weight:400;margin-left:4px}
-.price-note{font-size:13.5px;color:#8b87a8;margin:8px 0 22px}
+/* DB 지표 카드 (가격표 대체) */
+.stat-card{background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.12);border-radius:20px;padding:30px}
+.stat-grid{display:grid;grid-template-columns:1fr 1fr;gap:22px 18px}
+.stat-num{font-size:36px;font-weight:600;letter-spacing:-.02em;color:#f6f4ff;line-height:1}
+.stat-num small{font-size:15px;color:#8b87a8;font-weight:400;margin-left:3px}
+.stat-label{font-size:13px;color:#9e9abb;margin-top:8px}
+.stat-foot{font-size:12.5px;color:#8b87a8;text-align:center;margin:24px 0 16px;
+  padding-top:20px;border-top:1px solid rgba(255,255,255,.08)}
 
 /* CTA */
 .cta-box{text-align:center;border:1px solid rgba(139,92,246,.24);border-radius:28px;padding:56px 32px;
